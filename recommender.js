@@ -132,6 +132,30 @@ class GeoTripRecommender {
             .map(s => s.place);
     }
 
+    // ─── Step 3b: Get Current Start Location ──────────────────────────────────
+    /**
+     * Reads the starting location from Trip Details form or GPS.
+     * Falls back to Tirupati if neither is available.
+     * @returns {Object} { lat, lng }
+     */
+    getCurrentStartLocation() {
+        // Try to use GPS location if checkbox is enabled
+        const gpsCb = document.getElementById('mainGpsCheckbox');
+        if (gpsCb && gpsCb.checked) {
+            if (window._mainLastStartLat !== undefined && window._mainLastStartLng !== undefined) {
+                return { lat: window._mainLastStartLat, lng: window._mainLastStartLng };
+            }
+        }
+
+        // Try to read from stored coordinates (set by map click or GPS)
+        if (window._mainLastStartLat !== undefined && window._mainLastStartLng !== undefined) {
+            return { lat: window._mainLastStartLat, lng: window._mainLastStartLng };
+        }
+
+        // Fallback to Tirupati (13.6288, 79.4192)
+        return { lat: 13.6288, lng: 79.4192 };
+    }
+
     // ─── Step 4: Proximity + Route Optimisation ───────────────────────────────
     /**
      * Returns topN nearest places to (lat, lng), sorted by nearest-neighbour route.
@@ -196,12 +220,29 @@ class GeoTripRecommender {
     // ─── Step 6: Time-Aware Day Itinerary ─────────────────────────────────────
     /**
      * Reads trip start/end from Trip Details form fields.
+     * Uses starting location from form/GPS instead of hardcoded defaults.
      * Divides the outing into 3 equal slots (morning / afternoon / evening).
      * Only suggests places that have open timings overlapping each slot.
      * Falls back to rating-sorted if no timing data matches.
+     * 
+     * @param {string|null} theme - optional theme/category filter
+     * @param {number} [fallbackLat] - fallback latitude if coordinates not available
+     * @param {number} [fallbackLng] - fallback longitude if coordinates not available
      */
-    getDayItinerary(theme = null, startLat = 13.6288, startLng = 79.4192) {
+    getDayItinerary(theme = null, fallbackLat = null, fallbackLng = null) {
         if (!this.loaded) return { morning: [], afternoon: [], evening: [] };
+
+        // Get starting location from form or GPS
+        let startLocation = this.getCurrentStartLocation();
+        let startLat = startLocation.lat;
+        let startLng = startLocation.lng;
+
+        // If dynamic location is still Tirupati but fallback coords provided, use fallback
+        // (This handles the case where coordinates haven't been set yet)
+        if (startLat === 13.6288 && startLng === 79.4192 && fallbackLat !== null && fallbackLng !== null) {
+            startLat = fallbackLat;
+            startLng = fallbackLng;
+        }
 
         // Read form values
         const startStr = (document.getElementById('mainOutingStart')?.value) || '09:00';

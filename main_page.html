@@ -4886,12 +4886,17 @@
 
         // ── Coordinate Resolution Helper ──────────────────────────────────
         function _getRecBaseCoords() {
-            // 1. Check global mainGpsCoords (from map logic / GPS checkbox)
+            // 1. Check geocoded coordinates from Trip Details form (set by drawPreviewFromStart)
+            if (window._mainLastStartLat !== undefined && window._mainLastStartLng !== undefined) {
+                return { lat: window._mainLastStartLat, lng: window._mainLastStartLng, label: 'User Location' };
+            }
+            
+            // 2. Check global mainGpsCoords (from map logic / GPS checkbox)
             if (window.mainGpsCoords && window.mainGpsCoords.lat) {
                 return { lat: window.mainGpsCoords.lat, lng: window.mainGpsCoords.lng, label: 'GPS Position' };
             }
             
-            // 2. Check "Start Location" input field
+            // 3. Check "Start Location" input field and try to match with place
             var startLocText = (document.getElementById('mainStartLocation')?.value || '').trim().toLowerCase();
             if (startLocText && startLocText !== 'tirupati' && window.recommender && window.recommender.loaded) {
                 var matchedPlace = window.recommender.places.find(function(p) {
@@ -4903,7 +4908,7 @@
                 }
             }
             
-            // 3. Fallback to Tirupati Centre
+            // 4. Fallback to Tirupati Centre
             return { lat: 13.6288, lng: 79.4192, label: 'Tirupati Centre' };
         }
 
