@@ -4884,6 +4884,29 @@
             });
         });
 
+        // ── Coordinate Resolution Helper ──────────────────────────────────
+        function _getRecBaseCoords() {
+            // 1. Check global mainGpsCoords (from map logic / GPS checkbox)
+            if (window.mainGpsCoords && window.mainGpsCoords.lat) {
+                return { lat: window.mainGpsCoords.lat, lng: window.mainGpsCoords.lng, label: 'GPS Position' };
+            }
+            
+            // 2. Check "Start Location" input field
+            var startLocText = (document.getElementById('mainStartLocation')?.value || '').trim().toLowerCase();
+            if (startLocText && startLocText !== 'tirupati' && window.recommender && window.recommender.loaded) {
+                var matchedPlace = window.recommender.places.find(function(p) {
+                    var n = p.name.toLowerCase();
+                    return n.includes(startLocText) || startLocText.includes(n);
+                });
+                if (matchedPlace) {
+                    return { lat: matchedPlace.lat, lng: matchedPlace.lng, label: matchedPlace.name };
+                }
+            }
+            
+            // 3. Fallback to Tirupati Centre
+            return { lat: 13.6288, lng: 79.4192, label: 'Tirupati Centre' };
+        }
+
         // ── Tab switching ──────────────────────────────────────────────────
         document.querySelectorAll('.rec-tab-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
@@ -4950,79 +4973,96 @@
 
         window._renderRecNearby = function() {
             if (!window.recommender || !window.recommender.loaded) return;
-            
-            // Try to get coordinates from the "Start Location" field
-            var startLocText = (document.getElementById('mainStartLocation')?.value || '').trim().toLowerCase();
-            var lat = 13.6288, lng = 79.4192; // Default Tirupati
-            var locLabel = "Tirupati Centre";
 
-            if (startLocText && startLocText !== 'tirupati') {
-                // Better matching: Find any place that contains the search text or vice versa
-                var matchedPlace = window.recommender.places.find(p => 
-                    p.name.toLowerCase().includes(startLocText) || 
-                    startLocText.includes(p.name.toLowerCase())
-                );
-                
-                if (matchedPlace) {
-                    lat = matchedPlace.lat;
-                    lng = matchedPlace.lng;
-                    locLabel = matchedPlace.name;
-                    console.log("[Rec] Centering Nearby on:", matchedPlace.name);
-                } else {
-                    console.log("[Rec] No exact match for start location, using default.");
-                }
+            var activeTheme = (window._lastRecPlace && window._lastRecPlace !== 'all')
+                ? window._lastRecPlace : null;
+
+            var base = _getRecBaseCoords();
+            
+            // Fetch nearest places
+            var results = window.recommender.getNearbyRecommendations(base.lat, base.lng, 6, activeTheme);
+
+            if (!results.length && activeTheme) {
+                results = window.recommender.getNearbyRecommendations(base.lat, base.lng, 6, null);
             }
 
-            var results = window.recommender.getNearbyRecommendations(lat, lng, 5);
             if (!results.length) {
                 setContent('<p style="font-size:0.8rem;color:#92400e;text-align:center;margin:0;">No nearby places found.</p>');
                 return;
             }
-            setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">Closest to: ' + locLabel + '</p>' +
-                results.map(placeCard).join(''));
 
-            // Try live GPS (highest priority if active)
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(pos) {
-                    var res = window.recommender.getNearbyRecommendations(pos.coords.latitude, pos.coords.longitude, 5);
-                    setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">📍 Nearest to your live location</p>' +
-                        res.map(placeCard).join(''));
-                }, function() {});
-            }
+            var catBadge = activeTheme
+                ? ' &bull; <span style="background:#fef3c7;border:1px solid #fde68a;border-radius:0.4rem;padding:0.1rem 0.45rem;font-size:0.65rem;font-weight:700;color:#92400e;">' + activeTheme + '</span>'
+                : '';
+            var header = '<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">📍 From: ' + base.label + catBadge + '</p>';
+            setContent(header + results.map(placeCard).join(''));
         };
 
         window._renderRecItinerary = function() {
-            if (!window.recommender || !window.recommender.loaded) return;
-            
+            if (!window.recommender || !window.recommender.loaded) {
+                setContent('<p style="font-size:0.8rem;color:#92400e;text-align:center;">Loading data...</p>');
+                return;
+            }
+
+            // Read trip times for slot labels
+            var startStr = document.getElementById('mainOutingStart')?.value || '09:00';
+            var endStr   = document.getElementById('mainOutingEnd')?.value   || '21:00';
+            var toMin = function(s) { var p = s.split(':'); return +p[0]*60+(+p[1]||0); };
+            var toLabel = function(m) {
+                var h = Math.floor(m/60), mi = m%60;
+                return (h<10?'0':'')+h+':'+(mi<10?'0':'')+mi;
+            };
+            var s = toMin(startStr), e = toMin(endStr), dur = Math.max(e-s,120);
+            var s1e = s + Math.round(dur/3);
+            var s2e = s + Math.round(dur*2/3);
+            var slotLabels = [
+                { label: '🌅 Morning',   range: toLabel(s)  +' – '+toLabel(s1e) },
+                { label: '☀️ Afternoon', range: toLabel(s1e)+' – '+toLabel(s2e) },
+                { label: '🌆 Evening',   range: toLabel(s2e)+' – '+toLabel(e)   },
+            ];
+
             // Use current theme/last place as context
             var theme = window._lastRecPlace || 'all';
-            var it = window.recommender.getDayItinerary(theme);
-            
+            var base = _getRecBaseCoords();
+            var it = window.recommender.getDayItinerary(theme, base.lat, base.lng);
+
             var html = '';
-            var sections = [
-                { label: '🌅 Morning', key: 'morning', color: '#78350f' },
-                { label: '☀️ Afternoon', key: 'afternoon', color: '#92400e' },
-                { label: '🌆 Evening', key: 'evening', color: '#b45309' },
-            ];
+            var keys = ['morning','afternoon','evening'];
 
             // If a theme is selected, show it in the header
             if (theme && theme !== 'all') {
-                html += `<p style="font-size:0.75rem;font-weight:700;color:#b45309;margin:0 0 0.5rem;border-bottom:1px solid #f3e8c0;padding-bottom:0.25rem;">Theme: ${theme}</p>`;
+                html += '<p style="font-size:0.75rem;font-weight:700;color:#b45309;margin:0 0 0.5rem;border-bottom:1px solid #f3e8c0;padding-bottom:0.25rem;">Theme: '+theme+'</p>';
             }
 
-            sections.forEach(function(s) {
-                if (it[s.key] && it[s.key].length) {
-                    html += `<p style="font-size:0.72rem;font-weight:800;color:${s.color};margin:0.25rem 0 0.3rem;">${s.label}</p>`;
-                    html += it[s.key].map(placeCard).join('');
-                }
+            var hasAny = false;
+            keys.forEach(function(key, idx) {
+                var places = it[key];
+                if (!places || !places.length) return;
+                hasAny = true;
+                var sl = slotLabels[idx];
+                html += '<p style="font-size:0.72rem;font-weight:800;color:#78350f;margin:0.35rem 0 0.2rem;">'+sl.label+' <span style="font-weight:500;color:#92400e;">'+sl.range+'</span></p>';
+                html += places.map(placeCard).join('');
             });
-            setContent(html || '<p style="font-size:0.8rem;color:#92400e;text-align:center;">Building plan...</p>');
+
+            setContent(hasAny ? html : '<p style="font-size:0.8rem;color:#92400e;text-align:center;">No places match your trip window. Try changing start/end time.</p>');
         };
 
         window._showRecPanel = function() {
             var panel = document.getElementById('recPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-            window._renderRecItinerary();
+            var isOpen = panel.style.display !== 'none' && panel.style.display !== '';
+            panel.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen) {
+                // Reset to Day Plan tab when opening
+                document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                    b.style.borderBottomColor = 'transparent';
+                    b.style.color = '#92400e';
+                    if (b.dataset.recTab === 'itinerary') {
+                        b.style.borderBottomColor = '#b45309';
+                        b.style.color = '#78350f';
+                    }
+                });
+                window._renderRecItinerary();
+            }
         };
 
         // ── Hook into category chip clicks (Theme Selection) ───────────────
@@ -5058,16 +5098,35 @@
             el.addEventListener('change', function() {
                 if (!window.recommender || !window.recommender.loaded) return;
 
-                // If start location changed, refresh Nearby
-                if (id === 'mainStartLocation') {
-                    window._renderRecNearby();
+                // Show panel automatically on first change if closed
+                var panel = document.getElementById('recPanel');
+                if (panel && panel.style.display === 'none') {
+                    panel.style.display = 'block';
                 }
 
-                // Refresh Day Plan based on new times/date context (if logic allowed)
-                window._renderRecItinerary();
-                
-                // Show a subtle notification or just open panel
-                // document.getElementById('recPanel').style.display = 'block';
+                if (id === 'mainStartLocation') {
+                    // Switch to Nearby tab
+                    document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                        b.style.borderBottomColor = 'transparent';
+                        b.style.color = '#92400e';
+                        if (b.dataset.recTab === 'nearby') {
+                            b.style.borderBottomColor = '#b45309';
+                            b.style.color = '#78350f';
+                        }
+                    });
+                    window._renderRecNearby();
+                } else {
+                    // Start/End time or Date changed → refresh Day Plan
+                    document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                        b.style.borderBottomColor = 'transparent';
+                        b.style.color = '#92400e';
+                        if (b.dataset.recTab === 'itinerary') {
+                            b.style.borderBottomColor = '#b45309';
+                            b.style.color = '#78350f';
+                        }
+                    });
+                    window._renderRecItinerary();
+                }
             });
         });
 
