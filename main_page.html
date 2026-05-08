@@ -1382,8 +1382,8 @@
         /* Emergency hospitals FAB + panel */
         .emergency-fab {
             position: fixed;
-            right: 1rem;
-            bottom: 1rem;
+            right: 1.5rem;
+            bottom: 1.5rem;
             z-index: 10001;
             display: inline-flex;
             align-items: center;
@@ -4790,6 +4790,233 @@
 
     </script>
     <script src="chatbot.js" defer></script>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         GeoTrip Recommendation Engine
+         ═══════════════════════════════════════════════════════════════ -->
+    <script src="recommender.js"></script>
+
+    <!-- Recommendation Panel -->
+    <div id="recPanel" style="
+        display:none;
+        position:fixed;
+        bottom:10rem;
+        right:1.5rem;
+        width:min(360px, 94vw);
+        background:#fff;
+        border-radius:1.25rem;
+        box-shadow:0 12px 40px rgba(0,0,0,0.18);
+        z-index:9998;
+        overflow:hidden;
+        border:1px solid #e5d9a8;
+        font-family:'Public Sans',sans-serif;
+    " aria-label="Recommendations panel" role="complementary">
+        <div style="
+            background:linear-gradient(135deg,#735c00,#b45309);
+            padding:1rem 1.25rem 0.75rem;
+            display:flex;align-items:center;justify-content:space-between;
+        ">
+            <span style="color:#fff;font-weight:800;font-size:0.9rem;display:flex;align-items:center;gap:0.5rem;">
+                <span class="material-symbols-outlined" style="font-size:1.1rem;">auto_awesome</span>
+                Recommended for You
+            </span>
+            <button id="recPanelClose" onclick="document.getElementById('recPanel').style.display='none'"
+                style="background:none;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.25rem;line-height:1;padding:0;">✕</button>
+        </div>
+
+        <!-- Tab bar -->
+        <div style="display:flex;border-bottom:1px solid #f3e8c0;background:#fffbeb;">
+            <button class="rec-tab-btn is-active" data-rec-tab="similar"
+                style="flex:1;padding:0.55rem 0.25rem;font-size:0.75rem;font-weight:700;background:none;border:none;cursor:pointer;border-bottom:2px solid #b45309;color:#78350f;">
+                Similar Places
+            </button>
+            <button class="rec-tab-btn" data-rec-tab="nearby"
+                style="flex:1;padding:0.55rem 0.25rem;font-size:0.75rem;font-weight:700;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;color:#92400e;">
+                Nearby
+            </button>
+            <button class="rec-tab-btn" data-rec-tab="itinerary"
+                style="flex:1;padding:0.55rem 0.25rem;font-size:0.75rem;font-weight:700;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;color:#92400e;">
+                Day Plan
+            </button>
+        </div>
+
+        <div id="recContent" style="padding:1rem;max-height:280px;overflow-y:auto;">
+            <p style="color:#92400e;font-size:0.8rem;text-align:center;margin:0;">Loading recommendations...</p>
+        </div>
+    </div>
+
+    <!-- Recommendation FAB trigger -->
+    <button id="recFab" title="Get Recommendations" onclick="window._showRecPanel()" style="
+        display:none;
+        position:fixed;
+        bottom:5.5rem;
+        right:1.5rem;
+        width:3rem;
+        height:3rem;
+        border-radius:50%;
+        background:linear-gradient(135deg,#735c00,#b45309);
+        color:#fff;
+        border:none;
+        cursor:pointer;
+        box-shadow:0 4px 16px rgba(115,92,0,0.4);
+        z-index:9997;
+        font-size:1.4rem;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    " aria-label="Recommendations">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">auto_awesome</span>
+    </button>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ── Load recommender with enriched CSV ─────────────────────────────
+        window.addEventListener('load', function() {
+            if (!window.recommender) return;
+            window.recommender.loadCSV('tirupati_places_enriched.csv').then(function() {
+                document.getElementById('recFab').style.display = 'flex';
+                // Show day itinerary by default
+                window._renderRecItinerary();
+            });
+        });
+
+        // ── Tab switching ──────────────────────────────────────────────────
+        document.querySelectorAll('.rec-tab-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                    b.style.borderBottomColor = 'transparent';
+                    b.style.color = '#92400e';
+                });
+                btn.style.borderBottomColor = '#b45309';
+                btn.style.color = '#78350f';
+
+                var tab = btn.dataset.recTab;
+                var panel = document.getElementById('recPanel');
+                panel.style.display = 'block';
+
+                if (tab === 'similar') {
+                    window._renderRecSimilar(window._lastRecPlace || null);
+                } else if (tab === 'nearby') {
+                    window._renderRecNearby();
+                } else if (tab === 'itinerary') {
+                    window._renderRecItinerary();
+                }
+            });
+        });
+
+        // ── Render helpers ─────────────────────────────────────────────────
+        function setContent(html) {
+            var el = document.getElementById('recContent');
+            if (el) el.innerHTML = html;
+        }
+
+        function placeCard(p) {
+            var stars = '★'.repeat(Math.round(p.rating || 4)) + '☆'.repeat(5 - Math.round(p.rating || 4));
+            var dist = p.distanceKm != null ? ` &bull; ${p.distanceKm.toFixed(1)} km` : '';
+            return `<div style="
+                padding:0.7rem 0.75rem;
+                border-radius:0.75rem;
+                background:#fffbeb;
+                border:1px solid #fde68a;
+                margin-bottom:0.6rem;
+                cursor:default;
+            ">
+                <div style="font-size:0.82rem;font-weight:800;color:#451a03;margin-bottom:0.2rem;">${p.name}</div>
+                <div style="font-size:0.72rem;color:#92400e;font-weight:600;">
+                    ${p.category}${dist}
+                    <span style="color:#ca8a04;margin-left:0.4rem;">${stars}</span>
+                </div>
+            </div>`;
+        }
+
+        window._renderRecSimilar = function(placeName) {
+            if (!window.recommender || !window.recommender.loaded) {
+                setContent('<p style="font-size:0.8rem;color:#92400e;text-align:center;margin:0;">Loading...</p>');
+                return;
+            }
+            var target = placeName || 'Tirumala Venkateswara Temple';
+            var results = window.recommender.getContentRecommendations(target, 5);
+            if (!results.length) {
+                setContent('<p style="font-size:0.8rem;color:#92400e;text-align:center;margin:0;">No similar places found. Try clicking a category.</p>');
+                return;
+            }
+            setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">Similar to: <em>' + target + '</em></p>' +
+                results.map(placeCard).join(''));
+        };
+
+        window._renderRecNearby = function() {
+            if (!window.recommender || !window.recommender.loaded) return;
+            // Use Tirupati centre as default; swap for GPS if available
+            var lat = 13.6288, lng = 79.4192;
+            var results = window.recommender.getNearbyRecommendations(lat, lng, 5);
+            if (!results.length) {
+                setContent('<p style="font-size:0.8rem;color:#92400e;text-align:center;margin:0;">No nearby places found.</p>');
+                return;
+            }
+            setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">Closest to Tirupati centre</p>' +
+                results.map(placeCard).join(''));
+
+            // Try live GPS
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(pos) {
+                    var res = window.recommender.getNearbyRecommendations(pos.coords.latitude, pos.coords.longitude, 5);
+                    setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">📍 Nearest to your location</p>' +
+                        res.map(placeCard).join(''));
+                }, function() {});
+            }
+        };
+
+        window._renderRecItinerary = function() {
+            if (!window.recommender || !window.recommender.loaded) return;
+            var it = window.recommender.getDayItinerary();
+            var html = '';
+            var sections = [
+                { label: '🌅 Morning', key: 'morning', color: '#78350f' },
+                { label: '☀️ Afternoon', key: 'afternoon', color: '#92400e' },
+                { label: '🌆 Evening', key: 'evening', color: '#b45309' },
+            ];
+            sections.forEach(function(s) {
+                if (it[s.key] && it[s.key].length) {
+                    html += `<p style="font-size:0.72rem;font-weight:800;color:${s.color};margin:0.25rem 0 0.3rem;">${s.label}</p>`;
+                    html += it[s.key].map(placeCard).join('');
+                }
+            });
+            setContent(html || '<p style="font-size:0.8rem;color:#92400e;text-align:center;">Building plan...</p>');
+        };
+
+        window._showRecPanel = function() {
+            var panel = document.getElementById('recPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            window._renderRecItinerary();
+        };
+
+        // ── Hook into category chip clicks (if present on this page) ──────
+        document.addEventListener('click', function(e) {
+            var chip = e.target.closest('[data-cat]') || e.target.closest('.cat-chip') || e.target.closest('[data-category]');
+            if (!chip) return;
+            var cat = chip.dataset.cat || chip.dataset.category || chip.textContent.trim();
+            if (!cat) return;
+            window._lastRecPlace = cat;
+            if (window.recommender && window.recommender.loaded) {
+                var panel = document.getElementById('recPanel');
+                panel.style.display = 'block';
+                // Switch to similar tab
+                document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                    b.style.borderBottomColor = 'transparent';
+                    b.style.color = '#92400e';
+                    if (b.dataset.recTab === 'similar') {
+                        b.style.borderBottomColor = '#b45309';
+                        b.style.color = '#78350f';
+                    }
+                });
+                window._renderRecSimilar(cat);
+            }
+        });
+
+    })();
+    </script>
 </body>
 
 </html>

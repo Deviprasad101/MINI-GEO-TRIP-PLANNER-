@@ -4,7 +4,7 @@
     style.innerHTML = `
         .gt-chatbot-btn {
             position: fixed;
-            bottom: 88px;
+            bottom: 150px;
             right: 24px;
             width: 60px;
             height: 60px;
@@ -29,7 +29,7 @@
         }
         .gt-chatbot-window {
             position: fixed;
-            bottom: 160px;
+            bottom: 220px;
             right: 24px;
             width: 420px;
             max-height: 750px;
