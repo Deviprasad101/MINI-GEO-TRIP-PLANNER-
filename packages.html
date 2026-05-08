@@ -158,7 +158,7 @@
             border-radius: 1.35rem;
             background: #ffffff;
             box-shadow: 0 8px 32px rgba(15, 23, 42, 0.07), 0 0 0 1px rgba(226, 232, 240, 0.95);
-            overflow: visible;
+            overflow: hidden;
             transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
         }
 
@@ -232,7 +232,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 1.28rem 1.55rem 0.72rem;
+            padding: 1.5rem 1.55rem 0.75rem;
             text-align: center;
             background: transparent;
             color: #1a2233;
@@ -240,8 +240,8 @@
 
         .pricing-card--premium .pricing-card__header,
         .pricing-card--superpremium .pricing-card__header {
-            color: #ffffff;
-            padding-top: 1.48rem;
+            color: #1a2233;
+            padding-top: 1.75rem;
         }
 
         .pricing-card__header h3 {
@@ -519,61 +519,166 @@
             --dot: #7c3aed;
         }
 
-        /* Keep one common UI for all cards; only color theme differs */
-        .pricing-card::before {
-            content: none !important;
+        /* Tier specific theme variables */
+        .pricing-card--basic {
+            --offer-bg: #fffbeb;
+            --offer-border: #f59e0b;
+            --offer-text: #d97706;
+            --check-color: #f97316;
+            --cta-bg: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            --cta-text: #ffffff;
+            --icon-bg: #ffedd5;
+            --icon-text: #ea580c;
         }
 
-        .pricing-card .pricing-card__top-wrap {
-            background: transparent;
+        .pricing-card--standard {
+            --offer-bg: #eff6ff;
+            --offer-border: #3b82f6;
+            --offer-text: #1d4ed8;
+            --check-color: #3b82f6;
+            --cta-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --cta-text: #ffffff;
+            --icon-bg: #dbeafe;
+            --icon-text: #2563eb;
         }
 
-        .pricing-card .pricing-card__header {
-            color: #1a2233;
-            padding-top: 1.28rem;
+        .pricing-card--premium {
+            --offer-bg: #ecfdf5;
+            --offer-border: #10b981;
+            --offer-text: #047857;
+            --check-color: #10b981;
+            --cta-bg: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --cta-text: #ffffff;
+            --icon-bg: #d1fae5;
+            --icon-text: #059669;
         }
 
-        .pricing-card .pricing-card__header p {
-            color: #64748b;
+        .pricing-card--superpremium {
+            --offer-bg: #f5f3ff;
+            --offer-border: #8b5cf6;
+            --offer-text: #6d28d9;
+            --check-color: #8b5cf6;
+            --cta-bg: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --cta-text: #ffffff;
+            --icon-bg: #ede9fe;
+            --icon-text: #7c3aed;
         }
 
-        .pricing-card .pricing-card__body {
-            padding: 0 1.55rem 1.22rem;
+        .pricing-card__icon-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4.8rem;
+            height: 4.8rem;
+            border-radius: 50%;
+            background: #ffffff;
+            color: var(--icon-text);
+            margin-bottom: 0.5rem;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: relative;
         }
 
-        .pricing-card .pricing-card__pick-hint {
-            background: #f8fafc;
-            border-color: #e8ecf1;
-            color: #475569;
+        .pricing-card__header-bg {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200%;
+            height: 160px;
+            border-radius: 50%;
+            background: var(--icon-bg);
+            opacity: 0.6;
+            z-index: 1;
         }
 
-        .pricing-card .pricing-card__features li {
-            color: #334155;
+        /* Unified Ribbon Style - All on Top Left */
+        .pricing-card__ribbon {
+            position: absolute;
+            top: 18px;
+            left: -32px;
+            width: 130px;
+            text-align: center;
+            background: var(--cta-bg); /* Use the theme gradient */
+            color: white;
+            padding: 5px 0;
+            font-size: 0.65rem;
+            font-weight: 900;
+            transform: rotate(-45deg);
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            letter-spacing: 0.05em;
         }
 
-        .pricing-card .pricing-card__cta {
-            background: #1a2233;
-            color: #ffffff;
-            box-shadow: 0 4px 14px rgba(26, 34, 51, 0.25);
+        /* Specific color overrides if needed, but using var(--cta-bg) is smarter */
+        .pricing-card--standard .pricing-card__ribbon {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         }
 
-        .pricing-card .pricing-card__cta:hover {
-            filter: brightness(1.08);
-            box-shadow: 0 6px 18px rgba(26, 34, 51, 0.32);
+        .pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #ffffff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #6366f1;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.1);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .pricing-card__cta {
+            margin-top: auto;
+            width: 100%;
+            border: none;
+            border-radius: 999px;
+            padding: 0.9rem 1.12rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            text-transform: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--cta-bg);
+            color: var(--cta-text);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .pricing-card__cta:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.25);
+        }
+
+        .pricing-card__cta:active {
+            transform: translateY(0) scale(0.98);
         }
 
         .pricing-card__offer-line {
-            margin: 0 0 0.7rem;
-            padding: 0.55rem 0.8rem;
+            margin: 0.5rem 0 0.75rem;
+            padding: 0.6rem 1rem;
             border-radius: 0.75rem;
-            border: 1px dashed #f59e0b;
-            background: #fffbeb;
-            color: #92400e;
-            font-size: 0.84rem;
-            font-weight: 700;
+            border: 2px dotted var(--offer-border);
+            background: var(--offer-bg);
+            color: var(--offer-text);
+            font-size: 0.82rem;
+            font-weight: 800;
             text-align: center;
-            min-height: 3.4rem;
-            /* Standardized height to keep cards uniform */
+            min-height: 3.2rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -599,16 +704,40 @@
 
         .pricing-card__friendly-list li {
             position: relative;
-            padding-left: 1.1rem;
+            padding-left: 1.4rem;
             line-height: 1.4;
         }
 
         .pricing-card__friendly-list li::before {
-            content: "•";
+            content: "check_circle";
+            font-family: 'Material Symbols Outlined';
             position: absolute;
-            left: 0.15rem;
-            color: #d97706;
-            font-weight: bold;
+            left: 0;
+            top: 0.15rem;
+            color: var(--check-color);
+            font-size: 1.2rem;
+            font-weight: normal;
+        }
+
+        /* Feature list items styling */
+        .pricing-card__features li {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .pricing-card__features li:last-child {
+            border-bottom: none;
+        }
+
+        .pricing-card__features li .material-symbols-outlined {
+            color: var(--check-color);
+            font-size: 1.25rem;
         }
 
 
@@ -1423,19 +1552,75 @@
 
         .packages-section__title {
             margin: 0.35rem 0 0;
-            font-family: "Noto Serif", Georgia, serif;
-            font-size: clamp(1.35rem, 2.4vw, 1.85rem);
-            font-weight: 700;
+            font-family: "Public Sans", system-ui, sans-serif;
+            font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+            font-weight: 800;
             letter-spacing: -0.03em;
-            color: var(--pkg-ink);
+            color: #0f172a;
+            text-align: center;
+        }
+
+        .packages-section__subtitle {
+            text-align: center;
+            font-size: 1rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .packages-section__subtitle .sparkle {
+            color: #fbbf24;
+            font-size: 1.2rem;
         }
 
         .packages-section__desc {
-            margin: 0;
+            margin: 1rem auto 0;
             max-width: 36rem;
             font-size: 0.9375rem;
             line-height: 1.55;
             color: var(--pkg-muted);
+            text-align: center;
+        }
+
+        /* Bottom features bar */
+        .bottom-features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            background: #ffffff;
+            padding: 1.5rem 2rem;
+            border-radius: 1.25rem;
+            margin-top: 3rem;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .feature-icon {
+            font-size: 1.75rem;
+            color: #6366f1;
+        }
+
+        .feature-text h4 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .feature-text p {
+            margin: 0;
+            font-size: 0.75rem;
+            color: #64748b;
         }
 
         .route-start-card {
@@ -2640,14 +2825,55 @@
                 </section>
             </div>
 
-            <div class="packages-section">
-                <div class="packages-section__head">
-                    <div>
-                        <p class="packages-section__kicker"><span class="num">02</span> Package tiers</p>
-                        <h2 id="sec-tiers" class="packages-section__title">Choose your package</h2>
+            <div class="packages-section mt-12">
+                <div class="flex flex-col items-center">
+                    <div class="pill-badge">
+                        <span class="sparkle">✦</span> Smart plans, memorable journeys
+                    </div>
+                    <h2 id="sec-tiers" class="packages-section__title">Choose the <span class="text-purple-600">perfect plan</span> for your trip</h2>
+                    <div class="packages-section__subtitle">
+                        <span class="sparkle">✦</span> Flexible options. Epic experiences. Unbeatable value. <span class="sparkle">✦</span>
                     </div>
                 </div>
-                <section class="pricing-grid" id="packageCards" aria-label="Package tiers"></section>
+                <section class="pricing-grid mt-10" id="packageCards" aria-label="Package tiers"></section>
+
+                <div class="bottom-features">
+                    <div class="feature-item">
+                        <span class="material-symbols-outlined feature-icon" style="color: #8b5cf6;">verified_user</span>
+                        <div class="feature-text">
+                            <h4>Secure & Trusted</h4>
+                            <p>100% safe booking</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="material-symbols-outlined feature-icon" style="color: #3b82f6;">headset_mic</span>
+                        <div class="feature-text">
+                            <h4>24/7 Support</h4>
+                            <p>We're always here</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="material-symbols-outlined feature-icon" style="color: #10b981;">map</span>
+                        <div class="feature-text">
+                            <h4>Smart Itinerary</h4>
+                            <p>AI-powered planning</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="material-symbols-outlined feature-icon" style="color: #f97316;">percent</span>
+                        <div class="feature-text">
+                            <h4>Best Price Guarantee</h4>
+                            <p>Get by best deals</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="material-symbols-outlined feature-icon" style="color: #ec4899;">thumb_up</span>
+                        <div class="feature-text">
+                            <h4>Happy Travelers</h4>
+                            <p>Loved by 10K+ users</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <section id="selectionStrip" class="selection-strip hidden p-5 sm:p-6">
@@ -2911,63 +3137,76 @@
             var TIERS = [
                 {
                     id: 'basic',
+                    icon: 'backpack',
                     shortTitle: 'Basic',
+                    subtitle: 'Simple. Quick. Affordable.',
                     title: 'Basic Package',
                     displayRange: '₹1,000 – ₹5,000',
                     pickLimit: 5,
-                    offerLine: 'Offer: Save up to 10% on weekday bookings.',
+                    offerLine: '<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 6px;">sell</span> Offer: Save up to 10% on weekday bookings.',
                     friendlyLine1: 'Great choice for a quick, low-stress local trip.',
                     friendlyLine2: 'Pick your places and we map the easiest route for you.',
-                    tagline: '💰 Budget: ₹1,000 – ₹5,000',
-                    peopleLine: '👥 People: 1 – 2',
-                    durationLine: '📅 Duration: 1 Day',
-                    placesLine: '📍 Places: Select exactly 5 stops',
-                    themeClass: 'pricing-card--basic'
+                    tagline: '<span class="material-symbols-outlined">account_balance_wallet</span> Budget: ₹1,000 – ₹5,000',
+                    peopleLine: '<span class="material-symbols-outlined">group</span> People: 1 – 2',
+                    durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 1 Day',
+                    placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select exactly 5 stops',
+                    themeClass: 'pricing-card--basic',
+                    ribbonText: '10% OFF'
                 },
                 {
                     id: 'standard',
+                    icon: 'luggage',
                     shortTitle: 'Standard',
+                    subtitle: 'Balanced. Smooth. Enjoyable.',
                     title: 'Standard Package',
                     displayRange: '₹5,000 – ₹10,000',
                     pickLimit: 10,
-                    offerLine: 'Offer: Flat 12% off for early confirmations.',
+                    offerLine: '<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 6px;">sell</span> Offer: Flat 12% off for early confirmations.',
                     friendlyLine1: 'Balanced plan for couples, friends, and small families.',
                     friendlyLine2: 'More places, clear budget, and smooth trip flow.',
-                    tagline: '💰 Budget: ₹5,000 – ₹10,000',
-                    peopleLine: '👥 People: 2 – 4',
-                    durationLine: '📅 Duration: 1 – 2 Days',
-                    placesLine: '📍 Places: Select exactly 10 stops',
-                    themeClass: 'pricing-card--standard'
+                    tagline: '<span class="material-symbols-outlined">account_balance_wallet</span> Budget: ₹5,000 – ₹10,000',
+                    peopleLine: '<span class="material-symbols-outlined">group</span> People: 2 – 4',
+                    durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 1 – 2 Days',
+                    placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select exactly 10 stops',
+                    themeClass: 'pricing-card--standard',
+                    ribbonText: 'RECOMMENDED'
                 },
                 {
                     id: 'premium',
+                    icon: 'workspace_premium',
                     shortTitle: 'Premium',
+                    subtitle: 'Comfort. Flexibility. Value.',
                     title: 'Premium Package',
                     displayRange: '₹15,000+',
                     pickLimit: 20,
-                    offerLine: 'Offer: 15% off + priority support.',
+                    offerLine: '<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 6px;">sell</span> Offer: 15% off + priority support.',
                     friendlyLine1: 'Perfect when you want comfort, coverage, and flexibility.',
                     friendlyLine2: 'Plan bigger days without worrying about route complexity.',
-                    tagline: '💰 Budget: ₹15,000+',
-                    peopleLine: '👥 People: 6-8',
-                    durationLine: '📅 Duration: 3 – 5 Days',
-                    placesLine: '📍 Places: Select 20 stops',
-                    themeClass: 'pricing-card--premium'
+                    tagline: '<span class="material-symbols-outlined">account_balance_wallet</span> Budget: ₹15,000+',
+                    peopleLine: '<span class="material-symbols-outlined">group</span> People: 6 – 8',
+                    durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 3 – 5 Days',
+                    placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 20 stops',
+                    themeClass: 'pricing-card--premium',
+                    ribbonText: '★ POPULAR'
                 },
                 {
                     id: 'superpremium',
+                    icon: 'diamond',
                     shortTitle: 'Super Premium',
+                    subtitle: 'Maximum Control. VIP Experience.',
                     title: 'Super Premium Package',
                     displayRange: '₹25,000+',
                     pickLimit: 30,
-                    offerLine: 'Offer: 22% off + Priority VIP support.',
+                    offerLine: '<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 6px;">sell</span> Offer: 22% off + Priority VIP support.',
                     friendlyLine1: 'Best for grand trips with maximum place coverage.',
                     friendlyLine2: 'More control, more stops, and premium trip planning feel.',
-                    tagline: '💰 Budget: ₹25,000+',
-                    peopleLine: '👥 People: 8+',
-                    durationLine: '📅 Duration: 5 – 7 Days',
-                    placesLine: '📍 Places: Select 30+ stops',
-                    themeClass: 'pricing-card--superpremium'
+                    tagline: '<span class="material-symbols-outlined">account_balance_wallet</span> Budget: ₹25,000+',
+                    peopleLine: '<span class="material-symbols-outlined">group</span> People: 8+',
+                    durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 5 – 7 Days',
+                    placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 30+ stops',
+                    themeClass: 'pricing-card--superpremium',
+                    ribbonType: 'bestvalue',
+                    ribbonText: '<span style="font-size: 0.8rem;">✦</span> BEST VALUE <span style="font-size: 0.8rem;">✦</span>'
                 }
             ];
 
@@ -3128,17 +3367,29 @@
                     card.className = 'pricing-card ' + tier.themeClass;
                     card.setAttribute('data-package-id', tier.id);
 
+                    var ribbonHtml = '';
+                    if (tier.ribbonText) {
+                        ribbonHtml = '<div class="pricing-card__ribbon">' + tier.ribbonText + '</div>';
+                    }
+
                     card.innerHTML =
+                        ribbonHtml +
                         '<div class="pricing-card__top-wrap">' +
+                        '<div class="pricing-card__header-bg"></div>' +
                         '<div class="pricing-card__header">' +
+                        '<div class="pricing-card__icon-wrap">' +
+                        '<span class="material-symbols-outlined" style="position: absolute; top: -10px; right: -10px; font-size: 1.2rem; color: #fbbf24;">auto_awesome</span>' +
+                        '<span class="material-symbols-outlined">' + tier.icon + '</span>' +
+                        '</div>' +
                         '<h3>' +
                         escapeHtml(tier.shortTitle) +
                         '</h3>' +
+                        '<p>' + escapeHtml(tier.subtitle) + '</p>' +
                         '</div>' +
                         waveSvg() +
                         '</div>' +
                         '<div class="pricing-card__body">' +
-                        '<p class="pricing-card__offer-line">' + escapeHtml(tier.offerLine || 'Project offer available for this plan.') + '</p>' +
+                        '<p class="pricing-card__offer-line">' + tier.offerLine + '</p>' +
                         '<div class="pricing-card__friendly">' +
                         '<ul class="pricing-card__friendly-list">' +
                         '<li>' + escapeHtml(tier.friendlyLine1 || '') + '</li>' +
@@ -3146,14 +3397,14 @@
                         '</ul>' +
                         '</div>' +
                         '<ul class="pricing-card__features">' +
-                        '<li>' + escapeHtml(tier.tagline) + '</li>' +
-                        '<li>' + escapeHtml(tier.peopleLine || '') + '</li>' +
-                        '<li>' + escapeHtml(tier.durationLine || '') + '</li>' +
-                        '<li>' + escapeHtml(tier.placesLine || ('📍 Places: Select exactly ' + lim + ' stops')) + '</li>' +
+                        '<li>' + tier.tagline + '</li>' +
+                        '<li>' + tier.peopleLine + '</li>' +
+                        '<li>' + tier.durationLine + '</li>' +
+                        '<li>' + tier.placesLine + '</li>' +
                         '</ul>' +
                         '<button type="button" class="pricing-card__cta" data-cta-package="' +
                         escapeHtml(tier.id) +
-                        '">Choose places</button>' +
+                        '">Choose places <span class="material-symbols-outlined" style="font-size: 1.1rem; font-weight: 900;">arrow_forward</span></button>' +
                         '</div>';
 
                     var cta = card.querySelector('.pricing-card__cta');
