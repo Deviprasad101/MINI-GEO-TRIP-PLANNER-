@@ -307,21 +307,26 @@
         .site-header__link {
             display: inline-flex;
             align-items: center;
-            min-height: 2.75rem;
-            font-size: 1.1875rem;
-            font-weight: 600;
-            color: #78350f;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #92400e;
             text-decoration: none;
-            padding: 0.35rem 0.5rem;
-            border-radius: 0.5rem;
-            transition: background 0.15s ease, color 0.15s ease;
+            padding: 0.5rem 1.1rem;
+            border-radius: 9999px;
+            background: #ffffff;
+            border: 1px solid rgba(217, 119, 6, 0.4);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+            transition: all 0.2s ease;
             white-space: nowrap;
             box-sizing: border-box;
         }
 
         .site-header__link:hover {
-            background: rgba(254, 243, 199, 0.85);
-            color: #451a03;
+            background: #fffbeb;
+            border-color: #d97706;
+            color: #78350f;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12);
+            transform: translateY(-1px);
         }
 
         .site-header__link:focus-visible {
