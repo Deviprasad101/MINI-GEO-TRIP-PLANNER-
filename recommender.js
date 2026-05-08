@@ -160,13 +160,41 @@ class GeoTripRecommender {
     }
 
     // ─── Step 6: Smart Itinerary (Time-of-Day) ────────────────────────────────
-    getDayItinerary() {
+    getDayItinerary(theme = null) {
         if (!this.loaded) return { morning: [], afternoon: [], evening: [] };
-        const byTag = tag => this.places.filter(p => p.tags.toLowerCase().includes(tag));
+        
+        const getForSlot = (slotTag, filterTheme) => {
+            // Priority 1: Matches both slot and theme
+            let themeResults = [];
+            if (filterTheme && filterTheme !== 'all') {
+                themeResults = this.places.filter(p => 
+                    p.tags.toLowerCase().includes(slotTag) && 
+                    (p.category.toLowerCase().includes(filterTheme.toLowerCase()) || p.tags.toLowerCase().includes(filterTheme.toLowerCase()))
+                );
+            }
+
+            // Priority 2: Matches just the slot tag
+            let slotResults = this.places.filter(p => p.tags.toLowerCase().includes(slotTag));
+            
+            // Priority 3: Matches just the theme (top rated)
+            let catResults = filterTheme && filterTheme !== 'all' ? this.getCategoryRecommendations(filterTheme, 5) : [];
+
+            // Combine and unique
+            const combined = [...themeResults, ...slotResults, ...catResults];
+            const seen = new Set();
+            return combined.filter(p => {
+                if (seen.has(p.name)) return false;
+                seen.add(p.name);
+                return true;
+            }).slice(0, 3);
+        };
+
+        const themeVal = theme === 'all' ? null : theme;
+
         return {
-            morning:   [...byTag('morning'), ...this.getCategoryRecommendations('Temple', 2)].slice(0, 3),
-            afternoon: [...byTag('afternoon'), ...this.getCategoryRecommendations('Food Place', 2)].slice(0, 3),
-            evening:   [...byTag('evening'), ...this.getCategoryRecommendations('Sightseeing', 2)].slice(0, 3),
+            morning:   getForSlot('morning', themeVal),
+            afternoon: getForSlot('afternoon', themeVal),
+            evening:   getForSlot('evening', themeVal),
         };
     }
 }

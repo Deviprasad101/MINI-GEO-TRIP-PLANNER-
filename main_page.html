@@ -2904,7 +2904,7 @@
 
     <script>
             (function () {
-                const CSV_URL = 'tirupati_places_with_hospitals.csv';
+                const CSV_URL = 'tirupati_main_data.csv';
 
                 function categoryKeyFromCsv(cat) {
                     const c = (cat || '').toLowerCase();
@@ -3356,7 +3356,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         (function () {
-            var CSV_URL = 'tirupati_places_with_hospitals.csv';
+            var CSV_URL = 'tirupati_main_data.csv';
             var OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving';
             var OSRM_TRIP_BASE = 'https://router.project-osrm.org/trip/v1/driving';
             var DAY_END_MIN = 24 * 60 - 1;
@@ -4761,6 +4761,8 @@
             document.querySelectorAll('.js-main-show-map').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     showMainLandingMap();
+                    // Auto-open recommendations
+                    if (window._showRecPanel) window._showRecPanel();
                 });
             });
 
@@ -4875,7 +4877,7 @@
         // ── Load recommender with enriched CSV ─────────────────────────────
         window.addEventListener('load', function() {
             if (!window.recommender) return;
-            window.recommender.loadCSV('tirupati_places_enriched.csv').then(function() {
+            window.recommender.loadCSV('tirupati_main_data.csv').then(function() {
                 document.getElementById('recFab').style.display = 'flex';
                 // Show day itinerary by default
                 window._renderRecItinerary();
@@ -4948,21 +4950,42 @@
 
         window._renderRecNearby = function() {
             if (!window.recommender || !window.recommender.loaded) return;
-            // Use Tirupati centre as default; swap for GPS if available
-            var lat = 13.6288, lng = 79.4192;
+            
+            // Try to get coordinates from the "Start Location" field
+            var startLocText = (document.getElementById('mainStartLocation')?.value || '').trim().toLowerCase();
+            var lat = 13.6288, lng = 79.4192; // Default Tirupati
+            var locLabel = "Tirupati Centre";
+
+            if (startLocText && startLocText !== 'tirupati') {
+                // Better matching: Find any place that contains the search text or vice versa
+                var matchedPlace = window.recommender.places.find(p => 
+                    p.name.toLowerCase().includes(startLocText) || 
+                    startLocText.includes(p.name.toLowerCase())
+                );
+                
+                if (matchedPlace) {
+                    lat = matchedPlace.lat;
+                    lng = matchedPlace.lng;
+                    locLabel = matchedPlace.name;
+                    console.log("[Rec] Centering Nearby on:", matchedPlace.name);
+                } else {
+                    console.log("[Rec] No exact match for start location, using default.");
+                }
+            }
+
             var results = window.recommender.getNearbyRecommendations(lat, lng, 5);
             if (!results.length) {
                 setContent('<p style="font-size:0.8rem;color:#92400e;text-align:center;margin:0;">No nearby places found.</p>');
                 return;
             }
-            setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">Closest to Tirupati centre</p>' +
+            setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">Closest to: ' + locLabel + '</p>' +
                 results.map(placeCard).join(''));
 
-            // Try live GPS
+            // Try live GPS (highest priority if active)
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(pos) {
                     var res = window.recommender.getNearbyRecommendations(pos.coords.latitude, pos.coords.longitude, 5);
-                    setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">📍 Nearest to your location</p>' +
+                    setContent('<p style="font-size:0.7rem;color:#78350f;font-weight:700;margin:0 0 0.5rem;">📍 Nearest to your live location</p>' +
                         res.map(placeCard).join(''));
                 }, function() {});
             }
@@ -4970,13 +4993,23 @@
 
         window._renderRecItinerary = function() {
             if (!window.recommender || !window.recommender.loaded) return;
-            var it = window.recommender.getDayItinerary();
+            
+            // Use current theme/last place as context
+            var theme = window._lastRecPlace || 'all';
+            var it = window.recommender.getDayItinerary(theme);
+            
             var html = '';
             var sections = [
                 { label: '🌅 Morning', key: 'morning', color: '#78350f' },
                 { label: '☀️ Afternoon', key: 'afternoon', color: '#92400e' },
                 { label: '🌆 Evening', key: 'evening', color: '#b45309' },
             ];
+
+            // If a theme is selected, show it in the header
+            if (theme && theme !== 'all') {
+                html += `<p style="font-size:0.75rem;font-weight:700;color:#b45309;margin:0 0 0.5rem;border-bottom:1px solid #f3e8c0;padding-bottom:0.25rem;">Theme: ${theme}</p>`;
+            }
+
             sections.forEach(function(s) {
                 if (it[s.key] && it[s.key].length) {
                     html += `<p style="font-size:0.72rem;font-weight:800;color:${s.color};margin:0.25rem 0 0.3rem;">${s.label}</p>`;
@@ -4992,17 +5025,20 @@
             window._renderRecItinerary();
         };
 
-        // ── Hook into category chip clicks (if present on this page) ──────
+        // ── Hook into category chip clicks (Theme Selection) ───────────────
         document.addEventListener('click', function(e) {
-            var chip = e.target.closest('[data-cat]') || e.target.closest('.cat-chip') || e.target.closest('[data-category]');
+            var chip = e.target.closest('[data-ml-cat]') || e.target.closest('[data-cat]') || e.target.closest('.cat-chip') || e.target.closest('[data-category]');
             if (!chip) return;
-            var cat = chip.dataset.cat || chip.dataset.category || chip.textContent.trim();
-            if (!cat) return;
+
+            var cat = chip.dataset.mlCat || chip.dataset.cat || chip.dataset.category || chip.textContent.trim();
+            if (!cat || cat === 'all') cat = 'Tirumala Venkateswara Temple'; // Default if 'all'
+
             window._lastRecPlace = cat;
             if (window.recommender && window.recommender.loaded) {
                 var panel = document.getElementById('recPanel');
                 panel.style.display = 'block';
-                // Switch to similar tab
+
+                // Switch to similar tab to show theme-based results
                 document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
                     b.style.borderBottomColor = 'transparent';
                     b.style.color = '#92400e';
@@ -5013,6 +5049,26 @@
                 });
                 window._renderRecSimilar(cat);
             }
+        });
+
+        // ── Hook into Trip Details form changes ────────────────────────────
+        ['mainOutingStart', 'mainOutingEnd', 'mainOutingDate', 'mainStartLocation'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('change', function() {
+                if (!window.recommender || !window.recommender.loaded) return;
+
+                // If start location changed, refresh Nearby
+                if (id === 'mainStartLocation') {
+                    window._renderRecNearby();
+                }
+
+                // Refresh Day Plan based on new times/date context (if logic allowed)
+                window._renderRecItinerary();
+                
+                // Show a subtle notification or just open panel
+                // document.getElementById('recPanel').style.display = 'block';
+            });
         });
 
     })();
