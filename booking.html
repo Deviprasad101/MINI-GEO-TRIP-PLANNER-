@@ -921,6 +921,87 @@
             color: #64748b;
         }
 
+        .concession-container {
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .concession-title {
+            margin: 0 0 1rem 0;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .concession-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .checkbox-field {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #334155;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background 0.2s ease;
+        }
+
+        .checkbox-field:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .checkbox-field input[type="checkbox"] {
+            width: 1.15rem;
+            height: 1.15rem;
+            cursor: pointer;
+            accent-color: #b45309;
+        }
+
+        .booking-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .cta--secondary {
+            background: linear-gradient(135deg, #0f172a, #334155) !important;
+            border: 1px solid #1e293b !important;
+        }
+
+        .info-note {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-note .material-symbols-outlined {
+            font-size: 1.1rem;
+            color: #b45309;
+        }
+
         .emergency-panel__lead {
             margin: 0;
             padding: 0.65rem 1rem;
@@ -1388,20 +1469,32 @@
                 <div class="grid-2">
                     <div class="field">
                         <label for="busFrom">From</label>
-                        <div class="input-wrap"><span class="material-symbols-outlined"
-                                aria-hidden="true">location_on</span><input id="busFrom" type="text"
-                                placeholder="Enter departure city" /></div>
+                        <div class="input-wrap">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                            <input id="busFrom" type="text" list="commonCities" placeholder="e.g. Tirupati" />
+                        </div>
                     </div>
                     <div class="field">
                         <label for="busTo">To</label>
-                        <div class="input-wrap"><span class="material-symbols-outlined"
-                                aria-hidden="true">location_on</span><input id="busTo" type="text"
-                                placeholder="Enter destination city" /></div>
+                        <div class="input-wrap">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                            <input id="busTo" type="text" list="commonCities" placeholder="e.g. Bangalore" />
+                        </div>
                     </div>
                     <div class="field">
                         <label for="busDate">Journey Date</label>
                         <div class="input-wrap"><span class="material-symbols-outlined"
                                 aria-hidden="true">calendar_month</span><input id="busDate" type="date" /></div>
+                    </div>
+                    <div class="field">
+                        <label for="busTypeToggle">Trip Type</label>
+                        <div class="input-wrap">
+                            <span class="material-symbols-outlined" aria-hidden="true">swap_calls</span>
+                            <select id="busTypeToggle">
+                                <option value="oneway">One Way</option>
+                                <option value="roundtrip">Round Trip</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="field">
                         <label for="busPassengers">Passengers</label>
@@ -1431,15 +1524,17 @@
                 <div class="grid-2">
                     <div class="field">
                         <label for="cabFrom">Pickup Location</label>
-                        <div class="input-wrap"><span class="material-symbols-outlined"
-                                aria-hidden="true">location_on</span><input id="cabFrom" type="text"
-                                placeholder="Enter pickup location" /></div>
+                        <div class="input-wrap">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                            <input id="cabFrom" type="text" list="commonCities" placeholder="e.g. Tirupati Station" />
+                        </div>
                     </div>
                     <div class="field">
                         <label for="cabTo">Drop-off Location</label>
-                        <div class="input-wrap"><span class="material-symbols-outlined"
-                                aria-hidden="true">location_on</span><input id="cabTo" type="text"
-                                placeholder="Enter drop-off location" /></div>
+                        <div class="input-wrap">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                            <input id="cabTo" type="text" list="commonCities" placeholder="e.g. Chennai Airport" />
+                        </div>
                     </div>
                     <div class="field">
                         <label for="cabDate">Pickup Date</label>
@@ -1488,15 +1583,17 @@
                 <div class="grid-2">
                     <div class="field">
                         <label for="trainFrom">From Station</label>
-                        <div class="input-wrap"><span class="material-symbols-outlined"
-                                aria-hidden="true">location_on</span><input id="trainFrom" type="text"
-                                placeholder="Enter departure station" /></div>
+                        <div class="input-wrap">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                            <input id="trainFrom" type="text" list="commonStations" placeholder="e.g. TPTY - Tirupati" />
+                        </div>
                     </div>
                     <div class="field">
                         <label for="trainTo">To Station</label>
-                        <div class="input-wrap"><span class="material-symbols-outlined"
-                                aria-hidden="true">location_on</span><input id="trainTo" type="text"
-                                placeholder="Enter destination station" /></div>
+                        <div class="input-wrap">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                            <input id="trainTo" type="text" list="commonStations" placeholder="e.g. MAS - MGR Chennai Ctrl" />
+                        </div>
                     </div>
                     <div class="field">
                         <label for="trainDate">Journey Date</label>
@@ -1506,12 +1603,47 @@
                     <div class="field">
                         <label for="trainClass">Class</label>
                         <div class="input-wrap"><select id="trainClass">
-                                <option>Sleeper (SL)</option>
-                                <option>3A</option>
-                                <option>2A</option>
-                                <option>1A</option>
-                                <option>Chair Car (CC)</option>
+                                <option value="All">All Classes</option>
+                                <option value="SL">Sleeper (SL)</option>
+                                <option value="3A">AC 3 Tier (3A)</option>
+                                <option value="2A">AC 2 Tier (2A)</option>
+                                <option value="1A">AC 1st Class (1A)</option>
+                                <option value="CC">AC Chair Car (CC)</option>
                             </select></div>
+                    </div>
+                    <div class="field">
+                        <label for="trainQuota">Quota</label>
+                        <div class="input-wrap">
+                            <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+                            <select id="trainQuota">
+                                <option value="GN">GENERAL</option>
+                                <option value="TQ">TATKAL</option>
+                                <option value="LD">LADIES</option>
+                                <option value="SS">LOWER BERTH/SR. CITIZEN</option>
+                                <option value="PT">PREMIUM TATKAL</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="concession-container">
+                    <p class="concession-title">Special Search Options</p>
+                    <div class="concession-grid">
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="disabilityConcession" />
+                            <span class="material-symbols-outlined" aria-hidden="true">accessible</span>
+                            <span>Person With Disability Concession</span>
+                        </label>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="flexibleDate" />
+                            <span class="material-symbols-outlined" aria-hidden="true">event_repeat</span>
+                            <span>Flexible With Date</span>
+                        </label>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="railwayPass" />
+                            <span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span>
+                            <span>Railway Pass Concession</span>
+                        </label>
                     </div>
                 </div>
                 <div class="field single-row">
@@ -1533,10 +1665,31 @@
                         <li>Check PNR status anytime</li>
                     </ul>
                 </div>
-                <button class="cta" data-submit="Search Trains">Search Trains</button>
+                <button class="cta" data-submit="Search Trains">Search Trains (Auto-fill)</button>
                 <p class="toast" aria-live="polite"></p>
             </section>
         </section>
+
+        <!-- Common Data for Autocomplete -->
+        <datalist id="commonCities">
+            <option value="Tirupati"></option>
+            <option value="Bangalore"></option>
+            <option value="Chennai"></option>
+            <option value="Hyderabad"></option>
+            <option value="Vijayawada"></option>
+            <option value="Nellore"></option>
+            <option value="Chittoor"></option>
+            <option value="Madurai"></option>
+        </datalist>
+
+        <datalist id="commonStations">
+            <option value="TPTY - Tirupati"></option>
+            <option value="RU - Renigunta Jn"></option>
+            <option value="MAS - MGR Chennai Ctrl"></option>
+            <option value="SBC - KSR Bengaluru"></option>
+            <option value="SC - Secunderabad Jn"></option>
+            <option value="BZA - Vijayawada Jn"></option>
+        </datalist>
 
         <section class="emergency-map-card hidden" id="mapSection" aria-label="Emergency hospital map">
             <input type="hidden" id="userStartLocation" value="Tirupati" />
@@ -1594,24 +1747,68 @@
             document.querySelectorAll(".cta").forEach((btn) => {
                 btn.addEventListener("click", function () {
                     const action = (btn.dataset.submit || "").toLowerCase();
-                    if (action === "search buses") {
-                        window.location.href = "https://www.apsrtconline.in/oprs-web/guest/home.do?h=1";
-                        return;
-                    }
-                    if (action === "book cab now") {
-                        window.location.href = "https://www.uber.com/us/en/ride/?ad_id=614857634815&adg_id=141427178082&campaign_id=17954041642&cre=614857634815&dev=c&dev_m=&fi_id=&gad_campaignid=17954041642&gad_source=1&gbraid=0AAAAADiA3jppbKcfHAxKkVj8VLe0NyuaM&gclid=Cj0KCQjw2MbPBhCSARIsAP3jP9yX5UpXPsf4ex6JM_ERCsswWEv2HdA6kGEr988x7IUxmHqzSn8ZA5UaAq4SEALw_wcB&gclsrc=aw.ds&kw=uber%20auto&kwid=kwd-297339083264&match=b&net=g&placement=&tar=&utm_campaign=CM2197857-search-google-brand_77_-99_IN-National_r_web_acq_cpc_en_T1_Generic_BM_uber%20auto_kwd-297339083264_614857634815_141427178082_b_c&utm_source=AdWords_Brand";
-                        return;
-                    }
-                    if (action === "search trains") {
-                        window.location.href = "https://www.redbus.in/railways?utm_source=google&utm_medium=search&utm_campaign=IN-redRail-Search-Generic&utm_term=train%20booking&device=c&utm_matchtype=e&utm_network=g&utm_placement=&utm_content=725195611626&utm_Adposition=&utm_location=9147328&utm_Sitelink=}&utm_Audience=kwd-397123323&utm_campaignid=18285854609&utm_adgroupid=147370879579&utm_adgroup=&gad_source=1&gad_campaignid=18285854609&gbraid=0AAAAAoeJyA1MidDiLXi-a1bqO1sbWkp_L&gclid=Cj0KCQjw2MbPBhCSARIsAP3jP9xBZbBq3SiLCndr4xBM5l-89-izH65av6D-5eWBcMsiKhBPN-_V_I0aAjQzEALw_wcB";
-                        return;
-                    }
                     const panel = btn.closest(".tab-panel");
                     const toast = panel ? panel.querySelector(".toast") : null;
-                    if (!toast) return;
-                    toast.textContent = (btn.dataset.submit || "Request") + " request captured.";
-                    toast.classList.add("is-visible");
-                    window.setTimeout(() => toast.classList.remove("is-visible"), 2200);
+                    
+                    if (toast) {
+                        toast.textContent = "Connecting to official portal...";
+                        toast.classList.add("is-visible");
+                    }
+
+                    if (action === "search buses") {
+                        const from = document.getElementById('busFrom').value || 'Tirupati';
+                        const to = document.getElementById('busTo').value || 'Bangalore';
+                        const dateVal = document.getElementById('busDate').value;
+                        
+                        let dateStr = "";
+                        if(dateVal) {
+                            const d = new Date(dateVal);
+                            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                            dateStr = `${d.getDate()}-${months[d.getMonth()]}-${d.getFullYear()}`;
+                        }
+
+                        const url = `https://www.redbus.in/search?fromCityName=${encodeURIComponent(from)}&toCityName=${encodeURIComponent(to)}&onward=${dateStr}`;
+                        setTimeout(() => window.location.href = url, 800);
+                        return;
+                    }
+
+                    if (action === "book cab now") {
+                        const from = document.getElementById('cabFrom').value || 'Tirupati';
+                        const to = document.getElementById('cabTo').value || 'Chennai';
+                        const url = `https://m.uber.com/ul/?action=setPickup&pickup[formatted_address]=${encodeURIComponent(from)}&dropoff[formatted_address]=${encodeURIComponent(to)}`;
+                        setTimeout(() => window.location.href = url, 800);
+                        return;
+                    }
+
+                    if (action === "search trains") {
+                        const fromInput = document.getElementById('trainFrom').value || 'TPTY - Tirupati';
+                        const toInput = document.getElementById('trainTo').value || 'MAS - MGR Chennai Ctrl';
+                        const dateVal = document.getElementById('trainDate').value;
+
+                        // Extract station codes (e.g., "TPTY" from "TPTY - Tirupati")
+                        const fromCode = fromInput.split(' - ')[0].trim();
+                        const toCode = toInput.split(' - ')[0].trim();
+
+                        let dateStr = "";
+                        if (dateVal) {
+                            const d = new Date(dateVal);
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const yyyy = d.getFullYear();
+                            dateStr = `${dd}-${mm}-${yyyy}`; // DD-MM-YYYY
+                        }
+
+                        // Using ConfirmTkt (Official IRCTC Partner) for reliable pre-filling
+                        const url = `https://www.confirmtkt.com/trains-between-stations?src=${encodeURIComponent(fromCode)}&dest=${encodeURIComponent(toCode)}&doj=${dateStr}`;
+
+                        if (toast) {
+                            toast.textContent = "Auto-filling Train Details...";
+                            toast.classList.add("is-visible");
+                        }
+
+                        setTimeout(() => window.location.href = url, 800);
+                        return;
+                    }
                 });
             });
         })();
