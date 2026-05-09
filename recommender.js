@@ -355,3 +355,102 @@ class GeoTripRecommender {
 // Export as global singleton
 window.GeoTripRecommender = GeoTripRecommender;
 window.recommender = new GeoTripRecommender();
+
+// --- AI Recommendation Integration ---
+document.addEventListener('DOMContentLoaded', () => {
+    const getRecommendationsBtn = document.getElementById('get-recommendations');
+    if (!getRecommendationsBtn) return;
+
+    getRecommendationsBtn.addEventListener('click', async () => {
+        const destEl = document.getElementById('ai-destination');
+        const budgetEl = document.getElementById('ai-budget');
+        const interestsEl = document.getElementById('ai-interests');
+        
+        const data = {
+            destination: destEl ? destEl.value : 'Tirupati',
+            budget: budgetEl ? budgetEl.value : '5000',
+            interests: interestsEl ? interestsEl.value : 'temples'
+        };
+
+        const loadingEl = document.getElementById('ai-loading');
+        const resultsEl = document.getElementById('ai-results');
+        
+        if (loadingEl) loadingEl.classList.remove('hidden');
+        if (resultsEl) resultsEl.classList.add('hidden');
+
+        try {
+            // Note: The backend Flask app must be running on localhost:5000
+            const response = await fetch('http://localhost:5000/api/recommend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch from backend');
+
+            const aiRecommendation = await response.json();
+            
+            if (aiRecommendation.status === 'success') {
+                displayItinerary(aiRecommendation.recommendation, resultsEl);
+            } else {
+                throw new Error(aiRecommendation.message || 'Unknown error');
+            }
+        } catch (error) {
+            console.error('AI Recommendation Error:', error);
+            if (resultsEl) {
+                resultsEl.innerHTML = `<div class="p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl">
+                    <strong>Error:</strong> Could not load AI recommendations. Ensure the Flask backend is running on port 5000.
+                </div>`;
+                resultsEl.classList.remove('hidden');
+            }
+        } finally {
+            if (loadingEl) loadingEl.classList.add('hidden');
+        }
+    });
+});
+
+function displayItinerary(itineraryData, container) {
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (!Array.isArray(itineraryData) || itineraryData.length === 0) {
+        container.innerHTML = '<p class="text-slate-600">No itinerary generated. Please try again.</p>';
+        container.classList.remove('hidden');
+        return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6';
+
+    itineraryData.forEach((dayData, index) => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow';
+        
+        const header = document.createElement('div');
+        header.className = 'bg-gradient-to-r from-teal-600 to-teal-500 p-4 text-white font-bold text-lg';
+        header.textContent = dayData.day || `Day ${index + 1}`;
+        
+        const body = document.createElement('div');
+        body.className = 'p-5 flex-1';
+        
+        const list = document.createElement('ul');
+        list.className = 'space-y-3';
+        
+        const activities = Array.isArray(dayData.activities) ? dayData.activities : [dayData.activities || 'Explore the city'];
+        
+        activities.forEach(activity => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start gap-2 text-sm text-slate-700';
+            li.innerHTML = `<span class="material-symbols-outlined text-teal-500 text-lg shrink-0 mt-0.5">check_circle</span> <span>${activity}</span>`;
+            list.appendChild(li);
+        });
+        
+        body.appendChild(list);
+        card.appendChild(header);
+        card.appendChild(body);
+        wrapper.appendChild(card);
+    });
+
+    container.appendChild(wrapper);
+    container.classList.remove('hidden');
+}
