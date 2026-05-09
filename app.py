@@ -1,13 +1,14 @@
 import os
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__)
+# Set static_folder='.' to let Flask serve HTML, JS, CSS, and CSV files from the current directory
+app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
 
 # Configure the new google-genai client
@@ -16,7 +17,8 @@ client = genai.Client(api_key=api_key) if api_key else None
 
 @app.route('/')
 def home():
-    return "GeoTrip AI Backend is running successfully! <br><br>Please open your <b>packages.html</b> file in your browser to use the trip planner."
+    # Serve main_page.html when someone visits http://127.0.0.1:5000/
+    return send_from_directory('.', 'main_page.html')
 
 @app.route('/api/recommend', methods=['POST'])
 def recommend():
