@@ -1768,11 +1768,19 @@
         }
 
         .route-field input[type="text"]:disabled {
-            opacity: 0.72;
+            opacity: 0.55;
             cursor: not-allowed;
-            background: #f1f5f9;
+            background: #f8fafc;
             border-color: #e2e8f0;
             box-shadow: none;
+        }
+
+        .route-field.is-disabled {
+            opacity: 0.6;
+        }
+
+        .route-field.is-disabled * {
+            cursor: not-allowed !important;
         }
 
         .route-gps-tile {
@@ -3856,6 +3864,8 @@
                 var on = gpsEl.checked;
                 locInput.disabled = on;
                 locInput.setAttribute('aria-disabled', on ? 'true' : 'false');
+                var fieldGroup = locInput.closest('.route-field');
+                if (fieldGroup) fieldGroup.classList.toggle('is-disabled', on);
             }
 
             function showTripMapInline() {
