@@ -6976,16 +6976,10 @@
 
             function getEntryRows() {
                 return [
-                    ['Start mode', byId('sbGeoToggle') && byId('sbGeoToggle').classList.contains('active') ? 'Live GPS' : 'Entered location'],
-                    ['Start location', val('sbStartLocation') || val('routeStartLocation') || '-'],
-                    ['Trip date', val('sbTripDate') || val('mainTripDate') || '-'],
-                    ['Outing window', (val('sbTripStartTime') || val('mainOutingStart') || '-') + ' to ' + (val('sbTripEndTime') || val('mainOutingEnd') || '-')],
-                    ['Days', val('sbNumDays') || val('days') || '-'],
-                    ['Category', activeChipCategoryLabel()],
-                    ['Search text', val('sbPlaceSearch') || '-'],
                     ['Travel mode', val('travelMode') || '-'],
                     ['Distance (km)', val('distance') || '-'],
                     ['People', val('people') || '-'],
+                    ['Days', val('days') || '-'],
                     ['Rooms', val('rooms') || '-'],
                     ['Room cost/day', val('roomCost') || '-'],
                     ['Food/day per person', val('foodPerDay') || '-'],
@@ -6994,6 +6988,17 @@
                     ['Estimated total', text('kpiTotal') || '-'],
                     ['Budget delta', text('kpiDelta') || '-'],
                     ['Status', text('kpiStatus') || '-']
+                ];
+            }
+
+            function getBreakdownRows() {
+                return [
+                    ['Travel Cost', text('outTravel') || 'Rs. 0'],
+                    ['Stay Cost', text('outStay') || 'Rs. 0'],
+                    ['Food Cost', text('outFood') || 'Rs. 0'],
+                    ['Activities Cost', text('outActivities') || 'Rs. 0'],
+                    ['Safety Buffer', text('outBuffer') || 'Rs. 0'],
+                    ['Total Estimate', text('sumTotal') || 'Rs. 0']
                 ];
             }
 
@@ -7201,17 +7206,26 @@
                     drawHeaderBand();
                     var logoData = await loadImageAsDataURL('images/geointellab_logo.jpeg');
                     if (logoData) {
-                        doc.addImage(logoData, 'JPEG', margin, 18, contentW, 58);
+                        // Centered logo with refined dimensions
+                        var logoW = 260;
+                        var logoH = 54;
+                        doc.addImage(logoData, 'JPEG', (pageW - logoW) / 2, 12, logoW, logoH);
                     }
 
                     doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(24);
+                    doc.setFontSize(22);
                     doc.setTextColor(C.title[0], C.title[1], C.title[2]);
-                    doc.text('Geo Trip Planner', pageW / 2, 96, { align: 'center' });
+                    doc.text('Geo Trip Planner', pageW / 2, 84, { align: 'center' });
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(10);
+                    doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
+                    doc.text('Powered by Geo-Intel Lab, IITTNIF, Tirupati', pageW / 2, 101, { align: 'center' });
+
                     doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(11.5);
+                    doc.setFontSize(11);
                     doc.setTextColor(C.titleSub[0], C.titleSub[1], C.titleSub[2]);
-                    doc.text('Professional Visit Order & User Details Report', pageW / 2, 123, { align: 'center' });
+                    doc.text('Professional Budget Analysis Report', pageW / 2, 125, { align: 'center' });
 
                     y = 162;
                     var now = new Date();
@@ -7223,11 +7237,11 @@
                     // Keep clear vertical gap so the next section card never overlaps timestamp text.
                     y += 34;
 
-                    sectionTitle('User Entry Details', 'Captured from current Budget Calculator inputs');
+                    sectionTitle('Trip Input Parameters', 'The raw data provided for budget calculation');
                     drawInfoCards(getEntryRows());
 
-                    sectionTitle('Visit Order Places', 'Matches the current base map route order');
-                    drawVisitTable(getVisitOrderRows());
+                    sectionTitle('Estimated Cost Breakdown', 'Detailed distribution across different categories');
+                    drawInfoCards(getBreakdownRows());
 
                     drawFooter(doc.getNumberOfPages());
 
@@ -7238,7 +7252,7 @@
                         '-' +
                         String(now.getHours()).padStart(2, '0') +
                         String(now.getMinutes()).padStart(2, '0');
-                    doc.save('geo-trip-planner-report-' + stamp + '.pdf');
+                    doc.save('geotrip-budget-report-' + stamp + '.pdf');
                 } finally {
                     if (btn) btn.disabled = false;
                 }
