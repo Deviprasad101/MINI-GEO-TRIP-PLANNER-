@@ -4126,6 +4126,12 @@
                                     </p>
                                     <div class="user-split-grid" id="userSplitWrap" aria-label="Amount per person"
                                         hidden></div>
+                                    <div class="user-split-actions" style="margin-top:2.5rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; text-align:right;">
+                                        <button type="button" class="btn-primary" id="splitterPdfBtn" style="display:none; gap:0.5rem; align-items:center;">
+                                            <span class="material-symbols-outlined" style="font-size:18px">picture_as_pdf</span>
+                                            Download Splitter Report
+                                        </button>
+                                    </div>
                                 </section>
                             </div>
                         </div>
@@ -7014,230 +7020,187 @@
                 var btn = byId('sbDownloadPdfBtn');
                 if (btn) btn.disabled = true;
                 try {
-                    var jspdfNS = window.jspdf;
+                    var jspdfNS = window.jspdf || (window.jsPDF ? { jsPDF: window.jsPDF } : null);
                     if (!jspdfNS || !jspdfNS.jsPDF) {
-                        alert('PDF library not loaded. Please refresh the page and try again.');
+                        alert('PDF library (jsPDF) not loaded. Please refresh the page.');
                         return;
                     }
-                    var jsPDF = jspdfNS.jsPDF;
-                    var doc = new jsPDF({ unit: 'pt', format: 'a4' });
+                    var JS_PDF = jspdfNS.jsPDF;
+                    var doc = new JS_PDF({ unit: 'pt', format: 'a4' });
                     var pageW = doc.internal.pageSize.getWidth();
                     var pageH = doc.internal.pageSize.getHeight();
-                    var margin = 34;
+                    var margin = 40;
                     var contentW = pageW - margin * 2;
-                    var y = 28;
 
-                    var C = {
-                        navy: [15, 23, 42],
-                        slate: [71, 85, 105],
-                        gray: [148, 163, 184],
-                        pale: [248, 250, 252],
-                        line: [226, 232, 240],
-                        accentA: [219, 234, 254],
-                        accentB: [209, 250, 229],
-                        title: [30, 64, 175],
-                        titleSub: [79, 70, 229],
-                        white: [255, 255, 255]
+                    var Colors = {
+                        navy: [30, 41, 59],
+                        slate: [100, 116, 139],
+                        indigo: [79, 70, 229],
+                        emerald: [16, 185, 129],
+                        amber: [245, 158, 11],
+                        sky: [240, 249, 255],
+                        border: [226, 232, 240],
+                        white: [255, 255, 255],
+                        teal: [20, 184, 166]
                     };
 
-                    function drawHeaderBand() {
-                        doc.setFillColor(C.accentA[0], C.accentA[1], C.accentA[2]);
-                        doc.rect(0, 0, pageW, 142, 'F');
-                        doc.setFillColor(C.accentB[0], C.accentB[1], C.accentB[2]);
-                        doc.rect(0, 110, pageW, 32, 'F');
-                    }
-
-                    function drawFooter(pageNo) {
-                        doc.setDrawColor(C.line[0], C.line[1], C.line[2]);
-                        doc.line(margin, pageH - 30, pageW - margin, pageH - 30);
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(9);
-                        doc.setTextColor(C.slate[0], C.slate[1], C.slate[2]);
-                        doc.text('Geo Trip Planner', margin, pageH - 16);
-                        doc.text('Page ' + pageNo, pageW - margin - 36, pageH - 16);
-                    }
-
-                    function ensureSpace(h) {
-                        if (y + h <= pageH - 44) return;
-                        drawFooter(doc.getNumberOfPages());
-                        doc.addPage();
-                        y = 38;
-                    }
-
-                    function sectionTitle(title, subtitle) {
-                        ensureSpace(40);
-                        doc.setFillColor(C.pale[0], C.pale[1], C.pale[2]);
-                        doc.roundedRect(margin, y - 18, contentW, 28, 8, 8, 'F');
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(12.5);
-                        doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
-                        doc.text(title, margin + 12, y);
-                        y += 16;
-                        if (subtitle) {
-                            doc.setFont('helvetica', 'normal');
-                            doc.setFontSize(9.5);
-                            doc.setTextColor(C.slate[0], C.slate[1], C.slate[2]);
-                            doc.text(subtitle, margin + 2, y);
-                            y += 12;
-                        }
-                        y += 4;
-                    }
-
-                    function drawInfoCards(rows) {
-                        var half = Math.ceil(rows.length / 2);
-                        var leftRows = rows.slice(0, half);
-                        var rightRows = rows.slice(half);
-                        var colGap = 14;
-                        var colW = (contentW - colGap) / 2;
-                        var rowH = 34;
-                        var blockH = Math.max(leftRows.length, rightRows.length) * rowH + 12;
-                        ensureSpace(blockH + 8);
-
-                        function drawCol(colRows, x) {
-                            for (var i = 0; i < colRows.length; i++) {
-                                var yy = y + i * rowH;
-                                doc.setFillColor(250, 252, 255);
-                                doc.roundedRect(x, yy, colW, rowH - 6, 6, 6, 'F');
-                                doc.setDrawColor(C.line[0], C.line[1], C.line[2]);
-                                doc.roundedRect(x, yy, colW, rowH - 6, 6, 6, 'S');
-
-                                var key = String(colRows[i][0] || '');
-                                var valText = colRows[i][1] == null || colRows[i][1] === '' ? '-' : String(colRows[i][1]);
-                                doc.setFont('helvetica', 'bold');
-                                doc.setFontSize(8.8);
-                                doc.setTextColor(C.slate[0], C.slate[1], C.slate[2]);
-                                doc.text(key.toUpperCase(), x + 9, yy + 12);
-
-                                doc.setFont('helvetica', 'normal');
-                                doc.setFontSize(10);
-                                doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
-                                var wrapped = doc.splitTextToSize(valText, colW - 18);
-                                doc.text(String(wrapped[0] || ''), x + 9, yy + 25);
-                            }
-                        }
-
-                        drawCol(leftRows, margin);
-                        drawCol(rightRows, margin + colW + colGap);
-                        y += blockH + 4;
-                    }
-
-                    function drawVisitTable(rows) {
-                        if (!rows.length) {
-                            ensureSpace(28);
-                            doc.setFont('helvetica', 'normal');
-                            doc.setFontSize(10.5);
-                            doc.setTextColor(C.slate[0], C.slate[1], C.slate[2]);
-                            doc.text('No visit order is available yet. Apply filters and show map first.', margin + 2, y);
-                            y += 16;
-                            return;
-                        }
-                        var x = margin;
-                        var colNo = 34;
-                        var colPlace = contentW - 180;
-                        var colTime = 146;
-                        var rowH = 24;
-                        var rowPalette = [
-                            [255, 247, 237],
-                            [239, 246, 255],
-                            [236, 253, 245],
-                            [245, 243, 255],
-                            [254, 242, 242],
-                            [254, 249, 195]
-                        ];
-
-                        ensureSpace(34);
-                        doc.setFillColor(191, 219, 254);
-                        doc.roundedRect(x, y - 2, contentW, 22, 6, 6, 'F');
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(10);
-                        doc.setTextColor(30, 41, 59);
-                        doc.text('#', x + 10, y + 12);
-                        doc.text('PLACE', x + colNo + 8, y + 12);
-                        doc.text('TIMINGS', x + colNo + colPlace + 8, y + 12);
-                        y += 26;
-
-                        for (var i = 0; i < rows.length; i++) {
-                            var raw = String(rows[i] || '');
-                            var m = raw.match(/^\s*(\d+)\.\s*(.+?)\s*\(([^()]*)\)\s*$/);
-                            var no = m ? m[1] : String(i + 1);
-                            var place = m ? m[2] : raw.replace(/^\s*\d+\.\s*/, '');
-                            var tm = m ? m[3] : 'N/A';
-                            ensureSpace(rowH);
-
-                            var rp = rowPalette[i % rowPalette.length];
-                            doc.setFillColor(rp[0], rp[1], rp[2]);
-                            doc.rect(x, y - 2, contentW, rowH - 2, 'F');
-                            doc.setDrawColor(C.line[0], C.line[1], C.line[2]);
-                            doc.line(x, y + rowH - 2, x + contentW, y + rowH - 2);
-
-                            doc.setFont('helvetica', 'bold');
-                            doc.setFontSize(10);
-                            doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
-                            doc.text(String(no), x + 10, y + 13);
-
-                            doc.setFont('helvetica', 'normal');
-                            doc.setTextColor(30, 41, 59);
-                            var wrappedPlace = doc.splitTextToSize(place, colPlace - 14);
-                            doc.text(String(wrappedPlace[0] || ''), x + colNo + 8, y + 13);
-
-                            doc.setTextColor(C.slate[0], C.slate[1], C.slate[2]);
-                            var wrappedTime = doc.splitTextToSize(tm, colTime - 12);
-                            doc.text(String(wrappedTime[0] || ''), x + colNo + colPlace + 8, y + 13);
-
-                            y += rowH;
+                    function drawIcon(type, x, y, size, color) {
+                        doc.setDrawColor(color[0], color[1], color[2]);
+                        doc.setFillColor(color[0], color[1], color[2]);
+                        doc.setLineWidth(1);
+                        var s = size;
+                        if (type === 'wallet') {
+                            doc.roundedRect(x - s/2, y - s/3, s, s*0.7, 1, 1, 'D');
+                            doc.line(x + s/4, y - s/3, x + s/4, y + s/3);
+                        } else if (type === 'people') {
+                            doc.circle(x - s/4, y - s/2, s/6, 'D');
+                            doc.circle(x + s/4, y - s/2, s/6, 'D');
+                            doc.roundedRect(x - s/2, y - s/8, s/2.2, s/2, 2, 2, 'D');
+                            doc.roundedRect(x + s/12, y - s/8, s/2.2, s/2, 2, 2, 'D');
+                        } else if (type === 'clock') {
+                            doc.circle(x, y, s/2, 'D');
+                            doc.line(x, y, x, y - s/3);
+                            doc.line(x, y, x + s/4, y);
+                        } else if (type === 'chart') {
+                            doc.circle(x, y, s/2, 'D');
+                            doc.line(x, y, x, y - s/2);
+                            doc.line(x, y, x + s/3, y + s/3);
+                        } else if (type === 'card') {
+                            doc.rect(x - s/2, y - s/3, s, s*0.6, 'D');
+                            doc.line(x - s/2, y - s/6, x + s/2, y - s/6);
+                        } else if (type === 'shield') {
+                            doc.line(x, y - s/2, x + s/2, y - s/4);
+                            doc.line(x + s/2, y - s/4, x + s/2, y + s/4);
+                            doc.line(x + s/2, y + s/4, x, y + s/2);
+                            doc.line(x, y + s/2, x - s/2, y + s/4);
+                            doc.line(x - s/2, y + s/4, x - s/2, y - s/4);
+                            doc.line(x - s/2, y - s/4, x, y - s/2);
                         }
                     }
 
-                    drawHeaderBand();
-                    var logoData = await loadImageAsDataURL('images/geointellab_logo.jpeg');
+                    // --- 1. HERO SECTION ---
+                    doc.setFillColor(241, 245, 249);
+                    doc.rect(0, 0, pageW, 220, 'F');
+                    
+                    var bgUrl = 'images/tirumala-temple.jpg';
+                    var bgData = await (new Promise(function(res){
+                        var img = new Image();
+                        img.crossOrigin='anonymous';
+                        img.onload=function(){
+                            var c=document.createElement('canvas');
+                            c.width=img.width; c.height=img.height;
+                            var ctx = c.getContext('2d');
+                            ctx.globalAlpha = 0.22; // Increased visibility
+                            ctx.drawImage(img, 0, 0, c.width, c.height);
+                            res(c.toDataURL('image/jpeg', 0.8));
+                        };
+                        img.onerror=function(){res(null);};
+                        img.src=bgUrl;
+                    }));
+                    if (bgData) {
+                        doc.addImage(bgData, 'JPEG', 0, 0, pageW, 220);
+                    }
+
+                    var cardW = 340, cardH = 60;
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect((pageW - cardW) / 2, 20, cardW, cardH, 8, 8, 'F');
+                    
+                    var logoUrl = 'images/geointellab_logo.jpeg';
+                    var logoData = await (new Promise(function(res){
+                        var img = new Image();
+                        img.crossOrigin='anonymous';
+                        img.onload=function(){
+                            var c=document.createElement('canvas');
+                            c.width=img.width; c.height=img.height;
+                            c.getContext('2d').drawImage(img,0,0);
+                            res(c.toDataURL('image/jpeg',0.92));
+                        };
+                        img.onerror=function(){res(null);};
+                        img.src=logoUrl;
+                    }));
                     if (logoData) {
-                        // Centered logo with refined dimensions
-                        var logoW = 260;
-                        var logoH = 54;
-                        doc.addImage(logoData, 'JPEG', (pageW - logoW) / 2, 12, logoW, logoH);
+                        doc.addImage(logoData, 'JPEG', (pageW - 280) / 2, 28, 280, 44);
                     }
+                    // High-contrast container for title text
+                    doc.setFillColor(255, 255, 255);
+                    doc.setGState(new doc.GState({opacity: 0.9})); 
+                    doc.roundedRect(margin + 20, 105, contentW - 40, 60, 12, 12, 'F');
+                    doc.setGState(new doc.GState({opacity: 1.0}));
 
                     doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(22);
-                    doc.setTextColor(C.title[0], C.title[1], C.title[2]);
-                    doc.text('Geo Trip Planner', pageW / 2, 84, { align: 'center' });
-
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(10);
-                    doc.setTextColor(C.navy[0], C.navy[1], C.navy[2]);
-                    doc.text('Powered by Geo-Intel Lab, IITTNIF, Tirupati', pageW / 2, 101, { align: 'center' });
+                    doc.setFontSize(28);
+                    doc.setTextColor(20, 30, 50); 
+                    doc.text('Geo Trip Planner', pageW / 2, 132, { align: 'center' });
 
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(11);
-                    doc.setTextColor(C.titleSub[0], C.titleSub[1], C.titleSub[2]);
-                    doc.text('Professional Budget Analysis Report', pageW / 2, 125, { align: 'center' });
+                    doc.setTextColor(70, 80, 100); 
+                    doc.text('Powered by Geo-Intel Lab, IITTNIF, Tirupati', pageW / 2, 152, { align: 'center' });
 
-                    y = 162;
-                    var now = new Date();
-                    var stampText = now.toLocaleString();
-                    doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(9.5);
-                    doc.setTextColor(C.slate[0], C.slate[1], C.slate[2]);
-                    doc.text('Generated: ' + stampText, margin, y);
-                    // Keep clear vertical gap so the next section card never overlaps timestamp text.
-                    y += 34;
+                    var bTxt = 'Budget Audit Report', bW = 140;
+                    doc.setFillColor(232, 240, 254);
+                    doc.roundedRect((pageW - bW) / 2, 165, bW, 28, 14, 14, 'F');
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(37, 99, 235);
+                    doc.text(bTxt, pageW / 2, 183, { align: 'center' });
 
-                    sectionTitle('Trip Input Parameters', 'The raw data provided for budget calculation');
-                    drawInfoCards(getEntryRows());
+                    doc.setDrawColor(Colors.teal[0], Colors.teal[1], Colors.teal[2]);
+                    doc.setLineWidth(3);
+                    doc.line(0, 220, pageW, 220);
 
-                    sectionTitle('Estimated Cost Breakdown', 'Detailed distribution across different categories');
-                    drawInfoCards(getBreakdownRows());
+                    var y = 250;
 
-                    drawFooter(doc.getNumberOfPages());
+                    function sectionHeader(title) {
+                        if (y > 750) { doc.addPage(); y = 50; }
+                        doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(Colors.navy[0], Colors.navy[1], Colors.navy[2]);
+                        doc.text(title, margin, y);
+                        doc.setDrawColor(37, 99, 235); doc.setLineWidth(2);
+                        doc.line(margin, y + 8, margin + 30, y + 8);
+                        y += 40;
+                    }
 
-                    var stamp =
-                        now.getFullYear() +
-                        String(now.getMonth() + 1).padStart(2, '0') +
-                        String(now.getDate()).padStart(2, '0') +
-                        '-' +
-                        String(now.getHours()).padStart(2, '0') +
-                        String(now.getMinutes()).padStart(2, '0');
+                    function drawDataGrid(rows, color, icons) {
+                        var colW = contentW / 2;
+                        var startY = y;
+                        rows.forEach(function(row, i) {
+                            var isRight = i % 2 === 1;
+                            var cx = margin + (isRight ? colW : 0);
+                            var cy = startY + Math.floor(i/2) * 60;
+                            doc.setDrawColor(Colors.border[0], Colors.border[1], Colors.border[2]);
+                            doc.setLineWidth(0.5);
+                            doc.roundedRect(cx, cy, colW - 10, 50, 8, 8, 'D');
+                            if (icons && icons[i]) drawIcon(icons[i], cx + colW - 30, cy + 25, 10, color);
+                            doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+                            doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
+                            doc.text(row[0].toUpperCase(), cx + 15, cy + 18);
+                            doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+                            doc.setTextColor(color[0], color[1], color[2]);
+                            doc.text(String(row[1]), cx + 15, cy + 40);
+                            if (isRight || i === rows.length - 1) y = cy + 65;
+                        });
+                        y += 10;
+                    }
+
+                    sectionHeader('Trip Input Parameters');
+                    drawDataGrid(getEntryRows(), Colors.indigo, ['wallet', 'people', 'clock', 'chart', 'card', 'clock', 'card', 'card', 'wallet', 'chart', 'chart', 'check']);
+
+                    sectionHeader('Financial Breakdown');
+                    drawDataGrid(getBreakdownRows(), Colors.emerald, ['wallet', 'card', 'card', 'shield', 'check']);
+
+                    if (y > 750) { doc.addPage(); y = 50; }
+                    doc.setFillColor(248, 250, 252);
+                    doc.roundedRect(margin, y, contentW, 50, 8, 8, 'F');
+                    drawIcon('shield', margin + 25, y + 25, 12, [37, 99, 235]);
+                    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(37, 99, 235);
+                    doc.text('Secure Planning, Smart Savings!', margin + 50, y + 20);
+                    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
+                    doc.text('This automated audit report ensures your trip budget is optimized based on real-world market rates.', margin + 50, y + 36);
+
+                    var stamp = new Date().getTime();
                     doc.save('geotrip-budget-report-' + stamp + '.pdf');
+                } catch(e) {
+                    console.error('PDF Error:', e);
+                    alert('PDF generation failed: ' + (e.message || e));
                 } finally {
                     if (btn) btn.disabled = false;
                 }
@@ -7636,6 +7599,11 @@
                 }
             }
 
+            function fmtPdfMoney(n) {
+                if (!isFinite(n) || n < 0) return '—';
+                return 'Rs. ' + Math.round(n); // Plain numbers as requested
+            }
+
             function splitBudget(totalBudget, people, days, tierKey, actualBreakdown) {
                 var stay = 0, food = 0, transport = 0, activities = 0, label = 'Custom';
 
@@ -7782,6 +7750,8 @@
             function render(result) {
                 lastResult = result;
                 renderUserCards(result);
+                var pdfBtn = document.getElementById('splitterPdfBtn');
+                if (pdfBtn) pdfBtn.style.display = (result && result.totalBudget > 0) ? 'inline-flex' : 'none';
             }
 
             function renderUserCards(result) {
@@ -8104,6 +8074,305 @@
             window.geoTripBudgetSplitterOnModalOpen = function () {
                 clearSplitterState();
             };
+
+            async function downloadSplitterPdf() {
+                if (!lastResult) return;
+                var btn = document.getElementById('splitterPdfBtn');
+                if (btn) btn.disabled = true;
+                try {
+                    var jspdfNS = window.jspdf || (window.jsPDF ? { jsPDF: window.jsPDF } : null);
+                    if (!jspdfNS || !jspdfNS.jsPDF) {
+                        alert('PDF library (jsPDF) not loaded. Please refresh the page.');
+                        return;
+                    }
+                    var JS_PDF = jspdfNS.jsPDF;
+                    var doc = new JS_PDF({ unit: 'pt', format: 'a4' });
+                    var pageW = doc.internal.pageSize.getWidth();
+                    var pageH = doc.internal.pageSize.getHeight();
+                    var margin = 40;
+                    var contentW = pageW - margin * 2;
+
+                    var Colors = {
+                        navy: [30, 41, 59],
+                        slate: [100, 116, 139],
+                        blue: [59, 130, 246],
+                        green: [34, 197, 94],
+                        purple: [168, 85, 247],
+                        orange: [249, 115, 22],
+                        rose: [244, 63, 94],
+                        sky: [240, 249, 255],
+                        border: [226, 232, 240],
+                        lightBlue: [239, 246, 255],
+                        white: [255, 255, 255],
+                        teal: [20, 184, 166]
+                    };
+
+                    // --- 1. HERO SECTION ---
+                    doc.setFillColor(241, 245, 249);
+                    doc.rect(0, 0, pageW, 220, 'F');
+                    
+                    // Add Tirumala Temple Background (Subtle)
+                    var bgUrl = 'images/tirumala-temple.jpg';
+                    var bgData = await (new Promise(function(res){
+                        var img = new Image();
+                        img.crossOrigin='anonymous';
+                        img.onload=function(){
+                            var c=document.createElement('canvas');
+                            c.width=img.width; c.height=img.height;
+                            var ctx = c.getContext('2d');
+                            ctx.globalAlpha = 0.22; // Increased visibility
+                            ctx.drawImage(img, 0, 0, c.width, c.height);
+                            res(c.toDataURL('image/jpeg', 0.8));
+                        };
+                        img.onerror=function(){res(null);};
+                        img.src=bgUrl;
+                    }));
+                    if (bgData) {
+                        doc.addImage(bgData, 'JPEG', 0, 0, pageW, 220);
+                    }
+
+                    // Floating Logo Card
+                    var cardW = 340, cardH = 60;
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect((pageW - cardW) / 2, 20, cardW, cardH, 8, 8, 'F');
+                    
+                    var logoUrl = 'images/geointellab_logo.jpeg';
+                    var logoData = await (new Promise(function(res){
+                        var img = new Image();
+                        img.crossOrigin='anonymous';
+                        img.onload=function(){
+                            var c=document.createElement('canvas');
+                            c.width=img.width; c.height=img.height;
+                            c.getContext('2d').drawImage(img,0,0);
+                            res(c.toDataURL('image/jpeg',0.92));
+                        };
+                        img.onerror=function(){res(null);};
+                        img.src=logoUrl;
+                    }));
+                    if (logoData) {
+                        doc.addImage(logoData, 'JPEG', (pageW - 280) / 2, 28, 280, 44);
+                    }
+                    // High-contrast container for title text
+                    doc.setFillColor(255, 255, 255);
+                    doc.setGState(new doc.GState({opacity: 0.9})); 
+                    doc.roundedRect(margin + 20, 105, contentW - 40, 60, 12, 12, 'F');
+                    doc.setGState(new doc.GState({opacity: 1.0}));
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(28);
+                    doc.setTextColor(20, 30, 50); 
+                    doc.text('Geo Trip Planner', pageW / 2, 132, { align: 'center' });
+
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(11);
+                    doc.setTextColor(70, 80, 100); 
+                    doc.text('Powered by Geo-Intel Lab, IITTNIF, Tirupati', pageW / 2, 152, { align: 'center' });
+
+                    // Report Badge
+                    var bTxt = 'Budget Splitter Report', bW = 160;
+                    doc.setFillColor(219, 234, 254);
+                    doc.roundedRect((pageW - bW) / 2, 165, bW, 28, 14, 14, 'F');
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(12);
+                    doc.setTextColor(37, 99, 235);
+                    doc.text(bTxt, pageW / 2, 183, { align: 'center' });
+
+                    // Divider line
+                    doc.setDrawColor(Colors.teal[0], Colors.teal[1], Colors.teal[2]);
+                    doc.setLineWidth(3);
+                    doc.line(0, 220, pageW, 220);
+
+                    var y = 250;
+
+                    function drawIcon(type, x, y, size, color) {
+                        doc.setDrawColor(color[0], color[1], color[2]);
+                        doc.setFillColor(color[0], color[1], color[2]);
+                        doc.setLineWidth(1);
+                        var s = size;
+                        if (type === 'wallet') {
+                            doc.roundedRect(x - s/2, y - s/3, s, s*0.7, 1, 1, 'D');
+                            doc.line(x + s/4, y - s/3, x + s/4, y + s/3);
+                        } else if (type === 'people') {
+                            doc.circle(x - s/4, y - s/2, s/6, 'D');
+                            doc.circle(x + s/4, y - s/2, s/6, 'D');
+                            doc.roundedRect(x - s/2, y - s/8, s/2.2, s/2, 2, 2, 'D');
+                            doc.roundedRect(x + s/12, y - s/8, s/2.2, s/2, 2, 2, 'D');
+                        } else if (type === 'clock') {
+                            doc.circle(x, y, s/2, 'D');
+                            doc.line(x, y, x, y - s/3);
+                            doc.line(x, y, x + s/4, y);
+                        } else if (type === 'chart') {
+                            doc.circle(x, y, s/2, 'D');
+                            doc.line(x, y, x, y - s/2);
+                            doc.line(x, y, x + s/3, y + s/3);
+                        } else if (type === 'card') {
+                            doc.rect(x - s/2, y - s/3, s, s*0.6, 'D');
+                            doc.line(x - s/2, y - s/6, x + s/2, y - s/6);
+                        } else if (type === 'check') {
+                            doc.line(x - s/3, y, x, y + s/3);
+                            doc.line(x, y + s/3, x + s/2, y - s/3);
+                        } else if (type === 'shield') {
+                            doc.line(x, y - s/2, x + s/2, y - s/4);
+                            doc.line(x + s/2, y - s/4, x + s/2, y + s/4);
+                            doc.line(x + s/2, y + s/4, x, y + s/2);
+                            doc.line(x, y + s/2, x - s/2, y + s/4);
+                            doc.line(x - s/2, y + s/4, x - s/2, y - s/4);
+                            doc.line(x - s/2, y - s/4, x, y - s/2);
+                        } else if (type === 'person') {
+                            doc.circle(x, y - s/4, s/4, 'D');
+                            doc.roundedRect(x - s/2, y + s/12, s, s/2.5, 3, 3, 'D');
+                        }
+                    }
+
+                    // --- 2. SPLITTER OVERVIEW ---
+                    doc.setFontSize(16);
+                    doc.setTextColor(Colors.navy[0], Colors.navy[1], Colors.navy[2]);
+                    doc.text('Splitter Overview', margin, y);
+                    doc.setDrawColor(37, 99, 235);
+                    doc.setLineWidth(2);
+                    doc.line(margin, y + 8, margin + 30, y + 8);
+                    
+                    y += 35;
+                    var colW = contentW / 4;
+                    var overviewData = [
+                        { label: 'TOTAL BUDGET', val: fmtPdfMoney(lastResult.totalBudget), color: Colors.blue, icon: 'wallet' },
+                        { label: 'GROUP SIZE', val: lastResult.people + ' Travellers', color: Colors.green, icon: 'people' },
+                        { label: 'TRIP DURATION', val: lastResult.days + ' Days', color: Colors.purple, icon: 'clock' },
+                        { label: 'PER TRAVELLER SHARE', val: fmtPdfMoney(lastResult.perPerson), color: Colors.orange, icon: 'chart' }
+                    ];
+
+                    overviewData.forEach(function(item, i) {
+                        var cx = margin + i * colW;
+                        doc.setDrawColor(Colors.border[0], Colors.border[1], Colors.border[2]);
+                        doc.setLineWidth(0.5);
+                        doc.roundedRect(cx, y, colW - 10, 100, 8, 8, 'D');
+                        
+                        // Icon in Circle
+                        doc.setFillColor(241, 245, 249);
+                        doc.circle(cx + (colW - 10) / 2, y + 30, 15, 'F');
+                        drawIcon(item.icon, cx + (colW - 10) / 2, y + 30, 12, item.color);
+                        
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(8);
+                        doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
+                        doc.text(item.label, cx + (colW - 10) / 2, y + 62, { align: 'center' });
+                        
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(14);
+                        doc.setTextColor(item.color[0], item.color[1], item.color[2]);
+                        doc.text(String(item.val), cx + (colW - 10) / 2, y + 84, { align: 'center' });
+                    });
+
+                    y += 135;
+
+                    // --- 3. TRAVELLER BREAKDOWN ---
+                    doc.setFontSize(16);
+                    doc.setTextColor(Colors.navy[0], Colors.navy[1], Colors.navy[2]);
+                    doc.text('Traveller Breakdown', margin, y);
+                    doc.setDrawColor(37, 99, 235);
+                    doc.setLineWidth(2);
+                    doc.line(margin, y + 8, margin + 30, y + 8);
+                    
+                    y += 40;
+                    var users = customUsers.length > 0 ? customUsers : [];
+                    if (users.length === 0) {
+                        for(var i=1; i<=Math.min(lastResult.people, 24); i++) users.push({ name: 'User ' + i });
+                    }
+
+                    users.forEach(function(u, idx) {
+                        if (y > 700) { doc.addPage(); y = 50; }
+                        
+                        var paid = isFinite(u.amount) ? u.amount : 0;
+                        var share = lastResult.perPerson;
+                        var delta = paid - share;
+                        var isExtra = delta >= 0;
+                        var statusColor = isExtra ? Colors.blue : Colors.rose;
+                        var statusBg = isExtra ? Colors.lightBlue : [255, 241, 242];
+
+                        // Main Card
+                        doc.setDrawColor(Colors.border[0], Colors.border[1], Colors.border[2]);
+                        doc.setLineWidth(0.5);
+                        doc.roundedRect(margin, y, contentW, 130, 12, 12, 'D');
+
+                        // Avatar Circle
+                        var initials = (u.name || 'U').substring(0, 3).toUpperCase();
+                        doc.setFillColor(statusBg[0], statusBg[1], statusBg[2]);
+                        doc.circle(margin + 45, y + 55, 38, 'F');
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(18);
+                        doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+                        doc.text(initials, margin + 45, y + 62, { align: 'center' });
+                        
+                        // Tiny person icon in avatar
+                        doc.setFillColor(255, 255, 255);
+                        doc.circle(margin + 75, y + 75, 8, 'F');
+                        drawIcon('person', margin + 75, y + 75, 6, statusColor);
+
+                        // Columns with Icons
+                        var colX1 = margin + 110;
+                        var colX2 = margin + 270;
+                        var colX3 = margin + 430;
+                        
+                        // Allocated Share
+                        drawIcon('wallet', colX1 - 15, y + 42, 8, Colors.blue);
+                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
+                        doc.text('ALLOCATED SHARE', colX1, y + 45);
+                        doc.setFontSize(15); doc.setFont('helvetica', 'bold'); doc.setTextColor(Colors.blue[0], Colors.blue[1], Colors.blue[2]);
+                        doc.text(fmtPdfMoney(share), colX1, y + 68);
+
+                        // Paid
+                        drawIcon('card', colX2 - 15, y + 42, 8, Colors.green);
+                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
+                        doc.text('PAID', colX2, y + 45);
+                        doc.setFontSize(15); doc.setFont('helvetica', 'bold'); doc.setTextColor(Colors.green[0], Colors.green[1], Colors.green[2]);
+                        doc.text(fmtPdfMoney(paid), colX2, y + 68);
+
+                        // Status
+                        drawIcon(isExtra ? 'check' : 'chart', colX3 - 15, y + 42, 8, statusColor);
+                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
+                        doc.text(isExtra ? 'EXTRA PAID' : 'NEEDS TO PAY', colX3, y + 45);
+                        doc.setFontSize(15); doc.setFont('helvetica', 'bold'); doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+                        doc.text(fmtPdfMoney(Math.abs(delta)), colX3, y + 68);
+
+                        // Status Bar
+                        doc.setFillColor(statusBg[0], statusBg[1], statusBg[2]);
+                        doc.roundedRect(margin + 110, y + 85, contentW - 130, 24, 6, 6, 'F');
+                        
+                        // Info icon in status bar
+                        doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+                        doc.text('i', margin + 120, y + 101);
+                        
+                        doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+                        var statusMsg = isExtra ? 'You have paid ' + fmtPdfMoney(delta) + ' more than your share.' : 'You need to pay ' + fmtPdfMoney(Math.abs(delta)) + ' to settle your share.';
+                        doc.text(statusMsg, margin + 130, y + 101);
+
+                        y += 150;
+                    });
+
+                    // --- 4. FOOTER ---
+                    if (y > 750) { doc.addPage(); y = 50; }
+                    doc.setFillColor(248, 250, 252);
+                    doc.roundedRect(margin, y, contentW, 50, 8, 8, 'F');
+                    
+                    drawIcon('shield', margin + 25, y + 25, 12, Colors.blue);
+                    
+                    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(Colors.blue[0], Colors.blue[1], Colors.blue[2]);
+                    doc.text('Travel Together, Split Better!', margin + 50, y + 20);
+                    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
+                    doc.text('This report helps you keep track of expenses and ensures a fair split among all travellers.', margin + 50, y + 36);
+
+                    var stamp = new Date().getTime();
+                    doc.save('geotrip-splitter-report-' + stamp + '.pdf');
+                } catch(e) {
+                    console.error('Splitter PDF Error:', e);
+                    alert('PDF generation failed: ' + (e.message || e));
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            }
+
+            var pdfBtn = document.getElementById('splitterPdfBtn');
+            if (pdfBtn) pdfBtn.addEventListener('click', downloadSplitterPdf);
         })();
     </script>
     <script>
