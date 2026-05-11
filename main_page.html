@@ -5094,18 +5094,20 @@
             window._lastRecPlace = cat;
             if (window.recommender && window.recommender.loaded) {
                 var panel = document.getElementById('recPanel');
-                panel.style.display = 'block';
-
-                // Switch to similar tab to show theme-based results
-                document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
-                    b.style.borderBottomColor = 'transparent';
-                    b.style.color = '#92400e';
-                    if (b.dataset.recTab === 'similar') {
-                        b.style.borderBottomColor = '#b45309';
-                        b.style.color = '#78350f';
-                    }
-                });
-                window._renderRecSimilar(cat);
+                
+                // ONLY refresh if already visible, do NOT auto-open anymore
+                if (panel && panel.style.display !== 'none' && panel.style.display !== '') {
+                    // Switch to similar tab to show theme-based results
+                    document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                        b.style.borderBottomColor = 'transparent';
+                        b.style.color = '#92400e';
+                        if (b.dataset.recTab === 'similar') {
+                            b.style.borderBottomColor = '#b45309';
+                            b.style.color = '#78350f';
+                        }
+                    });
+                    window._renderRecSimilar(cat);
+                }
             }
         });
 
@@ -5116,34 +5118,36 @@
             el.addEventListener('change', function() {
                 if (!window.recommender || !window.recommender.loaded) return;
 
-                // Show panel automatically on first change if closed
+                // Do NOT auto-open panel here anymore
                 var panel = document.getElementById('recPanel');
-                if (panel && panel.style.display === 'none') {
-                    panel.style.display = 'block';
-                }
+                var isVisible = panel && panel.style.display !== 'none' && panel.style.display !== '';
 
                 if (id === 'mainStartLocation') {
-                    // Switch to Nearby tab
-                    document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
-                        b.style.borderBottomColor = 'transparent';
-                        b.style.color = '#92400e';
-                        if (b.dataset.recTab === 'nearby') {
-                            b.style.borderBottomColor = '#b45309';
-                            b.style.color = '#78350f';
-                        }
-                    });
-                    window._renderRecNearby();
+                    if (isVisible) {
+                        // Switch to Nearby tab if already visible
+                        document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                            b.style.borderBottomColor = 'transparent';
+                            b.style.color = '#92400e';
+                            if (b.dataset.recTab === 'nearby') {
+                                b.style.borderBottomColor = '#b45309';
+                                b.style.color = '#78350f';
+                            }
+                        });
+                        window._renderRecNearby();
+                    }
                 } else {
-                    // Start/End time or Date changed → refresh Day Plan
-                    document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
-                        b.style.borderBottomColor = 'transparent';
-                        b.style.color = '#92400e';
-                        if (b.dataset.recTab === 'itinerary') {
-                            b.style.borderBottomColor = '#b45309';
-                            b.style.color = '#78350f';
-                        }
-                    });
-                    window._renderRecItinerary();
+                    if (isVisible) {
+                        // Start/End time or Date changed → refresh Day Plan if already visible
+                        document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                            b.style.borderBottomColor = 'transparent';
+                            b.style.color = '#92400e';
+                            if (b.dataset.recTab === 'itinerary') {
+                                b.style.borderBottomColor = '#b45309';
+                                b.style.color = '#78350f';
+                            }
+                        });
+                        window._renderRecItinerary();
+                    }
                 }
             });
         });
