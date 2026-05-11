@@ -1405,7 +1405,11 @@
         }
 
         @media (max-width: 1024px) {
-            .kpi-strip { grid-template-columns: 1fr; gap: 1rem; padding: 1.25rem; }
+            .kpi-strip {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1.25rem;
+            }
         }
 
         .kpi-chip {
@@ -1420,16 +1424,27 @@
             transition: all 0.3s ease;
             background: #ffffff;
         }
-        
+
         .kpi-chip:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
         }
 
         /* Category Background Tints */
-        .kpi-chip--total { background: #f5f8ff; border-color: rgba(79, 140, 255, 0.1); }
-        .kpi-chip--delta { background: #f0fdf4; border-color: rgba(34, 197, 94, 0.1); }
-        .kpi-chip--compliance { background: #fffbeb; border-color: rgba(245, 158, 11, 0.1); }
+        .kpi-chip--total {
+            background: #f5f8ff;
+            border-color: rgba(79, 140, 255, 0.1);
+        }
+
+        .kpi-chip--delta {
+            background: #f0fdf4;
+            border-color: rgba(34, 197, 94, 0.1);
+        }
+
+        .kpi-chip--compliance {
+            background: #fffbeb;
+            border-color: rgba(245, 158, 11, 0.1);
+        }
 
         .kpi-chip__icon {
             width: 54px;
@@ -1450,9 +1465,17 @@
             font-size: 26px;
         }
 
-        .kpi-chip--total .kpi-chip__icon { color: #4f8cff; }
-        .kpi-chip--delta .kpi-chip__icon { color: #22c55e; }
-        .kpi-chip--compliance .kpi-chip__icon { color: #f59e0b; }
+        .kpi-chip--total .kpi-chip__icon {
+            color: #4f8cff;
+        }
+
+        .kpi-chip--delta .kpi-chip__icon {
+            color: #22c55e;
+        }
+
+        .kpi-chip--compliance .kpi-chip__icon {
+            color: #f59e0b;
+        }
 
         .kpi-chip__content {
             position: relative;
@@ -1468,9 +1491,17 @@
             margin-bottom: 0.25rem;
         }
 
-        .kpi-chip--total .kpi-chip__label { color: #4f8cff; }
-        .kpi-chip--delta .kpi-chip__label { color: #22c55e; }
-        .kpi-chip--compliance .kpi-chip__label { color: #f59e0b; }
+        .kpi-chip--total .kpi-chip__label {
+            color: #4f8cff;
+        }
+
+        .kpi-chip--delta .kpi-chip__label {
+            color: #22c55e;
+        }
+
+        .kpi-chip--compliance .kpi-chip__label {
+            color: #f59e0b;
+        }
 
         .kpi-chip__value {
             margin: 0;
@@ -1501,25 +1532,54 @@
         .kpi-chip--total::after {
             background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"><path d="M0 80 Q 50 10, 100 80 T 200 80" fill="none" stroke="%234f8cff" stroke-width="2" stroke-dasharray="5,5"/></svg>');
         }
+
         .kpi-chip--delta::after {
             background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"><path d="M0 80 Q 50 10, 100 80 T 200 80" fill="none" stroke="%2322c55e" stroke-width="2" stroke-dasharray="5,5"/></svg>');
         }
+
         .kpi-chip--compliance::after {
             background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"><path d="M0 80 Q 50 10, 100 80 T 200 80" fill="none" stroke="%23f59e0b" stroke-width="2" stroke-dasharray="5,5"/></svg>');
         }
 
         /* Status colors for compliance chip */
-        .kpi-chip--compliance.good { background: #f0fdf4 !important; border-color: #86efac !important; }
-        .kpi-chip--compliance.good .kpi-chip__label { color: #16a34a !important; }
-        .kpi-chip--compliance.good .kpi-chip__icon { color: #16a34a !important; }
+        .kpi-chip--compliance.good {
+            background: #f0fdf4 !important;
+            border-color: #86efac !important;
+        }
 
-        .kpi-chip--compliance.warn { background: #fef2f2 !important; border-color: #fecaca !important; }
-        .kpi-chip--compliance.warn .kpi-chip__label { color: #dc2626 !important; }
-        .kpi-chip--compliance.warn .kpi-chip__icon { color: #dc2626 !important; }
+        .kpi-chip--compliance.good .kpi-chip__label {
+            color: #16a34a !important;
+        }
 
-        .kpi-chip--compliance.neutral { background: #fffbeb !important; border-color: rgba(245, 158, 11, 0.15) !important; }
-        .kpi-chip--compliance.neutral .kpi-chip__label { color: #f59e0b !important; }
-        .kpi-chip--compliance.neutral .kpi-chip__icon { color: #f59e0b !important; }
+        .kpi-chip--compliance.good .kpi-chip__icon {
+            color: #16a34a !important;
+        }
+
+        .kpi-chip--compliance.warn {
+            background: #fef2f2 !important;
+            border-color: #fecaca !important;
+        }
+
+        .kpi-chip--compliance.warn .kpi-chip__label {
+            color: #dc2626 !important;
+        }
+
+        .kpi-chip--compliance.warn .kpi-chip__icon {
+            color: #dc2626 !important;
+        }
+
+        .kpi-chip--compliance.neutral {
+            background: #fffbeb !important;
+            border-color: rgba(245, 158, 11, 0.15) !important;
+        }
+
+        .kpi-chip--compliance.neutral .kpi-chip__label {
+            color: #f59e0b !important;
+        }
+
+        .kpi-chip--compliance.neutral .kpi-chip__icon {
+            color: #f59e0b !important;
+        }
 
         .card {
             background: var(--card);
@@ -1670,10 +1730,12 @@
                 grid-template-columns: repeat(2, 1fr) !important;
             }
         }
+
         @media (max-width: 640px) {
             .card--inputs .form-grid {
                 grid-template-columns: 1fr !important;
             }
+
             .card--inputs {
                 padding: 1.5rem !important;
                 border-radius: 20px !important;
@@ -1720,13 +1782,40 @@
         }
 
         /* Specific pastel categories for input icons */
-        .icon--travel-input { background: #fffbeb !important; color: #f59e0b !important; }
-        .icon--stay-input { background: #eff6ff !important; color: #3b82f6 !important; }
-        .icon--food-input { background: #ecfdf5 !important; color: #10b981 !important; }
-        .icon--budget-input { background: #f0fdf4 !important; color: #16a34a !important; }
-        .icon--neutral-input { background: #f8fafc !important; color: #64748b !important; }
-        .icon--people-input { background: #fef2f2 !important; color: #ef4444 !important; }
-        .icon--duration-input { background: #f5f3ff !important; color: #8b5cf6 !important; }
+        .icon--travel-input {
+            background: #fffbeb !important;
+            color: #f59e0b !important;
+        }
+
+        .icon--stay-input {
+            background: #eff6ff !important;
+            color: #3b82f6 !important;
+        }
+
+        .icon--food-input {
+            background: #ecfdf5 !important;
+            color: #10b981 !important;
+        }
+
+        .icon--budget-input {
+            background: #f0fdf4 !important;
+            color: #16a34a !important;
+        }
+
+        .icon--neutral-input {
+            background: #f8fafc !important;
+            color: #64748b !important;
+        }
+
+        .icon--people-input {
+            background: #fef2f2 !important;
+            color: #ef4444 !important;
+        }
+
+        .icon--duration-input {
+            background: #f5f3ff !important;
+            color: #8b5cf6 !important;
+        }
 
         .card--inputs input,
         .card--inputs select {
@@ -1785,7 +1874,8 @@
         }
 
         /* --- IMAGE-ACCURATE DASHBOARD UI --- */
-        .breakdown-stack, .summary-stack {
+        .breakdown-stack,
+        .summary-stack {
             background: #ffffff !important;
             border-radius: 30px !important;
             padding: 2.5rem !important;
@@ -1841,10 +1931,15 @@
         }
 
         @media (max-width: 1024px) {
-            .grid-breakdown { grid-template-columns: repeat(3, 1fr) !important; }
+            .grid-breakdown {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
         }
+
         @media (max-width: 640px) {
-            .grid-breakdown { grid-template-columns: 1fr !important; }
+            .grid-breakdown {
+                grid-template-columns: 1fr !important;
+            }
         }
 
         .grid-breakdown .card {
@@ -1872,11 +1967,25 @@
             border-radius: 3px 3px 0 0;
         }
 
-        .card--travel::after { background: #f59e0b; }
-        .card--stay::after { background: #3b82f6; }
-        .card--food::after { background: #10b981; }
-        .card--activities::after { background: #8b5cf6; }
-        .card--buffer::after { background: #f43f5e; }
+        .card--travel::after {
+            background: #f59e0b;
+        }
+
+        .card--stay::after {
+            background: #3b82f6;
+        }
+
+        .card--food::after {
+            background: #10b981;
+        }
+
+        .card--activities::after {
+            background: #8b5cf6;
+        }
+
+        .card--buffer::after {
+            background: #f43f5e;
+        }
 
         .grid-breakdown .card__icon {
             width: 44px !important;
@@ -1911,7 +2020,9 @@
         }
 
         @media (max-width: 992px) {
-            .summary-card-layout { grid-template-columns: 1fr; }
+            .summary-card-layout {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Left side: List */
@@ -2111,8 +2222,16 @@
             transition: all 0.3s ease !important;
         }
 
-        .btn-premium-blue:hover, .btn-premium-dark:hover { transform: translateY(-3px); filter: brightness(1.1); }
-        .btn-premium-white:hover { transform: translateY(-3px); border-color: #cbd5e1; }
+        .btn-premium-blue:hover,
+        .btn-premium-dark:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+        }
+
+        .btn-premium-white:hover {
+            transform: translateY(-3px);
+            border-color: #cbd5e1;
+        }
 
         .summary-card__clear {
             background: #fff5f5 !important;
@@ -3695,7 +3814,8 @@
                                 class="site-header__brand-logo" width="520" height="104" decoding="async"
                                 loading="eager" />
                         </span>
-                        <p class="mt-1 text-[10px] font-bold uppercase tracking-tight text-slate-500">Powered by Geo-Intel Lab, IITTNIF, Tirupati</p>
+                        <p class="mt-1 text-[10px] font-bold uppercase tracking-tight text-slate-500">Powered by
+                            Geo-Intel Lab, IITTNIF, Tirupati</p>
                     </div>
                 </div>
             </header>
@@ -3767,7 +3887,8 @@
                                     </div>
                                     <div>
                                         <h2 class="card__title" id="inputsHeading">Trip Details</h2>
-                                        <p class="card__subtitle">Configure your journey parameters for real-time cost estimation.</p>
+                                        <p class="card__subtitle">Configure your journey parameters for real-time cost
+                                            estimation.</p>
                                     </div>
                                 </div>
                                 <div class="form-grid">
@@ -3777,19 +3898,21 @@
                                         <input type="time" id="mainOutingStart" tabindex="-1" />
                                         <input type="time" id="mainOutingEnd" tabindex="-1" />
                                     </div>
-                                    
+
                                     <div class="input-group-premium">
                                         <label for="userBudget">Total Budget (Rs. )</label>
                                         <div class="input-wrapper-premium">
                                             <span class="material-symbols-outlined icon--budget-input">payments</span>
-                                            <input type="number" id="userBudget" min="0" step="100" inputmode="decimal" placeholder="e.g. 5000" />
+                                            <input type="number" id="userBudget" min="0" step="100" inputmode="decimal"
+                                                placeholder="e.g. 5000" />
                                         </div>
                                     </div>
 
                                     <div class="input-group-premium">
                                         <label for="travelMode">Travel Mode</label>
                                         <div class="input-wrapper-premium">
-                                            <span class="material-symbols-outlined icon--travel-input">directions_car</span>
+                                            <span
+                                                class="material-symbols-outlined icon--travel-input">directions_car</span>
                                             <select id="travelMode">
                                                 <option value="" selected disabled>Select mode</option>
                                                 <option value="car">Car</option>
@@ -3803,8 +3926,10 @@
                                     <div class="input-group-premium" id="transitTicketField" hidden>
                                         <label for="ticketPrice" id="transitTicketLabel">Ticket Price (Rs. )</label>
                                         <div class="input-wrapper-premium">
-                                            <span class="material-symbols-outlined icon--travel-input">confirmation_number</span>
-                                            <input type="number" id="ticketPrice" min="0" step="1" inputmode="decimal" placeholder="Fare per person" />
+                                            <span
+                                                class="material-symbols-outlined icon--travel-input">confirmation_number</span>
+                                            <input type="number" id="ticketPrice" min="0" step="1" inputmode="decimal"
+                                                placeholder="Fare per person" />
                                         </div>
                                     </div>
 
@@ -3812,7 +3937,8 @@
                                         <label for="distance">Total Distance (km)</label>
                                         <div class="input-wrapper-premium">
                                             <span class="material-symbols-outlined icon--travel-input">distance</span>
-                                            <input type="number" id="distance" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 120" />
+                                            <input type="number" id="distance" min="0" step="0.1" inputmode="decimal"
+                                                placeholder="e.g. 120" />
                                         </div>
                                     </div>
 
@@ -3820,15 +3946,18 @@
                                         <label for="people">Group Size</label>
                                         <div class="input-wrapper-premium">
                                             <span class="material-symbols-outlined icon--people-input">groups</span>
-                                            <input type="number" id="people" min="1" step="1" inputmode="numeric" placeholder="Number of people" />
+                                            <input type="number" id="people" min="1" step="1" inputmode="numeric"
+                                                placeholder="Number of people" />
                                         </div>
                                     </div>
 
                                     <div class="input-group-premium">
                                         <label for="days">Trip Duration</label>
                                         <div class="input-wrapper-premium">
-                                            <span class="material-symbols-outlined icon--duration-input">calendar_month</span>
-                                            <input type="number" id="days" min="1" step="1" inputmode="numeric" placeholder="Total days" />
+                                            <span
+                                                class="material-symbols-outlined icon--duration-input">calendar_month</span>
+                                            <input type="number" id="days" min="1" step="1" inputmode="numeric"
+                                                placeholder="Total days" />
                                         </div>
                                     </div>
 
@@ -3836,7 +3965,8 @@
                                         <label for="rooms">Rooms Needed</label>
                                         <div class="input-wrapper-premium">
                                             <span class="material-symbols-outlined icon--stay-input">hotel</span>
-                                            <input type="number" id="rooms" min="0" step="1" inputmode="numeric" placeholder="Total rooms" />
+                                            <input type="number" id="rooms" min="0" step="1" inputmode="numeric"
+                                                placeholder="Total rooms" />
                                         </div>
                                     </div>
 
@@ -3844,7 +3974,8 @@
                                         <label for="roomCost">Price per Night (Rs. )</label>
                                         <div class="input-wrapper-premium">
                                             <span class="material-symbols-outlined icon--stay-input">sell</span>
-                                            <input type="number" id="roomCost" min="0" step="1" inputmode="decimal" placeholder="Room rate" />
+                                            <input type="number" id="roomCost" min="0" step="1" inputmode="decimal"
+                                                placeholder="Room rate" />
                                         </div>
                                     </div>
 
@@ -3852,153 +3983,168 @@
                                         <label for="foodPerDay">Food Cost (Rs. /day)</label>
                                         <div class="input-wrapper-premium">
                                             <span class="material-symbols-outlined icon--food-input">restaurant</span>
-                                            <input type="number" id="foodPerDay" min="0" step="1" inputmode="decimal" placeholder="Per person" />
+                                            <input type="number" id="foodPerDay" min="0" step="1" inputmode="decimal"
+                                                placeholder="Per person" />
                                         </div>
                                     </div>
                                 </div>
                             </section>
-                                            <div class="breakdown-stack">
-                            <div class="section-header-wrap">
-                                <div class="section-header-info">
-                                    <div class="section-header-icon">
-                                        <span class="material-symbols-outlined">analytics</span>
-                                    </div>
-                                    <div class="section-header-text">
-                                        <h2>Cost Breakdown</h2>
-                                        <p>Explore the estimated cost distribution for your trip</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="grid-breakdown">
-                                <section class="card card--travel" aria-labelledby="travelCardTitle">
-                                    <div class="card__icon" style="background: #fffbeb; color: #f59e0b;">
-                                        <span class="material-symbols-outlined">directions_car</span>
-                                    </div>
-                                    <h2 class="card__title" id="travelCardTitle">Travel cost</h2>
-                                    <span class="amount" id="outTravel">Rs. 0</span>
-                                </section>
-
-                                <section class="card card--stay" aria-labelledby="stayCardTitle">
-                                    <div class="card__icon" style="background: #eff6ff; color: #3b82f6;">
-                                        <span class="material-symbols-outlined">hotel</span>
-                                    </div>
-                                    <h2 class="card__title" id="stayCardTitle">Stay cost</h2>
-                                    <span class="amount" id="outStay">Rs. 0</span>
-                                </section>
-
-                                <section class="card card--food" aria-labelledby="foodCardTitle">
-                                    <div class="card__icon" style="background: #ecfdf5; color: #10b981;">
-                                        <span class="material-symbols-outlined">restaurant</span>
-                                    </div>
-                                    <h2 class="card__title" id="foodCardTitle">Food cost</h2>
-                                    <span class="amount" id="outFood">Rs. 0</span>
-                                </section>
-
-
-
-                                <section class="card card--buffer" aria-labelledby="extraCardTitle">
-                                    <div class="card__icon" style="background: #fff1f2; color: #f43f5e;">
-                                        <span class="material-symbols-outlined">shield_with_heart</span>
-                                    </div>
-                                    <h2 class="card__title" id="extraCardTitle">Safety buffer</h2>
-                                    <span class="amount" id="outBuffer">Rs. 0</span>
-                                </section>
-                            </div>
-                        </div>
-
-                        <div class="summary-stack">
-                            <div class="section-header-wrap">
-                                <div class="section-header-info">
-                                    <div class="section-header-icon">
-                                        <span class="material-symbols-outlined">account_balance_wallet</span>
-                                    </div>
-                                    <div class="section-header-text">
-                                        <h2>Budget Summary</h2>
-                                        <p>Review your trip budget and plan smartly</p>
-                                    </div>
-                                </div>
-                                <button type="button" class="summary-card__clear" id="resetBudgetBtn">
-                                    <span class="material-symbols-outlined" style="font-size: 18px;">ink_eraser</span>
-                                    Clear inputs
-                                </button>
-                            </div>
-
-                            <div class="summary-card-layout">
-                                <div class="summary-list-panel">
-                                    <div class="summary-list-title">
-                                        <span class="material-symbols-outlined">receipt_long</span>
-                                        Final budget summary
-                                    </div>
-                                    <div class="summary-item">
-                                        <div class="summary-item-label">
-                                            <div class="summary-item-icon" style="background: #fffbeb; color: #f59e0b;">
-                                                <span class="material-symbols-outlined" style="font-size: 16px;">directions_car</span>
-                                            </div>
-                                            Travel cost
+                            <div class="breakdown-stack">
+                                <div class="section-header-wrap">
+                                    <div class="section-header-info">
+                                        <div class="section-header-icon">
+                                            <span class="material-symbols-outlined">analytics</span>
                                         </div>
-                                        <div class="summary-item-value" id="sumTravel">Rs. 0</div>
-                                    </div>
-                                    <div class="summary-item">
-                                        <div class="summary-item-label">
-                                            <div class="summary-item-icon" style="background: #eff6ff; color: #3b82f6;">
-                                                <span class="material-symbols-outlined" style="font-size: 16px;">hotel</span>
-                                            </div>
-                                            Stay cost
+                                        <div class="section-header-text">
+                                            <h2>Cost Breakdown</h2>
+                                            <p>Explore the estimated cost distribution for your trip</p>
                                         </div>
-                                        <div class="summary-item-value" id="sumStay">Rs. 0</div>
-                                    </div>
-                                    <div class="summary-item">
-                                        <div class="summary-item-label">
-                                            <div class="summary-item-icon" style="background: #ecfdf5; color: #10b981;">
-                                                <span class="material-symbols-outlined" style="font-size: 16px;">restaurant</span>
-                                            </div>
-                                            Food cost
-                                        </div>
-                                        <div class="summary-item-value" id="sumFood">Rs. 0</div>
-                                    </div>
-
-                                    <div class="summary-item">
-                                        <div class="summary-item-label">
-                                            <div class="summary-item-icon" style="background: #fff1f2; color: #f43f5e;">
-                                                <span class="material-symbols-outlined" style="font-size: 16px;">shield_with_heart</span>
-                                            </div>
-                                            Safety buffer (10%)
-                                        </div>
-                                        <div class="summary-item-value" id="sumBuf">Rs. 0</div>
                                     </div>
                                 </div>
 
-                                <div class="summary-actions-panel">
-                                    <div class="total-budget-card">
+                                <div class="grid-breakdown">
+                                    <section class="card card--travel" aria-labelledby="travelCardTitle">
+                                        <div class="card__icon" style="background: #fffbeb; color: #f59e0b;">
+                                            <span class="material-symbols-outlined">directions_car</span>
+                                        </div>
+                                        <h2 class="card__title" id="travelCardTitle">Travel cost</h2>
+                                        <span class="amount" id="outTravel">Rs. 0</span>
+                                    </section>
 
-                                        <div class="total-budget-label">Estimated Total Budget</div>
-                                        <div class="total-budget-value" id="sumTotal">Rs. 0</div>
+                                    <section class="card card--stay" aria-labelledby="stayCardTitle">
+                                        <div class="card__icon" style="background: #eff6ff; color: #3b82f6;">
+                                            <span class="material-symbols-outlined">hotel</span>
+                                        </div>
+                                        <h2 class="card__title" id="stayCardTitle">Stay cost</h2>
+                                        <span class="amount" id="outStay">Rs. 0</span>
+                                    </section>
+
+                                    <section class="card card--food" aria-labelledby="foodCardTitle">
+                                        <div class="card__icon" style="background: #ecfdf5; color: #10b981;">
+                                            <span class="material-symbols-outlined">restaurant</span>
+                                        </div>
+                                        <h2 class="card__title" id="foodCardTitle">Food cost</h2>
+                                        <span class="amount" id="outFood">Rs. 0</span>
+                                    </section>
+
+
+
+                                    <section class="card card--buffer" aria-labelledby="extraCardTitle">
+                                        <div class="card__icon" style="background: #fff1f2; color: #f43f5e;">
+                                            <span class="material-symbols-outlined">shield_with_heart</span>
+                                        </div>
+                                        <h2 class="card__title" id="extraCardTitle">Safety buffer</h2>
+                                        <span class="amount" id="outBuffer">Rs. 0</span>
+                                    </section>
+                                </div>
+                            </div>
+
+                            <div class="summary-stack">
+                                <div class="section-header-wrap">
+                                    <div class="section-header-info">
+                                        <div class="section-header-icon">
+                                            <span class="material-symbols-outlined">account_balance_wallet</span>
+                                        </div>
+                                        <div class="section-header-text">
+                                            <h2>Budget Summary</h2>
+                                            <p>Review your trip budget and plan smartly</p>
+                                        </div>
                                     </div>
-
-                                    <div class="info-box-premium" id="remainingBox">
-                                        <span class="material-symbols-outlined">info</span>
-                                        <span>Enter your total budget (first field) to see if you are within plan.</span>
-                                    </div>
-
-                                    <div class="summary-btns-row">
-                                        <button type="button" class="btn-premium-blue" id="sbDownloadPdfBtn">
-                                            <span class="material-symbols-outlined" style="font-size: 20px;">picture_as_pdf</span>
-                                            PDF Export
-                                        </button>
-                                        <button type="button" class="btn-premium-white" id="openBudgetSplitterBtn">
-                                            <span class="material-symbols-outlined" style="font-size: 20px;">pie_chart</span>
-                                            Splitter
-                                        </button>
-                                    </div>
-
-                                    <button type="button" class="btn-premium-dark" id="recalcBudgetBtn">
-                                        <span class="material-symbols-outlined" style="font-size: 24px;">calculate</span>
-                                        Recalculate Now
+                                    <button type="button" class="summary-card__clear" id="resetBudgetBtn">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 18px;">ink_eraser</span>
+                                        Clear inputs
                                     </button>
                                 </div>
+
+                                <div class="summary-card-layout">
+                                    <div class="summary-list-panel">
+                                        <div class="summary-list-title">
+                                            <span class="material-symbols-outlined">receipt_long</span>
+                                            Final budget summary
+                                        </div>
+                                        <div class="summary-item">
+                                            <div class="summary-item-label">
+                                                <div class="summary-item-icon"
+                                                    style="background: #fffbeb; color: #f59e0b;">
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size: 16px;">directions_car</span>
+                                                </div>
+                                                Travel cost
+                                            </div>
+                                            <div class="summary-item-value" id="sumTravel">Rs. 0</div>
+                                        </div>
+                                        <div class="summary-item">
+                                            <div class="summary-item-label">
+                                                <div class="summary-item-icon"
+                                                    style="background: #eff6ff; color: #3b82f6;">
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size: 16px;">hotel</span>
+                                                </div>
+                                                Stay cost
+                                            </div>
+                                            <div class="summary-item-value" id="sumStay">Rs. 0</div>
+                                        </div>
+                                        <div class="summary-item">
+                                            <div class="summary-item-label">
+                                                <div class="summary-item-icon"
+                                                    style="background: #ecfdf5; color: #10b981;">
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size: 16px;">restaurant</span>
+                                                </div>
+                                                Food cost
+                                            </div>
+                                            <div class="summary-item-value" id="sumFood">Rs. 0</div>
+                                        </div>
+
+                                        <div class="summary-item">
+                                            <div class="summary-item-label">
+                                                <div class="summary-item-icon"
+                                                    style="background: #fff1f2; color: #f43f5e;">
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size: 16px;">shield_with_heart</span>
+                                                </div>
+                                                Safety buffer (10%)
+                                            </div>
+                                            <div class="summary-item-value" id="sumBuf">Rs. 0</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="summary-actions-panel">
+                                        <div class="total-budget-card">
+
+                                            <div class="total-budget-label">Estimated Total Budget</div>
+                                            <div class="total-budget-value" id="sumTotal">Rs. 0</div>
+                                        </div>
+
+                                        <div class="info-box-premium" id="remainingBox">
+                                            <span class="material-symbols-outlined">info</span>
+                                            <span>Enter your total budget (first field) to see if you are within
+                                                plan.</span>
+                                        </div>
+
+                                        <div class="summary-btns-row">
+                                            <button type="button" class="btn-premium-blue" id="sbDownloadPdfBtn">
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size: 20px;">picture_as_pdf</span>
+                                                PDF Export
+                                            </button>
+                                            <button type="button" class="btn-premium-white" id="openBudgetSplitterBtn">
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size: 20px;">pie_chart</span>
+                                                Splitter
+                                            </button>
+                                        </div>
+
+                                        <button type="button" class="btn-premium-dark" id="recalcBudgetBtn">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 24px;">calculate</span>
+                                            Recalculate Now
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>      </div>
+                        </div>
                     </main>
 
                     <aside class="budget-page-split__map" aria-label="Emergency map">
@@ -4126,9 +4272,12 @@
                                     </p>
                                     <div class="user-split-grid" id="userSplitWrap" aria-label="Amount per person"
                                         hidden></div>
-                                    <div class="user-split-actions" style="margin-top:2.5rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; text-align:right;">
-                                        <button type="button" class="btn-primary" id="splitterPdfBtn" style="display:none; gap:0.5rem; align-items:center;">
-                                            <span class="material-symbols-outlined" style="font-size:18px">picture_as_pdf</span>
+                                    <div class="user-split-actions"
+                                        style="margin-top:2.5rem; border-top:1px solid #e2e8f0; padding-top:1.5rem; text-align:right;">
+                                        <button type="button" class="btn-primary" id="splitterPdfBtn"
+                                            style="display:none; gap:0.5rem; align-items:center;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size:18px">picture_as_pdf</span>
                                             Download Splitter Report
                                         </button>
                                     </div>
@@ -4153,18 +4302,25 @@
                         </div>
                     </div>
                 </div>
-                <footer style="background-color: #0f172a; color: #94a3b8; padding: 1.5rem; font-family: 'Inter', sans-serif; border-top: 4px solid #b45309; margin-top: auto; z-index: 50; position: relative; max-height: 180px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #b45309 #1e293b;">
-                    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: space-between; font-size: 0.85rem;">
+                <footer
+                    style="background-color: #0f172a; color: #94a3b8; padding: 1.5rem; font-family: 'Inter', sans-serif; border-top: 4px solid #b45309; margin-top: auto; z-index: 50; position: relative; max-height: 180px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #b45309 #1e293b;">
+                    <div
+                        style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: space-between; font-size: 0.85rem;">
                         <div style="flex: 1; min-width: 200px;">
-                            <h3 style="color: #f8fafc; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                                <span class="material-symbols-outlined" style="color: #fbbf24; font-size: 1.2rem;">query_stats</span> Financial Itinerary Auditor
+                            <h3
+                                style="color: #f8fafc; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="material-symbols-outlined"
+                                    style="color: #fbbf24; font-size: 1.2rem;">query_stats</span> Financial Itinerary
+                                Auditor
                             </h3>
                             <p style="line-height: 1.4;">
-                                We audit your trip costs across transport, accommodation, and food. Our algorithm uses weighted averages from current Tirupati market rates for high precision.
+                                We audit your trip costs across transport, accommodation, and food. Our algorithm uses
+                                weighted averages from current Tirupati market rates for high precision.
                             </p>
                         </div>
                         <div style="flex: 1; min-width: 150px;">
-                            <h4 style="color: #f8fafc; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Auditing Factors</h4>
+                            <h4 style="color: #f8fafc; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                Auditing Factors</h4>
                             <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8; color: #cbd5e1;">
                                 <li>📉 Dynamic Fuel Surcharge</li>
                                 <li>🏨 Room Tax Logic (GST)</li>
@@ -4173,13 +4329,16 @@
                             </ul>
                         </div>
                         <div style="flex: 1; min-width: 150px;">
-                            <h4 style="color: #f8fafc; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Export Security</h4>
+                            <h4 style="color: #f8fafc; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                Export Security</h4>
                             <p style="line-height: 1.4; color: #94a3b8;">
-                                Your generated PDFs are processed locally in your browser (jsPDF) and are never stored on our servers for maximum privacy.
+                                Your generated PDFs are processed locally in your browser (jsPDF) and are never stored
+                                on our servers for maximum privacy.
                             </p>
                         </div>
                     </div>
-                    <div style="max-width: 1200px; margin: 1rem auto 0; padding-top: 0.75rem; border-top: 1px solid #1e293b; text-align: center; font-size: 0.7rem;">
+                    <div
+                        style="max-width: 1200px; margin: 1rem auto 0; padding-top: 0.75rem; border-top: 1px solid #1e293b; text-align: center; font-size: 0.7rem;">
                         &copy; 2026 Financial Itinerary Auditor. Locally Computed Costs.
                     </div>
                 </footer>
@@ -7050,52 +7209,52 @@
                         doc.setLineWidth(1);
                         var s = size;
                         if (type === 'wallet') {
-                            doc.roundedRect(x - s/2, y - s/3, s, s*0.7, 1, 1, 'D');
-                            doc.line(x + s/4, y - s/3, x + s/4, y + s/3);
+                            doc.roundedRect(x - s / 2, y - s / 3, s, s * 0.7, 1, 1, 'D');
+                            doc.line(x + s / 4, y - s / 3, x + s / 4, y + s / 3);
                         } else if (type === 'people') {
-                            doc.circle(x - s/4, y - s/2, s/6, 'D');
-                            doc.circle(x + s/4, y - s/2, s/6, 'D');
-                            doc.roundedRect(x - s/2, y - s/8, s/2.2, s/2, 2, 2, 'D');
-                            doc.roundedRect(x + s/12, y - s/8, s/2.2, s/2, 2, 2, 'D');
+                            doc.circle(x - s / 4, y - s / 2, s / 6, 'D');
+                            doc.circle(x + s / 4, y - s / 2, s / 6, 'D');
+                            doc.roundedRect(x - s / 2, y - s / 8, s / 2.2, s / 2, 2, 2, 'D');
+                            doc.roundedRect(x + s / 12, y - s / 8, s / 2.2, s / 2, 2, 2, 'D');
                         } else if (type === 'clock') {
-                            doc.circle(x, y, s/2, 'D');
-                            doc.line(x, y, x, y - s/3);
-                            doc.line(x, y, x + s/4, y);
+                            doc.circle(x, y, s / 2, 'D');
+                            doc.line(x, y, x, y - s / 3);
+                            doc.line(x, y, x + s / 4, y);
                         } else if (type === 'chart') {
-                            doc.circle(x, y, s/2, 'D');
-                            doc.line(x, y, x, y - s/2);
-                            doc.line(x, y, x + s/3, y + s/3);
+                            doc.circle(x, y, s / 2, 'D');
+                            doc.line(x, y, x, y - s / 2);
+                            doc.line(x, y, x + s / 3, y + s / 3);
                         } else if (type === 'card') {
-                            doc.rect(x - s/2, y - s/3, s, s*0.6, 'D');
-                            doc.line(x - s/2, y - s/6, x + s/2, y - s/6);
+                            doc.rect(x - s / 2, y - s / 3, s, s * 0.6, 'D');
+                            doc.line(x - s / 2, y - s / 6, x + s / 2, y - s / 6);
                         } else if (type === 'shield') {
-                            doc.line(x, y - s/2, x + s/2, y - s/4);
-                            doc.line(x + s/2, y - s/4, x + s/2, y + s/4);
-                            doc.line(x + s/2, y + s/4, x, y + s/2);
-                            doc.line(x, y + s/2, x - s/2, y + s/4);
-                            doc.line(x - s/2, y + s/4, x - s/2, y - s/4);
-                            doc.line(x - s/2, y - s/4, x, y - s/2);
+                            doc.line(x, y - s / 2, x + s / 2, y - s / 4);
+                            doc.line(x + s / 2, y - s / 4, x + s / 2, y + s / 4);
+                            doc.line(x + s / 2, y + s / 4, x, y + s / 2);
+                            doc.line(x, y + s / 2, x - s / 2, y + s / 4);
+                            doc.line(x - s / 2, y + s / 4, x - s / 2, y - s / 4);
+                            doc.line(x - s / 2, y - s / 4, x, y - s / 2);
                         }
                     }
 
                     // --- 1. HERO SECTION ---
                     doc.setFillColor(241, 245, 249);
                     doc.rect(0, 0, pageW, 220, 'F');
-                    
+
                     var bgUrl = 'images/tirumala-temple.jpg';
-                    var bgData = await (new Promise(function(res){
+                    var bgData = await (new Promise(function (res) {
                         var img = new Image();
-                        img.crossOrigin='anonymous';
-                        img.onload=function(){
-                            var c=document.createElement('canvas');
-                            c.width=img.width; c.height=img.height;
+                        img.crossOrigin = 'anonymous';
+                        img.onload = function () {
+                            var c = document.createElement('canvas');
+                            c.width = img.width; c.height = img.height;
                             var ctx = c.getContext('2d');
                             ctx.globalAlpha = 0.22; // Increased visibility
                             ctx.drawImage(img, 0, 0, c.width, c.height);
                             res(c.toDataURL('image/jpeg', 0.8));
                         };
-                        img.onerror=function(){res(null);};
-                        img.src=bgUrl;
+                        img.onerror = function () { res(null); };
+                        img.src = bgUrl;
                     }));
                     if (bgData) {
                         doc.addImage(bgData, 'JPEG', 0, 0, pageW, 220);
@@ -7104,37 +7263,37 @@
                     var cardW = 340, cardH = 60;
                     doc.setFillColor(255, 255, 255);
                     doc.roundedRect((pageW - cardW) / 2, 20, cardW, cardH, 8, 8, 'F');
-                    
+
                     var logoUrl = 'images/geointellab_logo.jpeg';
-                    var logoData = await (new Promise(function(res){
+                    var logoData = await (new Promise(function (res) {
                         var img = new Image();
-                        img.crossOrigin='anonymous';
-                        img.onload=function(){
-                            var c=document.createElement('canvas');
-                            c.width=img.width; c.height=img.height;
-                            c.getContext('2d').drawImage(img,0,0);
-                            res(c.toDataURL('image/jpeg',0.92));
+                        img.crossOrigin = 'anonymous';
+                        img.onload = function () {
+                            var c = document.createElement('canvas');
+                            c.width = img.width; c.height = img.height;
+                            c.getContext('2d').drawImage(img, 0, 0);
+                            res(c.toDataURL('image/jpeg', 0.92));
                         };
-                        img.onerror=function(){res(null);};
-                        img.src=logoUrl;
+                        img.onerror = function () { res(null); };
+                        img.src = logoUrl;
                     }));
                     if (logoData) {
                         doc.addImage(logoData, 'JPEG', (pageW - 280) / 2, 28, 280, 44);
                     }
                     // High-contrast container for title text
                     doc.setFillColor(255, 255, 255);
-                    doc.setGState(new doc.GState({opacity: 0.9})); 
+                    doc.setGState(new doc.GState({ opacity: 0.9 }));
                     doc.roundedRect(margin + 20, 105, contentW - 40, 60, 12, 12, 'F');
-                    doc.setGState(new doc.GState({opacity: 1.0}));
+                    doc.setGState(new doc.GState({ opacity: 1.0 }));
 
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(28);
-                    doc.setTextColor(20, 30, 50); 
+                    doc.setTextColor(20, 30, 50);
                     doc.text('Geo Trip Planner', pageW / 2, 132, { align: 'center' });
 
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(11);
-                    doc.setTextColor(70, 80, 100); 
+                    doc.setTextColor(70, 80, 100);
                     doc.text('Powered by Geo-Intel Lab, IITTNIF, Tirupati', pageW / 2, 152, { align: 'center' });
 
                     var bTxt = 'Budget Audit Report', bW = 140;
@@ -7161,10 +7320,10 @@
 
                     function drawDataGrid(rows, color, icons) {
                         var colW = contentW / 2;
-                        rows.forEach(function(row, i) {
+                        rows.forEach(function (row, i) {
                             var isRight = i % 2 === 1;
                             var cx = margin + (isRight ? colW : 0);
-                            
+
                             // Check if we need a new page BEFORE drawing
                             // If it's a left item, we check if there's space for the row
                             // If it's a right item, we've already checked space when we did the left item
@@ -7177,21 +7336,21 @@
                             doc.setLineWidth(0.5);
                             doc.roundedRect(cx, y, colW - 10, 50, 8, 8, 'D');
                             if (icons && icons[i]) drawIcon(icons[i], cx + colW - 30, y + 25, 10, color);
-                            
+
                             doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
                             doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
                             doc.text(row[0].toUpperCase(), cx + 15, y + 18);
-                            
+
                             doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
                             doc.setTextColor(color[0], color[1], color[2]);
-                            
+
                             if (row[0].toLowerCase().includes('total') || row[0].toLowerCase().includes('estimate')) {
                                 doc.setTextColor(37, 99, 235);
                                 doc.setFontSize(14);
                             }
-                            
+
                             doc.text(String(row[1]), cx + 15, y + 40);
-                            
+
                             // Only advance Y after completing a full row (right item) or if it's the absolute last item
                             if (isRight || i === rows.length - 1) {
                                 y += 60;
@@ -7218,7 +7377,7 @@
 
                     var stamp = new Date().getTime();
                     doc.save('geotrip-budget-report-' + stamp + '.pdf');
-                } catch(e) {
+                } catch (e) {
                     console.error('PDF Error:', e);
                     alert('PDF generation failed: ' + (e.message || e));
                 } finally {
@@ -7470,10 +7629,10 @@
                 if (el) {
                     el.addEventListener('input', calc);
                     el.addEventListener('change', calc);
-                    
+
                     // Special logic for travelMode icon switching
                     if (id === 'travelMode') {
-                        const updateIcon = function() {
+                        const updateIcon = function () {
                             const iconMap = {
                                 'car': 'directions_car',
                                 'bike': 'pedal_bike',
@@ -7963,7 +8122,7 @@
                             stay: mainStay * scale,
                             food: mainFood * scale,
                             transport: mainTravel * scale,
-                            activities: mainBuf * scale 
+                            activities: mainBuf * scale
                         };
                     }
                 }
@@ -8130,22 +8289,22 @@
                     // --- 1. HERO SECTION ---
                     doc.setFillColor(241, 245, 249);
                     doc.rect(0, 0, pageW, 220, 'F');
-                    
+
                     // Add Tirumala Temple Background (Subtle)
                     var bgUrl = 'images/tirumala-temple.jpg';
-                    var bgData = await (new Promise(function(res){
+                    var bgData = await (new Promise(function (res) {
                         var img = new Image();
-                        img.crossOrigin='anonymous';
-                        img.onload=function(){
-                            var c=document.createElement('canvas');
-                            c.width=img.width; c.height=img.height;
+                        img.crossOrigin = 'anonymous';
+                        img.onload = function () {
+                            var c = document.createElement('canvas');
+                            c.width = img.width; c.height = img.height;
                             var ctx = c.getContext('2d');
                             ctx.globalAlpha = 0.22; // Increased visibility
                             ctx.drawImage(img, 0, 0, c.width, c.height);
                             res(c.toDataURL('image/jpeg', 0.8));
                         };
-                        img.onerror=function(){res(null);};
-                        img.src=bgUrl;
+                        img.onerror = function () { res(null); };
+                        img.src = bgUrl;
                     }));
                     if (bgData) {
                         doc.addImage(bgData, 'JPEG', 0, 0, pageW, 220);
@@ -8155,37 +8314,37 @@
                     var cardW = 340, cardH = 60;
                     doc.setFillColor(255, 255, 255);
                     doc.roundedRect((pageW - cardW) / 2, 20, cardW, cardH, 8, 8, 'F');
-                    
+
                     var logoUrl = 'images/geointellab_logo.jpeg';
-                    var logoData = await (new Promise(function(res){
+                    var logoData = await (new Promise(function (res) {
                         var img = new Image();
-                        img.crossOrigin='anonymous';
-                        img.onload=function(){
-                            var c=document.createElement('canvas');
-                            c.width=img.width; c.height=img.height;
-                            c.getContext('2d').drawImage(img,0,0);
-                            res(c.toDataURL('image/jpeg',0.92));
+                        img.crossOrigin = 'anonymous';
+                        img.onload = function () {
+                            var c = document.createElement('canvas');
+                            c.width = img.width; c.height = img.height;
+                            c.getContext('2d').drawImage(img, 0, 0);
+                            res(c.toDataURL('image/jpeg', 0.92));
                         };
-                        img.onerror=function(){res(null);};
-                        img.src=logoUrl;
+                        img.onerror = function () { res(null); };
+                        img.src = logoUrl;
                     }));
                     if (logoData) {
                         doc.addImage(logoData, 'JPEG', (pageW - 280) / 2, 28, 280, 44);
                     }
                     // High-contrast container for title text
                     doc.setFillColor(255, 255, 255);
-                    doc.setGState(new doc.GState({opacity: 0.9})); 
+                    doc.setGState(new doc.GState({ opacity: 0.9 }));
                     doc.roundedRect(margin + 20, 105, contentW - 40, 60, 12, 12, 'F');
-                    doc.setGState(new doc.GState({opacity: 1.0}));
+                    doc.setGState(new doc.GState({ opacity: 1.0 }));
 
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(28);
-                    doc.setTextColor(20, 30, 50); 
+                    doc.setTextColor(20, 30, 50);
                     doc.text('Geo Trip Planner', pageW / 2, 132, { align: 'center' });
 
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(11);
-                    doc.setTextColor(70, 80, 100); 
+                    doc.setTextColor(70, 80, 100);
                     doc.text('Powered by Geo-Intel Lab, IITTNIF, Tirupati', pageW / 2, 152, { align: 'center' });
 
                     // Report Badge
@@ -8210,37 +8369,37 @@
                         doc.setLineWidth(1);
                         var s = size;
                         if (type === 'wallet') {
-                            doc.roundedRect(x - s/2, y - s/3, s, s*0.7, 1, 1, 'D');
-                            doc.line(x + s/4, y - s/3, x + s/4, y + s/3);
+                            doc.roundedRect(x - s / 2, y - s / 3, s, s * 0.7, 1, 1, 'D');
+                            doc.line(x + s / 4, y - s / 3, x + s / 4, y + s / 3);
                         } else if (type === 'people') {
-                            doc.circle(x - s/4, y - s/2, s/6, 'D');
-                            doc.circle(x + s/4, y - s/2, s/6, 'D');
-                            doc.roundedRect(x - s/2, y - s/8, s/2.2, s/2, 2, 2, 'D');
-                            doc.roundedRect(x + s/12, y - s/8, s/2.2, s/2, 2, 2, 'D');
+                            doc.circle(x - s / 4, y - s / 2, s / 6, 'D');
+                            doc.circle(x + s / 4, y - s / 2, s / 6, 'D');
+                            doc.roundedRect(x - s / 2, y - s / 8, s / 2.2, s / 2, 2, 2, 'D');
+                            doc.roundedRect(x + s / 12, y - s / 8, s / 2.2, s / 2, 2, 2, 'D');
                         } else if (type === 'clock') {
-                            doc.circle(x, y, s/2, 'D');
-                            doc.line(x, y, x, y - s/3);
-                            doc.line(x, y, x + s/4, y);
+                            doc.circle(x, y, s / 2, 'D');
+                            doc.line(x, y, x, y - s / 3);
+                            doc.line(x, y, x + s / 4, y);
                         } else if (type === 'chart') {
-                            doc.circle(x, y, s/2, 'D');
-                            doc.line(x, y, x, y - s/2);
-                            doc.line(x, y, x + s/3, y + s/3);
+                            doc.circle(x, y, s / 2, 'D');
+                            doc.line(x, y, x, y - s / 2);
+                            doc.line(x, y, x + s / 3, y + s / 3);
                         } else if (type === 'card') {
-                            doc.rect(x - s/2, y - s/3, s, s*0.6, 'D');
-                            doc.line(x - s/2, y - s/6, x + s/2, y - s/6);
+                            doc.rect(x - s / 2, y - s / 3, s, s * 0.6, 'D');
+                            doc.line(x - s / 2, y - s / 6, x + s / 2, y - s / 6);
                         } else if (type === 'check') {
-                            doc.line(x - s/3, y, x, y + s/3);
-                            doc.line(x, y + s/3, x + s/2, y - s/3);
+                            doc.line(x - s / 3, y, x, y + s / 3);
+                            doc.line(x, y + s / 3, x + s / 2, y - s / 3);
                         } else if (type === 'shield') {
-                            doc.line(x, y - s/2, x + s/2, y - s/4);
-                            doc.line(x + s/2, y - s/4, x + s/2, y + s/4);
-                            doc.line(x + s/2, y + s/4, x, y + s/2);
-                            doc.line(x, y + s/2, x - s/2, y + s/4);
-                            doc.line(x - s/2, y + s/4, x - s/2, y - s/4);
-                            doc.line(x - s/2, y - s/4, x, y - s/2);
+                            doc.line(x, y - s / 2, x + s / 2, y - s / 4);
+                            doc.line(x + s / 2, y - s / 4, x + s / 2, y + s / 4);
+                            doc.line(x + s / 2, y + s / 4, x, y + s / 2);
+                            doc.line(x, y + s / 2, x - s / 2, y + s / 4);
+                            doc.line(x - s / 2, y + s / 4, x - s / 2, y - s / 4);
+                            doc.line(x - s / 2, y - s / 4, x, y - s / 2);
                         } else if (type === 'person') {
-                            doc.circle(x, y - s/4, s/4, 'D');
-                            doc.roundedRect(x - s/2, y + s/12, s, s/2.5, 3, 3, 'D');
+                            doc.circle(x, y - s / 4, s / 4, 'D');
+                            doc.roundedRect(x - s / 2, y + s / 12, s, s / 2.5, 3, 3, 'D');
                         }
                     }
 
@@ -8251,7 +8410,7 @@
                     doc.setDrawColor(37, 99, 235);
                     doc.setLineWidth(2);
                     doc.line(margin, y + 8, margin + 30, y + 8);
-                    
+
                     y += 35;
                     var colW = contentW / 4;
                     var overviewData = [
@@ -8261,22 +8420,22 @@
                         { label: 'PER TRAVELLER SHARE', val: fmtPdfMoney(lastResult.perPerson), color: Colors.orange, icon: 'chart' }
                     ];
 
-                    overviewData.forEach(function(item, i) {
+                    overviewData.forEach(function (item, i) {
                         var cx = margin + i * colW;
                         doc.setDrawColor(Colors.border[0], Colors.border[1], Colors.border[2]);
                         doc.setLineWidth(0.5);
                         doc.roundedRect(cx, y, colW - 10, 100, 8, 8, 'D');
-                        
+
                         // Icon in Circle
                         doc.setFillColor(241, 245, 249);
                         doc.circle(cx + (colW - 10) / 2, y + 30, 15, 'F');
                         drawIcon(item.icon, cx + (colW - 10) / 2, y + 30, 12, item.color);
-                        
+
                         doc.setFont('helvetica', 'normal');
                         doc.setFontSize(8);
                         doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
                         doc.text(item.label, cx + (colW - 10) / 2, y + 62, { align: 'center' });
-                        
+
                         doc.setFont('helvetica', 'bold');
                         doc.setFontSize(14);
                         doc.setTextColor(item.color[0], item.color[1], item.color[2]);
@@ -8292,16 +8451,16 @@
                     doc.setDrawColor(37, 99, 235);
                     doc.setLineWidth(2);
                     doc.line(margin, y + 8, margin + 30, y + 8);
-                    
+
                     y += 40;
                     var users = customUsers.length > 0 ? customUsers : [];
                     if (users.length === 0) {
-                        for(var i=1; i<=Math.min(lastResult.people, 24); i++) users.push({ name: 'User ' + i });
+                        for (var i = 1; i <= Math.min(lastResult.people, 24); i++) users.push({ name: 'User ' + i });
                     }
 
-                    users.forEach(function(u, idx) {
+                    users.forEach(function (u, idx) {
                         if (y > 700) { doc.addPage(); y = 50; }
-                        
+
                         var paid = isFinite(u.amount) ? u.amount : 0;
                         var share = lastResult.perPerson;
                         var delta = paid - share;
@@ -8322,7 +8481,7 @@
                         doc.setFontSize(18);
                         doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
                         doc.text(initials, margin + 45, y + 62, { align: 'center' });
-                        
+
                         // Tiny person icon in avatar
                         doc.setFillColor(255, 255, 255);
                         doc.circle(margin + 75, y + 75, 8, 'F');
@@ -8332,7 +8491,7 @@
                         var colX1 = margin + 110;
                         var colX2 = margin + 270;
                         var colX3 = margin + 430;
-                        
+
                         // Allocated Share
                         drawIcon('wallet', colX1 - 15, y + 42, 8, Colors.blue);
                         doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
@@ -8357,11 +8516,11 @@
                         // Status Bar
                         doc.setFillColor(statusBg[0], statusBg[1], statusBg[2]);
                         doc.roundedRect(margin + 110, y + 85, contentW - 130, 24, 6, 6, 'F');
-                        
+
                         // Info icon in status bar
                         doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
                         doc.text('i', margin + 120, y + 101);
-                        
+
                         doc.setFontSize(9); doc.setFont('helvetica', 'normal');
                         var statusMsg = isExtra ? 'You have paid ' + fmtPdfMoney(delta) + ' more than your share.' : 'You need to pay ' + fmtPdfMoney(Math.abs(delta)) + ' to settle your share.';
                         doc.text(statusMsg, margin + 130, y + 101);
@@ -8373,9 +8532,9 @@
                     if (y > 750) { doc.addPage(); y = 50; }
                     doc.setFillColor(248, 250, 252);
                     doc.roundedRect(margin, y, contentW, 50, 8, 8, 'F');
-                    
+
                     drawIcon('shield', margin + 25, y + 25, 12, Colors.blue);
-                    
+
                     doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(Colors.blue[0], Colors.blue[1], Colors.blue[2]);
                     doc.text('Travel Together, Split Better!', margin + 50, y + 20);
                     doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
@@ -8383,7 +8542,7 @@
 
                     var stamp = new Date().getTime();
                     doc.save('geotrip-splitter-report-' + stamp + '.pdf');
-                } catch(e) {
+                } catch (e) {
                     console.error('Splitter PDF Error:', e);
                     alert('PDF generation failed: ' + (e.message || e));
                 } finally {
