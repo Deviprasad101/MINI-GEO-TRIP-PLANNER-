@@ -5149,6 +5149,7 @@
         });
 
         // High-Fidelity Luxury PDF Generation
+        // High-Fidelity Luxury PDF Generation (Matched to Premium UI)
         async function generateMainPdf() {
             try {
                 if (typeof window.jspdf === 'undefined') {
@@ -5157,167 +5158,260 @@
                 }
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4');
-                const pageWidth = 210;
-                const pageHeight = 297;
-                
+                const pageW = 210;
+                const pageH = 297;
+                const margin = 15;
+                const contentW = pageW - (margin * 2);
+
                 const outingDate = document.getElementById('mainOutingDate')?.value || 'N/A';
                 const startTime = document.getElementById('mainOutingStart')?.value || 'N/A';
                 const endTime = document.getElementById('mainOutingEnd')?.value || 'N/A';
                 const startLoc = document.getElementById('mainStartLocation')?.value || 'N/A';
 
-                // Helper for Side Accent
-                const drawSideAccent = (pageDoc) => {
-                    pageDoc.setFillColor(251, 191, 36); // Amber-400
-                    pageDoc.rect(0, 0, 5, pageHeight, 'F');
-                };
-
-                // --- 1. Hero Header & Logo ---
-                drawSideAccent(doc);
-                const logoUrl = 'images/geointellab_logo.jpeg';
-                const addLogo = () => {
+                // Helper: Load Image as DataURL with Timeout
+                const loadImage = (src) => {
                     return new Promise((resolve) => {
                         const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        const timeout = setTimeout(() => {
+                            console.warn("Image load timeout:", src);
+                            resolve(null);
+                        }, 3000); // 3s timeout
+                        
                         img.onload = function() {
+                            clearTimeout(timeout);
                             try {
                                 const canvas = document.createElement('canvas');
-                                canvas.width = img.width;
-                                canvas.height = img.height;
+                                canvas.width = img.width; canvas.height = img.height;
                                 const ctx = canvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0);
-                                const dataURL = canvas.toDataURL('image/jpeg');
-                                // Bolder Logo
-                                doc.addImage(dataURL, 'JPEG', (210 - 120) / 2, 10, 120, 24);
-                                
-                                // Powered By Text under logo
-                                doc.setFont("helvetica", "bold");
-                                doc.setFontSize(8);
-                                doc.setTextColor(100);
-                                doc.text("Powered by Geo-Intel Lab, IITTNIF, Tirupati", 105, 33, { align: "center" });
-                            } catch (e) { console.warn("Logo failed", e); }
-                            resolve();
+                                resolve(canvas.toDataURL('image/jpeg', 0.8));
+                            } catch (e) { resolve(null); }
                         };
-                        img.onerror = () => resolve();
-                        img.src = logoUrl;
+                        img.onerror = () => {
+                            clearTimeout(timeout);
+                            resolve(null);
+                        };
+                        img.src = src;
                     });
                 };
 
-                await addLogo();
+                // Helper: Vector Icons (Ultra-High-Detail Illustrative Style)
+                const drawIcon = (type, x, y, size, color) => {
+                    const s = size;
+                    doc.setDrawColor(color[0], color[1], color[2]);
+                    doc.setFillColor(color[0], color[1], color[2]);
+                    doc.setLineWidth(0.4);
+                    
+                    if (type === 'calendar') {
+                        doc.roundedRect(x - s/2, y - s/2, s, s, 1, 1, 'D');
+                        doc.line(x - s/2, y - s/4, x + s/2, y - s/4);
+                        for(let i=-1; i<=1; i++) doc.rect(x + i*s/3.5 - 0.5, y - s/2 - 1, 1, 2, 'F');
+                        for(let i=-1; i<=1; i++) for(let j=0; j<=1; j++) doc.circle(x + i*s/4, y + j*s/4, 0.5, 'F');
+                    } else if (type === 'clock') {
+                        doc.circle(x, y, s/2, 'D');
+                        doc.circle(x, y, 0.5, 'F');
+                        doc.setLineWidth(0.8);
+                        doc.line(x, y, x, y - s/3);
+                        doc.line(x, y, x + s/4, y);
+                        doc.setLineWidth(0.2);
+                        for(let a=0; a<360; a+=30) {
+                            const rad = a * Math.PI / 180;
+                            doc.line(x + Math.cos(rad)*s/2.4, y + Math.sin(rad)*s/2.4, x + Math.cos(rad)*s/2.1, y + Math.sin(rad)*s/2.1);
+                        }
+                    } else if (type === 'pin') {
+                        doc.setFillColor(color[0], color[1], color[2]);
+                        doc.circle(x, y - s/6, s/3, 'F');
+                        doc.setFillColor(255, 255, 255);
+                        doc.circle(x, y - s/6, s/8, 'F');
+                        doc.setFillColor(color[0], color[1], color[2]);
+                        doc.triangle(x - s/3, y - s/8, x + s/3, y - s/8, x, y + s/2, 'F');
+                    } else if (type === 'food') {
+                        // Detailed Fork & Spoon
+                        doc.ellipse(x - s/4, y - s/8, s/5, s/3, 'D'); // Spoon
+                        doc.line(x - s/4, y + s/5, x - s/4, y + s/2); 
+                        doc.rect(x + s/6, y - s/8, s/3, s/1.5, 'D'); // Fork head
+                        doc.line(x + s/4, y - s/8, x + s/4, y + s/2); // Handle
+                        doc.line(x + s/4, y - s/8, x + s/4, y - s/3); // Prongs
+                        doc.line(x + s/6, y - s/8, x + s/6, y - s/3);
+                        doc.line(x + s/3, y - s/8, x + s/3, y - s/3);
+                    } else if (type === 'temple') {
+                        // Detailed Gopuram
+                        doc.rect(x - s/2, y + s/4, s, s/4, 'F'); // Base
+                        doc.rect(x - s/3, y - s/8, 2*s/3, s/4, 'D'); // Mid
+                        doc.rect(x - s/4, y - s/2, s/2, s/4, 'D'); // Top
+                        doc.line(x, y - s/2, x, y - s/1.5); // Spire
+                        doc.circle(x, y - s/1.5, 0.5, 'F');
+                    } else if (type === 'adventure') {
+                        // Detailed Mountains
+                        doc.triangle(x - s/2, y + s/2, x, y - s/4, x + s/2, y + s/2, 'F');
+                        doc.setFillColor(255, 255, 255);
+                        doc.triangle(x - s/6, y - s/8, x + s/6, y - s/8, x, y - s/4, 'F'); // Snow
+                        doc.setFillColor(color[0], color[1], color[2]);
+                        doc.triangle(x, y + s/2, x + s/2, y + s/2, x + s/4, y, 'F');
+                    } else if (type === 'wildlife') {
+                        // Detailed Leaf
+                        doc.ellipse(x, y, s/3, s/2, 'F');
+                        doc.setDrawColor(255, 255, 255);
+                        doc.line(x, y - s/2, x, y + s/2);
+                        doc.line(x, y, x - s/4, y - s/4);
+                        doc.line(x, y + s/6, x + s/4, y - s/6);
+                    } else if (type === 'sightseeing') {
+                        // Detailed Camera
+                        doc.roundedRect(x - s/2, y - s/4, s, s/1.5, 1, 1, 'D');
+                        doc.circle(x, y + s/8, s/4, 'D');
+                        doc.circle(x, y + s/8, s/8, 'F');
+                        doc.rect(x + s/4, y - s/3, s/6, s/10, 'F'); // Flash
+                    } else if (type === 'map') {
+                        doc.rect(x - s/2, y - s/3, s, s/1.5, 'D');
+                        doc.line(x - s/6, y - s/3, x - s/6, y + s/3);
+                        doc.line(x + s/6, y - s/3, x + s/6, y + s/3);
+                    } else if (type === 'tip') {
+                        doc.circle(x, y, s/2, 'D');
+                        doc.line(x, y - s/6, x, y + s/4);
+                        doc.circle(x, y - s/3, s/12, 'F');
+                    }
+                };
 
-                let y = 52; // Adjusted down for the branding text
+                // --- 1. Top Background & Header ---
+                const bgImg = await loadImage('images/tirumala-temple.jpg');
+                if (bgImg) {
+                    doc.setGState(new doc.GState({opacity: 0.1}));
+                    doc.addImage(bgImg, 'JPEG', 0, 0, pageW, 60);
+                    doc.setGState(new doc.GState({opacity: 1.0}));
+                }
+
+                // Logos
+                const logoData = await loadImage('images/geointellab_logo.jpeg');
+                if (logoData) {
+                    doc.addImage(logoData, 'JPEG', (pageW - 140) / 2, 8, 140, 22);
+                }
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.setTextColor(100);
+                doc.text("Powered by Geo-Intel Lab, IITTNIF, Tirupati", pageW / 2, 34, { align: "center" });
+
+                // Title
+                let y = 50;
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(26);
-                doc.setTextColor(15, 23, 42);
-                doc.text("YOUR TIRUPATI TRAVEL PLAN", 15, y);
+                doc.setTextColor(30, 41, 59);
+                doc.text("YOUR TIRUPATI TRAVEL PLAN", pageW / 2, y, { align: "center" });
                 
                 y += 8;
                 doc.setFontSize(11);
                 doc.setFont("helvetica", "normal");
-                doc.setTextColor(100);
-                doc.text("Personalized itinerary for your perfect outing", 15, y);
+                doc.setTextColor(120);
+                doc.text("Personalized itinerary for your perfect outing", pageW / 2, y, { align: "center" });
 
-                // --- 2. Structured Trip Grid (Boarding Pass Style) ---
-                y += 15;
-                doc.setDrawColor(226, 232, 240);
-                doc.setLineWidth(0.3);
-                doc.line(15, y, 195, y); // Top Line
+                // --- 2. Summary Cards ---
+                y += 12;
+                const cardW = (contentW - 10) / 3;
+                const cardH = 22;
+                const summaryY = y;
                 
-                y += 8;
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(9);
-                doc.setTextColor(148, 163, 184); // Labels
-                doc.text("DATE", 15, y);
-                doc.text("DURATION", 65, y);
-                doc.text("STARTING POINT", 115, y);
+                const drawSummaryCard = (x, icon, label, val) => {
+                    doc.setDrawColor(241, 245, 249);
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(x, summaryY, cardW, cardH, 4, 4, 'FD');
+                    
+                    // Icon Circle
+                    doc.setFillColor(248, 250, 252);
+                    doc.circle(x + 8, summaryY + cardH/2, 6, 'F');
+                    drawIcon(icon, x + 8, summaryY + cardH/2, 6, [15, 118, 110]); // Emerald 700
 
-                y += 6;
-                doc.setFontSize(12);
-                doc.setTextColor(30, 41, 59); // Values
-                doc.text(outingDate, 15, y);
-                doc.text(`${startTime} - ${endTime}`, 65, y);
-                const truncatedLoc = startLoc.length > 25 ? startLoc.substring(0, 22) + "..." : startLoc;
-                doc.text(truncatedLoc, 115, y);
+                    doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(148, 163, 184);
+                    doc.text(label, x + 18, summaryY + 8);
+                    doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 41, 59);
+                    doc.text(val, x + 18, summaryY + 16);
+                };
 
-                y += 8;
-                doc.line(15, y, 195, y); // Bottom Line
+                drawSummaryCard(margin, 'calendar', 'DATE', outingDate);
+                drawSummaryCard(margin + cardW + 5, 'clock', 'DURATION', `${startTime} - ${endTime}`);
+                drawSummaryCard(margin + (cardW + 5) * 2, 'pin', 'STARTING POINT', startLoc.substring(0, 15));
 
-                // --- 3. The Itinerary (Destination Cards) ---
-                y += 15;
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(18);
-                doc.setTextColor(15, 23, 42);
-                doc.text("Day Itinerary", 15, y);
+                // --- 3. Itinerary Section ---
+                y += cardH + 15;
+                doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 41, 59);
+                doc.text("Day Itinerary", margin + 12, y);
+                
+                // Timeline decoration
+                doc.setDrawColor(20, 184, 166); doc.setLineWidth(0.8);
+                doc.line(margin + 45, y - 2, margin + 180, y - 2);
+                drawIcon('map', margin + 6, y - 2, 10, [20, 184, 166]);
 
-                const stops = window.lastSelectedStops;
-                if (!stops || stops.length === 0) {
+                const stops = window.lastSelectedStops || [];
+                if (stops.length === 0) {
                     y += 15;
-                    doc.setFontSize(11);
-                    doc.setFont("helvetica", "italic");
-                    doc.setTextColor(100);
-                    doc.text("No destinations selected yet. Search and click 'Show Map' to generate.", 15, y);
+                    doc.setFontSize(10); doc.setFont("helvetica", "italic"); doc.text("No destinations selected yet.", margin + 12, y);
                 } else {
-                    y += 10;
+                    y += 12;
                     stops.forEach((place, index) => {
-                        // Prepare wrapped text
-                        const maxNameWidth = 140;
-                        const maxMetaWidth = 140;
-                        doc.setFont("helvetica", "bold");
-                        doc.setFontSize(12);
-                        const wrappedName = doc.splitTextToSize(place.name || "Destination", maxNameWidth);
+                        const nameText = place.name || "Destination";
+                        const metaText = `${place.category || 'POI'}  \u2022  ${place.timings || 'Daily Access'}`;
                         
-                        doc.setFont("helvetica", "normal");
-                        doc.setFontSize(9);
-                        const metaStr = `${place.category || 'POI'}  \u2022  ${place.timings || 'Daily Access'}`;
-                        const wrappedMeta = doc.splitTextToSize(metaStr, maxMetaWidth);
+                        const maxTextWidth = contentW - 35; 
+                        doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+                        const wrappedName = doc.splitTextToSize(nameText, maxTextWidth);
+                        
+                        doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+                        const wrappedMeta = doc.splitTextToSize(metaText, maxTextWidth);
+                        
+                        const nameLineHeight = 6;
+                        const metaLineHeight = 5;
+                        const cardPadding = 14;
+                        const calcHeight = (wrappedName.length * nameLineHeight) + (wrappedMeta.length * metaLineHeight) + cardPadding;
+                        const cardHeight = Math.max(32, calcHeight);
 
-                        // Calculate required card height
-                        const lineCount = wrappedName.length + wrappedMeta.length;
-                        const cardHeight = Math.max(22, (lineCount * 6) + 6);
-
-                        if (y + cardHeight > 270) {
+                        if (y + cardHeight > 275) {
                             doc.addPage();
-                            drawSideAccent(doc);
                             y = 30;
                         }
 
-                        // Destination Card Box
-                        doc.setFillColor(248, 250, 252);
-                        doc.roundedRect(15, y, 180, cardHeight, 2, 2, 'F');
+                        // Dashed Timeline
+                        if (index < stops.length - 1) {
+                            doc.setDrawColor(203, 213, 225);
+                            doc.setLineDashPattern([2, 2], 0);
+                            doc.line(margin + 6, y + 5, margin + 6, y + cardHeight + 8);
+                            doc.setLineDashPattern([], 0);
+                        }
+
+                        // Number Circle
+                        const colors = [[16, 185, 129], [245, 158, 11], [59, 130, 246], [168, 85, 247]];
+                        const circleColor = colors[index % colors.length];
+                        doc.setFillColor(circleColor[0], circleColor[1], circleColor[2]);
+                        doc.circle(margin + 6, y + 5, 5, 'F');
+                        doc.setFontSize(7); doc.setTextColor(255, 255, 255);
+                        doc.text(String(index + 1).padStart(2, '0'), margin + 6, y + 6.5, { align: 'center' });
+
+                        // Place Card
+                        doc.setDrawColor(241, 245, 249);
+                        doc.setFillColor(255, 255, 255);
+                        doc.roundedRect(margin + 18, y - 5, contentW - 25, cardHeight, 6, 6, 'FD');
+
+                        // Main Text (Shifted Left since icons are removed)
+                        doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 41, 59);
+                        doc.text(wrappedName, margin + 25, y + 4);
                         
-                        // Left Marker in Card
-                        doc.setFillColor(251, 191, 36);
-                        doc.rect(15, y, 2, cardHeight, 'F');
+                        // Metadata (Wrapped & Larger)
+                        doc.setFontSize(11); doc.setFont("helvetica", "normal"); doc.setTextColor(100);
+                        const nameHeightTotal = wrappedName.length * nameLineHeight;
+                        doc.text(wrappedMeta, margin + 25, y + 4 + nameHeightTotal);
 
-                        // Number
-                        doc.setFont("helvetica", "bold");
-                        doc.setFontSize(14);
-                        doc.setTextColor(251, 191, 36);
-                        doc.text(String(index + 1).padStart(2, '0'), 22, y + 13);
-
-                        // Place Info (Name)
-                        doc.setTextColor(15, 23, 42);
-                        doc.setFontSize(12);
-                        doc.text(wrappedName, 35, y + 9);
-                        
-                        // Metadata (Subtext)
-                        doc.setFont("helvetica", "normal");
-                        doc.setFontSize(9);
-                        doc.setTextColor(100);
-                        const nameHeight = wrappedName.length * 5;
-                        doc.text(wrappedMeta, 35, y + 9 + nameHeight);
-
-                        y += cardHeight + 4;
+                        y += cardHeight + 8;
                     });
                 }
 
-                // --- 4. Footer & Branding ---
-                const totalPages = doc.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
-                    doc.setPage(i);
-                    doc.setFontSize(8);
-                    doc.setTextColor(148, 163, 184);
-                    doc.text("THIS IS AN AUTOMATED TRAVEL PLAN GENERATED BY GEOTRIP PLANNING ENGINE", 105, 288, { align: "center" });
-                    doc.setFont("helvetica", "bold");
-                    doc.text(`${i} / ${totalPages}`, 195, 288, { align: "right" });
+                // --- 4. Plan Tip Footer ---
+                if (y < 260) {
+                    y = 265;
+                    doc.setFillColor(240, 253, 244);
+                    doc.roundedRect(margin, y, contentW, 25, 6, 6, 'F');
+                    drawIcon('tip', margin + 10, y + 12, 8, [21, 128, 61]);
+                    doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(21, 128, 61);
+                    doc.text("Plan Tip", margin + 18, y + 10);
+                    doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(22, 101, 52);
+                    doc.text("Carry water, wear comfortable shoes and start early to make the most of your day!", margin + 18, y + 18);
                 }
 
                 doc.save(`GeoTrip_Premium_Itinerary_${outingDate}.pdf`);
@@ -5334,5 +5428,4 @@
     })();
     </script>
 </body>
-
 </html>
