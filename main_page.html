@@ -2602,6 +2602,11 @@
                             <span class="material-symbols-outlined" aria-hidden="true">map</span>
                             Show map
                         </button>
+                        <button type="button" id="mainDownloadPdfBtn"
+                            class="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-800 px-6 py-3 text-base font-bold text-white shadow-md transition hover:bg-slate-900 active:scale-[0.98]">
+                            <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                            Download PDF
+                        </button>
                     </div>
                     <p id="mainTripFormHint" class="mt-3 hidden text-sm font-medium text-red-700" role="alert"></p>
                 </div>
@@ -2891,6 +2896,7 @@
         </div>
     </dialog>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
             (function () {
                 const CSV_URL = 'tirupati_main_data.csv';
@@ -3350,10 +3356,10 @@
             var OSRM_TRIP_BASE = 'https://router.project-osrm.org/trip/v1/driving';
             var DAY_END_MIN = 24 * 60 - 1;
 
-            var places = [];
+            var lastSelectedStops = [];
+            window.lastSelectedStops = lastSelectedStops;
             var hospitalStubs = [];
             var hospitalGeocodeCache = {};
-            var lastSelectedStops = [];
             var activeTierMeta = null;
 
             var pkgMap = null;
@@ -4033,6 +4039,7 @@
                             return Math.abs(p.lat - pt[0]) < 0.00001 && Math.abs(p.lng - pt[1]) < 0.00001;
                         });
                     }).filter(Boolean);
+                    window.lastSelectedStops = orderedPlaces;
 
                     mapsToUpdate.forEach(function (m) {
                         if (m.markers) m.markers.clearLayers();
@@ -4527,6 +4534,7 @@
                             );
                             // Greedy nearest-neighbor: start → nearest hospital → next nearest → ...
                             var orderedPts = greedyNearestOrder(seqPts);
+                            window.lastSelectedStops = top3;
                             fetchOsrmRoute(orderedPts, signal).then(function (coords) {
                                 if (signal.aborted) return;
                                 if (coords && coords.length >= 2) {
@@ -5124,6 +5132,183 @@
             });
         });
 
+        // High-Fidelity Luxury PDF Generation
+        async function generateMainPdf() {
+            try {
+                if (typeof window.jspdf === 'undefined') {
+                    alert("PDF Library is still loading...");
+                    return;
+                }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = 210;
+                const pageHeight = 297;
+                
+                const outingDate = document.getElementById('mainOutingDate')?.value || 'N/A';
+                const startTime = document.getElementById('mainOutingStart')?.value || 'N/A';
+                const endTime = document.getElementById('mainOutingEnd')?.value || 'N/A';
+                const startLoc = document.getElementById('mainStartLocation')?.value || 'N/A';
+
+                // Helper for Side Accent
+                const drawSideAccent = (pageDoc) => {
+                    pageDoc.setFillColor(251, 191, 36); // Amber-400
+                    pageDoc.rect(0, 0, 5, pageHeight, 'F');
+                };
+
+                // --- 1. Hero Header & Logo ---
+                drawSideAccent(doc);
+                const logoUrl = 'images/geointellab_logo.jpeg';
+                const addLogo = () => {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = function() {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                const dataURL = canvas.toDataURL('image/jpeg');
+                                // Slightly larger Logo
+                                doc.addImage(dataURL, 'JPEG', (210 - 100) / 2, 10, 100, 20);
+                            } catch (e) { console.warn("Logo failed", e); }
+                            resolve();
+                        };
+                        img.onerror = () => resolve();
+                        img.src = logoUrl;
+                    });
+                };
+
+                await addLogo();
+
+                let y = 45; // Moved down to fit the larger logo
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(26);
+                doc.setTextColor(15, 23, 42);
+                doc.text("YOUR TIRUPATI TRAVEL PLAN", 15, y);
+                
+                y += 8;
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(100);
+                doc.text("Personalized itinerary for your perfect outing", 15, y);
+
+                // --- 2. Structured Trip Grid (Boarding Pass Style) ---
+                y += 15;
+                doc.setDrawColor(226, 232, 240);
+                doc.setLineWidth(0.3);
+                doc.line(15, y, 195, y); // Top Line
+                
+                y += 8;
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(9);
+                doc.setTextColor(148, 163, 184); // Labels
+                doc.text("DATE", 15, y);
+                doc.text("DURATION", 65, y);
+                doc.text("STARTING POINT", 115, y);
+
+                y += 6;
+                doc.setFontSize(12);
+                doc.setTextColor(30, 41, 59); // Values
+                doc.text(outingDate, 15, y);
+                doc.text(`${startTime} - ${endTime}`, 65, y);
+                const truncatedLoc = startLoc.length > 25 ? startLoc.substring(0, 22) + "..." : startLoc;
+                doc.text(truncatedLoc, 115, y);
+
+                y += 8;
+                doc.line(15, y, 195, y); // Bottom Line
+
+                // --- 3. The Itinerary (Destination Cards) ---
+                y += 15;
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(18);
+                doc.setTextColor(15, 23, 42);
+                doc.text("Day Itinerary", 15, y);
+
+                const stops = window.lastSelectedStops;
+                if (!stops || stops.length === 0) {
+                    y += 15;
+                    doc.setFontSize(11);
+                    doc.setFont("helvetica", "italic");
+                    doc.setTextColor(100);
+                    doc.text("No destinations selected yet. Search and click 'Show Map' to generate.", 15, y);
+                } else {
+                    y += 10;
+                    stops.forEach((place, index) => {
+                        // Prepare wrapped text
+                        const maxNameWidth = 140;
+                        const maxMetaWidth = 140;
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(12);
+                        const wrappedName = doc.splitTextToSize(place.name || "Destination", maxNameWidth);
+                        
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9);
+                        const metaStr = `${place.category || 'POI'}  \u2022  ${place.timings || 'Daily Access'}`;
+                        const wrappedMeta = doc.splitTextToSize(metaStr, maxMetaWidth);
+
+                        // Calculate required card height
+                        const lineCount = wrappedName.length + wrappedMeta.length;
+                        const cardHeight = Math.max(22, (lineCount * 6) + 6);
+
+                        if (y + cardHeight > 270) {
+                            doc.addPage();
+                            drawSideAccent(doc);
+                            y = 30;
+                        }
+
+                        // Destination Card Box
+                        doc.setFillColor(248, 250, 252);
+                        doc.roundedRect(15, y, 180, cardHeight, 2, 2, 'F');
+                        
+                        // Left Marker in Card
+                        doc.setFillColor(251, 191, 36);
+                        doc.rect(15, y, 2, cardHeight, 'F');
+
+                        // Number
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(14);
+                        doc.setTextColor(251, 191, 36);
+                        doc.text(String(index + 1).padStart(2, '0'), 22, y + 13);
+
+                        // Place Info (Name)
+                        doc.setTextColor(15, 23, 42);
+                        doc.setFontSize(12);
+                        doc.text(wrappedName, 35, y + 9);
+                        
+                        // Metadata (Subtext)
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9);
+                        doc.setTextColor(100);
+                        const nameHeight = wrappedName.length * 5;
+                        doc.text(wrappedMeta, 35, y + 9 + nameHeight);
+
+                        y += cardHeight + 4;
+                    });
+                }
+
+                // --- 4. Footer & Branding ---
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(148, 163, 184);
+                    doc.text("THIS IS AN AUTOMATED TRAVEL PLAN GENERATED BY GEOTRIP PLANNING ENGINE", 105, 288, { align: "center" });
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`${i} / ${totalPages}`, 195, 288, { align: "right" });
+                }
+
+                doc.save(`GeoTrip_Premium_Itinerary_${outingDate}.pdf`);
+            } catch (err) {
+                console.error("PDF Error:", err);
+                alert("Could not generate PDF: " + err.message);
+            }
+        }
+
+        const mainDownloadPdfBtn = document.getElementById('mainDownloadPdfBtn');
+        if (mainDownloadPdfBtn) {
+            mainDownloadPdfBtn.onclick = generateMainPdf;
+        }
     })();
     </script>
 </body>
