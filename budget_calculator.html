@@ -1836,7 +1836,7 @@
         /* --- COST BREAKDOWN CARDS --- */
         .grid-breakdown {
             display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important;
+            grid-template-columns: repeat(4, 1fr) !important;
             gap: 1.25rem !important;
         }
 
@@ -3895,13 +3895,7 @@
                                     <span class="amount" id="outFood">Rs. 0</span>
                                 </section>
 
-                                <section class="card card--activities" aria-labelledby="actCardTitle">
-                                    <div class="card__icon" style="background: #f5f3ff; color: #8b5cf6;">
-                                        <span class="material-symbols-outlined">confirmation_number</span>
-                                    </div>
-                                    <h2 class="card__title" id="actCardTitle">Activities cost</h2>
-                                    <span class="amount" id="outActivities">Rs. 0</span>
-                                </section>
+
 
                                 <section class="card card--buffer" aria-labelledby="extraCardTitle">
                                     <div class="card__icon" style="background: #fff1f2; color: #f43f5e;">
@@ -3963,15 +3957,7 @@
                                         </div>
                                         <div class="summary-item-value" id="sumFood">Rs. 0</div>
                                     </div>
-                                    <div class="summary-item">
-                                        <div class="summary-item-label">
-                                            <div class="summary-item-icon" style="background: #f5f3ff; color: #8b5cf6;">
-                                                <span class="material-symbols-outlined" style="font-size: 16px;">confirmation_number</span>
-                                            </div>
-                                            Activities cost
-                                        </div>
-                                        <div class="summary-item-value" id="sumAct">Rs. 0</div>
-                                    </div>
+
                                     <div class="summary-item">
                                         <div class="summary-item-label">
                                             <div class="summary-item-icon" style="background: #fff1f2; color: #f43f5e;">
@@ -6996,7 +6982,6 @@
                     ['Travel Cost', text('outTravel') || 'Rs. 0'],
                     ['Stay Cost', text('outStay') || 'Rs. 0'],
                     ['Food Cost', text('outFood') || 'Rs. 0'],
-                    ['Activities Cost', text('outActivities') || 'Rs. 0'],
                     ['Safety Buffer', text('outBuffer') || 'Rs. 0'],
                     ['Total Estimate', text('sumTotal') || 'Rs. 0']
                 ];
@@ -7420,21 +7405,18 @@
 
                 const stay = rooms * roomCost * days;
                 const food = foodPerDay * people * days;
-                const activities = entry * people;
-                const subtotal = travel + stay + food + activities;
+                const subtotal = travel + stay + food;
                 const buffer = subtotal * 0.1;
                 const total = subtotal + buffer;
 
                 document.getElementById('outTravel').textContent = rupee(travel);
                 document.getElementById('outStay').textContent = rupee(stay);
                 document.getElementById('outFood').textContent = rupee(food);
-                document.getElementById('outActivities').textContent = rupee(activities);
                 document.getElementById('outBuffer').textContent = rupee(buffer);
 
                 document.getElementById('sumTravel').textContent = rupee(travel);
                 document.getElementById('sumStay').textContent = rupee(stay);
                 document.getElementById('sumFood').textContent = rupee(food);
-                document.getElementById('sumAct').textContent = rupee(activities);
                 document.getElementById('sumBuf').textContent = rupee(buffer);
                 document.getElementById('sumTotal').textContent = rupee(total);
                 if (kpiTotal) kpiTotal.textContent = rupee(total);
@@ -7640,9 +7622,9 @@
             var TRIP_SPEND_KEY = 'tirupati_trip_total_spend';
 
             var TIERS = {
-                balanced: { stay: 0.40, food: 0.25, transport: 0.20, activities: 0.15, label: 'Balanced' },
-                basic: { stay: 0.32, food: 0.26, transport: 0.30, activities: 0.12, label: 'Basic' },
-                premium: { stay: 0.45, food: 0.22, transport: 0.15, activities: 0.18, label: 'Premium' }
+                balanced: { stay: 0.50, food: 0.30, transport: 0.20, activities: 0, label: 'Balanced' },
+                basic: { stay: 0.40, food: 0.30, transport: 0.30, activities: 0, label: 'Basic' },
+                premium: { stay: 0.55, food: 0.30, transport: 0.15, activities: 0, label: 'Premium' }
             };
 
             function fmtMoney(n) {
@@ -7980,9 +7962,8 @@
                     var mainStay = parseFloat(document.getElementById('sumStay').textContent.replace(/[^\d.]/g, '')) || 0;
                     var mainFood = parseFloat(document.getElementById('sumFood').textContent.replace(/[^\d.]/g, '')) || 0;
                     var mainTravel = parseFloat(document.getElementById('sumTravel').textContent.replace(/[^\d.]/g, '')) || 0;
-                    var mainAct = parseFloat(document.getElementById('sumAct').textContent.replace(/[^\d.]/g, '')) || 0;
                     var mainBuf = parseFloat(document.getElementById('sumBuf').textContent.replace(/[^\d.]/g, '')) || 0;
-                    var mainTotal = mainStay + mainFood + mainTravel + mainAct + mainBuf;
+                    var mainTotal = mainStay + mainFood + mainTravel + mainBuf;
 
                     if (mainTotal > 0) {
                         // If splitter total matches main total, use actual values. 
@@ -7992,7 +7973,7 @@
                             stay: mainStay * scale,
                             food: mainFood * scale,
                             transport: mainTravel * scale,
-                            activities: (mainAct + mainBuf) * scale // Including buffer in activities for simplicity in split view
+                            activities: mainBuf * scale 
                         };
                     }
                 }
