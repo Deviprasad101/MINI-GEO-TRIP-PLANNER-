@@ -7161,22 +7161,41 @@
 
                     function drawDataGrid(rows, color, icons) {
                         var colW = contentW / 2;
-                        var startY = y;
                         rows.forEach(function(row, i) {
                             var isRight = i % 2 === 1;
                             var cx = margin + (isRight ? colW : 0);
-                            var cy = startY + Math.floor(i/2) * 60;
+                            
+                            // Check if we need a new page BEFORE drawing
+                            // If it's a left item, we check if there's space for the row
+                            // If it's a right item, we've already checked space when we did the left item
+                            if (!isRight && (y + 60 > 800)) {
+                                doc.addPage();
+                                y = 50;
+                            }
+
                             doc.setDrawColor(Colors.border[0], Colors.border[1], Colors.border[2]);
                             doc.setLineWidth(0.5);
-                            doc.roundedRect(cx, cy, colW - 10, 50, 8, 8, 'D');
-                            if (icons && icons[i]) drawIcon(icons[i], cx + colW - 30, cy + 25, 10, color);
+                            doc.roundedRect(cx, y, colW - 10, 50, 8, 8, 'D');
+                            if (icons && icons[i]) drawIcon(icons[i], cx + colW - 30, y + 25, 10, color);
+                            
                             doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
                             doc.setTextColor(Colors.slate[0], Colors.slate[1], Colors.slate[2]);
-                            doc.text(row[0].toUpperCase(), cx + 15, cy + 18);
+                            doc.text(row[0].toUpperCase(), cx + 15, y + 18);
+                            
                             doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
                             doc.setTextColor(color[0], color[1], color[2]);
-                            doc.text(String(row[1]), cx + 15, cy + 40);
-                            if (isRight || i === rows.length - 1) y = cy + 65;
+                            
+                            if (row[0].toLowerCase().includes('total') || row[0].toLowerCase().includes('estimate')) {
+                                doc.setTextColor(37, 99, 235);
+                                doc.setFontSize(14);
+                            }
+                            
+                            doc.text(String(row[1]), cx + 15, y + 40);
+                            
+                            // Only advance Y after completing a full row (right item) or if it's the absolute last item
+                            if (isRight || i === rows.length - 1) {
+                                y += 60;
+                            }
                         });
                         y += 10;
                     }
@@ -7187,7 +7206,8 @@
                     sectionHeader('Financial Breakdown');
                     drawDataGrid(getBreakdownRows(), Colors.emerald, ['wallet', 'card', 'card', 'shield', 'check']);
 
-                    if (y > 750) { doc.addPage(); y = 50; }
+                    // Ensure the final CTA card also checks for space
+                    if (y + 60 > 800) { doc.addPage(); y = 50; }
                     doc.setFillColor(248, 250, 252);
                     doc.roundedRect(margin, y, contentW, 50, 8, 8, 'F');
                     drawIcon('shield', margin + 25, y + 25, 12, [37, 99, 235]);
