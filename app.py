@@ -31,9 +31,11 @@ def recommend():
         prompt = f"Create a 3-day itinerary for {destination}. The user is interested in {interests}, has a budget of Rs. {budget}. Return the response as a JSON array of daily activities. Each item in the array should have 'day' (e.g., 'Day 1'), and 'activities' (a list of strings). Only output the valid JSON array, do not wrap in markdown tags."
         
         if not client:
+            print("[ERROR] API key not found")
             return jsonify({"status": "error", "message": "API key not found."}), 500
 
         # Use the new package structure
+        print(f"[DEBUG] Requesting Gemini with model: gemini-2.5-flash")
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt
@@ -49,6 +51,9 @@ def recommend():
             
         return jsonify({"status": "success", "recommendation": json.loads(text.strip())})
     except Exception as e:
+        print(f"[ERROR] Exception in /api/recommend: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
