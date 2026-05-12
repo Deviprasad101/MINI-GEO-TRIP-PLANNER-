@@ -973,46 +973,92 @@
 
         @media (max-width: 1023px) {
             .site-header__layout {
-                display: grid !important;
-                grid-template-columns: minmax(0, 1fr) auto;
+                display: flex !important;
+                flex-direction: column;
                 align-items: center;
-                gap: 0.6rem 0.85rem;
-                overflow: visible;
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-
-            .site-header__start {
-                grid-column: 1;
-                min-width: 0;
-                display: flex;
-                align-items: center;
-                gap: 0.45rem;
-            }
-
-            .site-header__brand {
-                margin-left: 7rem;
-                min-width: 0;
-            }
-
-            .site-header__brand-name {
-                display: block;
-                max-width: 100%;
-                line-height: 1.15;
+                justify-content: center;
+                gap: 0.1rem; /* Even tighter gap */
+                padding: 0.3rem 1rem;
+                min-height: auto;
             }
 
             .site-header__end {
-                grid-column: 2;
-                justify-self: end;
-                display: inline-flex;
+                order: 1; /* Logo and Powered by text at the top */
+                width: 100%;
+                display: flex;
+                flex-direction: column;
                 align-items: center;
-                max-width: min(42vw, 11rem);
+                justify-content: center;
+                max-width: none;
+            }
+
+            .site-header__end p {
+                margin-top: 0.1rem !important;
+                font-size: 8.5px !important;
             }
 
             .site-header__logo-wrap {
-                height: 2.1rem;
+                height: 2.2rem; /* Slightly smaller logo */
                 min-width: 0;
-                max-width: min(42vw, 11rem);
+                max-width: 90vw;
+            }
+
+            .site-header__start {
+                order: 2; /* Brand title in the middle, centered */
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0.05rem 0;
+            }
+
+            .site-header__brand {
+                margin-left: 0 !important;
+                padding-left: 0 !important;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .site-header__brand-name {
+                font-size: 1.55rem !important; /* Increased heading size */
+                text-align: center;
+                line-height: 1.1;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            .site-header__nav--primary {
+                display: flex !important;
+                order: 3; /* HOME, Packages and Booking at the bottom */
+                width: 100%;
+                justify-content: center;
+                gap: 0.25rem;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-top: 0;
+                border-top: 1px solid rgba(251, 191, 36, 0.08);
+                padding: 0.35rem 0.2rem 0.2rem;
+                scrollbar-width: none;
+            }
+
+            .site-header__nav--primary::-webkit-scrollbar {
+                display: none;
+            }
+
+            .site-header__nav--primary .site-header__home {
+                padding: 0.35rem 0.65rem;
+                font-size: 0.8rem; /* Increased button size */
+                border-radius: 999px;
+                flex-shrink: 0;
+                display: inline-flex !important;
+            }
+
+            .site-header__nav--primary .site-header__link {
+                font-size: 0.8rem; /* Increased button size */
+                padding: 0.35rem 0.65rem;
+                flex-shrink: 0;
+                white-space: nowrap;
             }
 
             .site-header__brand-logo {
@@ -2234,9 +2280,9 @@
         }
 
         .summary-card__clear {
-            background: #fff5f5 !important;
-            color: #ff4d4d !important;
-            border: 1px solid #ffebeb !important;
+            background: #fff1f2 !important; /* Slightly more saturated pink/red */
+            color: #e11d48 !important; /* Prominent red */
+            border: 1px solid #fecaca !important; /* Visible border */
             padding: 0.5rem 1.25rem !important;
             border-radius: 12px !important;
             font-weight: 700 !important;
@@ -2244,6 +2290,13 @@
             display: flex !important;
             align-items: center !important;
             gap: 0.5rem !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .summary-card__clear:hover {
+            background: #ffe4e6 !important;
+            border-color: #fda4af !important;
+            transform: translateY(-1px) !important;
         }
 
         .form-grid {
@@ -3725,6 +3778,26 @@
                 justify-content: center;
                 white-space: normal;
             }
+
+            .section-header-wrap {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .section-header-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .summary-card__clear {
+                width: 100%;
+                max-width: 200px;
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -3784,11 +3857,7 @@
                 <div
                     class="site-header__layout flex min-h-[4.3rem] min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 overflow-hidden px-5 py-2.5 sm:min-h-[4.8rem] sm:gap-x-4 sm:px-7 sm:py-3">
                     <div class="site-header__start flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
-                        <button type="button" id="mobileNavOpen" class="icon-btn shrink-0 lg:hidden"
-                            aria-expanded="false" aria-controls="mobileNavPanel" aria-label="Open menu">
-                            <span class="material-symbols-outlined text-2xl" aria-hidden="true">menu</span>
-                        </button>
-                        <a href="main_page.html" class="site-header__home shrink-0"
+                        <a href="main_page.html" class="site-header__home shrink-0 hidden lg:inline-flex"
                             aria-label="Home — GeoTrip main page">
                             <span class="material-symbols-outlined" aria-hidden="true">home</span>
                             <span class="site-header__home-text">HOME</span>
@@ -3803,8 +3872,12 @@
                     </div>
                     <nav class="site-header__nav site-header__nav--primary hidden min-w-0 items-center justify-center gap-1 sm:gap-2 lg:flex"
                         aria-label="Primary">
+                        <a href="main_page.html" class="site-header__home shrink-0 lg:hidden"
+                            aria-label="Home — GeoTrip main page">
+                            <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                            <span class="site-header__home-text">HOME</span>
+                        </a>
                         <a class="site-header__link" href="packages.html">Packages</a>
-
                         <a class="site-header__link" href="booking.html">Booking</a>
                     </nav>
                     <div class="site-header__end flex flex-col items-center">
