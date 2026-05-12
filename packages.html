@@ -3994,7 +3994,7 @@
                 var root = document.getElementById('emergencyListRoot');
                 if (!root) return;
                 if (!hospitalStubs.length) {
-                    root.innerHTML = '<p style="padding:0.5rem 1rem;font-size:0.8125rem;color:#64748b;">No hospitals found in CSV.</p>';
+                    root.innerHTML = '<p style="padding:0.5rem 1rem;font-size:0.8125rem;color:#64748b;">No hospitals found in the dataset.</p>';
                     return;
                 }
                 var ul = document.createElement('ul');
@@ -4088,22 +4088,47 @@
 
             async function geocodeAllHospitals(signal) {
                 var out = [];
+                // 1. Process hospitalStubs (from CSV)
                 for (var i = 0; i < hospitalStubs.length; i++) {
                     if (signal.aborted) return out;
                     var h = hospitalStubs[i];
                     var cached = hospitalGeocodeCache[h.name];
                     var fb = EMERGENCY_HOSPITAL_LATLNG_FALLBACK[h.name];
-                    var g = cached || (fb ? { lat: fb.lat, lng: fb.lng, label: h.name } : null);
-                    if (!g) g = await geocodeHospitalRecord(h, signal);
+                    
+                    // Priority: Cache > CSV Coordinates > Fallback Lookup
+                    var g = cached || 
+                            (!isNaN(h.lat) && !isNaN(h.lng) ? { lat: h.lat, lng: h.lng, label: h.name } : null) ||
+                            (fb ? { lat: fb.lat, lng: fb.lng, label: h.name } : null);
+                    
+                    if (!g) {
+                        try {
+                            g = await geocodeHospitalRecord(h, signal);
+                        } catch(e) { console.warn('Geocode fail for', h.name, e); }
+                    }
+
                     if (g) {
                         out.push({
                             name: h.name,
-                            category: h.category,
-                            timings: h.timings,
-                            lat: g.lat,
-                            lng: g.lng
+                            category: h.category || 'Hospital',
+                            timings: h.timings || '24 Hours',
+                            lat: Number(g.lat),
+                            lng: Number(g.lng)
                         });
                     }
+                }
+
+                // 2. Final Safety Net: If no hospitals from CSV, inject hardcoded fallback set
+                if (out.length === 0) {
+                    Object.keys(EMERGENCY_HOSPITAL_LATLNG_FALLBACK).forEach(function(name) {
+                        var coord = EMERGENCY_HOSPITAL_LATLNG_FALLBACK[name];
+                        out.push({
+                            name: name,
+                            category: 'Hospital',
+                            timings: '24 Hours',
+                            lat: coord.lat,
+                            lng: coord.lng
+                        });
+                    });
                 }
                 return out;
             }
@@ -4217,17 +4242,19 @@
                                         }).addTo(pkgHospitalLayer);
                                     }
                                     var b = orderedPts.slice();
-                                    if (b.length && pkgMap) pkgMap.fitBounds(b, { padding: [40, 40], maxZoom: 13, animate: true });
+                                    if (b.length && pkgMap) {
+                                        pkgMap.fitBounds(b, { padding: [40, 40], maxZoom: 13, animate: true });
+                                    }
                                     window.setTimeout(function () {
                                         if (pkgMap) pkgMap.invalidateSize();
-                                    }, 200);
+                                    }, 250);
                                     if (hint) {
                                         hint.textContent =
                                             'Driving route via OSRM trip optimization (start fixed, last hospital fixed).';
                                     }
                                     setMapStatus('Emergency: 3 nearest hospitals + optimized driving route.');
                                     closeEmergencyPanel();
-                                    if (mapSec) mapSec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                    if (mapSec) mapSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                 });
                             });
                         })
@@ -4418,16 +4445,16 @@
                         if (/^name of the place/i.test(raw) || /^name,/i.test(raw)) continue;
                         var row = parseCSVLine(raw);
                         if (!row) continue;
-                        if (row.needsGeocode) {
-                            hospitalStubs.push({
-                                name: row.name,
-                                category: row.category,
-                                timings: row.timings
-                            });
-                            continue;
+                        
+                        // Always collect hospitals for the emergency system
+                        if ((row.category || '').toLowerCase().includes('hospital')) {
+                            hospitalStubs.push(row);
                         }
-                        places.push(row);
-                        placeByName[row.name] = row;
+
+                        if (!row.needsGeocode) {
+                            places.push(row);
+                            placeByName[row.name] = row;
+                        }
                     }
                     if (!places.length) throw new Error('No places parsed');
                     renderPackageCards();
