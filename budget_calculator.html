@@ -4718,15 +4718,15 @@
                         if (/^name of the place/i.test(raw) || /^name,/i.test(raw)) continue;
                         const row = parseCSVLine(raw);
                         if (!row) continue;
-                        if (row.needsGeocode) {
-                            emergencyHospitals.push({
-                                name: row.name,
-                                category: row.category,
-                                timings: row.timings
-                            });
-                            continue;
+
+                        // Always collect hospitals for the emergency system
+                        if ((row.category || '').toLowerCase().includes('hospital')) {
+                            emergencyHospitals.push(row);
                         }
-                        if (!isNaN(row.lat) && !isNaN(row.lng)) places.push(row);
+
+                        if (!isNaN(row.lat) && !isNaN(row.lng)) {
+                            places.push(row);
+                        }
                     }
                     try {
                         window.__TIRUPATI_EMERGENCY_HOSPITALS = emergencyHospitals.slice();
@@ -6834,26 +6834,49 @@
 
             async function geocodeAllHospitalsBudget(list, signal, onProgress) {
                 var out = [];
+                // 1. Process the provided list (from CSV)
                 for (var i = 0; i < list.length; i++) {
                     if (signal.aborted) return out;
                     var h = list[i];
                     if (typeof onProgress === 'function') onProgress(i + 1, list.length);
                     var cached = hospitalGeocodeCacheEmerg[h.name];
                     var fb = EMERGENCY_HOSPITAL_LATLNG_FALLBACK[h.name];
-                    var g = cached || (fb ? { lat: fb.lat, lng: fb.lng, label: h.name } : null);
+                    
+                    // Priority: Cache > CSV Coordinates > Fallback Lookup
+                    var g = cached || 
+                            (!isNaN(h.lat) && !isNaN(h.lng) ? { lat: h.lat, lng: h.lng, label: h.name } : null) ||
+                            (fb ? { lat: fb.lat, lng: fb.lng, label: h.name } : null);
+                    
                     if (!g) {
-                        g = await geocodeHospitalBudget(h, signal);
+                        try {
+                            g = await geocodeHospitalBudget(h, signal);
+                        } catch(e) { console.warn('Geocode fail for', h.name, e); }
                     }
+
                     if (g) {
                         hospitalGeocodeCacheEmerg[h.name] = g;
                         out.push({
                             name: h.name,
-                            category: h.category,
-                            timings: h.timings,
-                            lat: g.lat,
-                            lng: g.lng
+                            category: h.category || 'Hospital',
+                            timings: h.timings || '24 Hours',
+                            lat: Number(g.lat),
+                            lng: Number(g.lng)
                         });
                     }
+                }
+
+                // 2. Final Safety Net: If no hospitals from CSV, inject hardcoded fallback set
+                if (out.length === 0) {
+                    Object.keys(EMERGENCY_HOSPITAL_LATLNG_FALLBACK).forEach(function(name) {
+                        var coord = EMERGENCY_HOSPITAL_LATLNG_FALLBACK[name];
+                        out.push({
+                            name: name,
+                            category: 'Hospital',
+                            timings: '24 Hours',
+                            lat: coord.lat,
+                            lng: coord.lng
+                        });
+                    });
                 }
                 return out;
             }
@@ -7047,13 +7070,11 @@
                 if (hint) {
                     hint.textContent = 'Nearest hospitals are shown in the map panel on the right.';
                 }
-                if (tripPanel) tripPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                if (tripPanel) tripPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
                 window.setTimeout(function () {
                     if (map) map.invalidateSize();
-                }, 120);
-                window.setTimeout(function () {
-                    if (map) map.invalidateSize();
-                }, 400);
+                }, 300);
             }
 
             var emergencyFabEl = $('emergencyFab');
