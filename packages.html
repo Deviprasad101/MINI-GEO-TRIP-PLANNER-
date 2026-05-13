@@ -2878,39 +2878,6 @@
                 </section>
             </div>
 
-            <!-- AI Recommendation Section -->
-            <div class="packages-section mt-12 mb-8 bg-teal-50/50 py-10 rounded-3xl border border-teal-100 shadow-sm">
-                <div class="flex flex-col items-center">
-                    <div class="pill-badge" style="color: #0f766e; border-color: rgba(15, 118, 110, 0.2); background: white;">
-                        <span class="sparkle" style="color: #14b8a6;">✦</span> AI-Powered Magic
-                    </div>
-                    <h2 class="packages-section__title">Get a <span style="color: #0d9488;">Smart AI Itinerary</span></h2>
-                    <div class="packages-section__subtitle">
-                        Tell us your preferences and let our AI plan your trip instantly.
-                    </div>
-                    <div class="mt-8 flex flex-col sm:flex-row gap-4 w-full max-w-4xl px-6">
-                        <input type="text" id="ai-destination" placeholder="Where to? (e.g., Tirupati)" value="Tirupati" class="flex-1 rounded-xl border border-slate-200 px-4 py-3 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-all text-sm font-medium">
-                        <input type="number" id="ai-budget" placeholder="Budget (Rs.)" value="5000" class="w-full sm:w-36 rounded-xl border border-slate-200 px-4 py-3 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-all text-sm font-medium">
-                        <select id="ai-interests" class="w-full sm:w-48 rounded-xl border border-slate-200 px-4 py-3 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-all text-sm font-medium">
-                            <option value="temples">Temples</option>
-                            <option value="nature">Nature & Adventure</option>
-                            <option value="food">Food & Culture</option>
-                            <option value="shopping">Shopping</option>
-                            <option value="everything">A bit of everything</option>
-                        </select>
-                        <button id="get-recommendations" class="btn-primary-dark whitespace-nowrap flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-xl">auto_awesome</span> Get Itinerary
-                        </button>
-                    </div>
-                    <div id="ai-loading" class="mt-6 text-teal-700 font-semibold text-sm hidden flex items-center gap-2">
-                        <span class="material-symbols-outlined animate-spin" style="animation: pkg-shimmer 1s linear infinite;">refresh</span> Generating your magical itinerary...
-                    </div>
-                    <div id="ai-results" class="mt-10 w-full max-w-4xl px-6 hidden text-left">
-                        <!-- AI Results render here -->
-                    </div>
-                </div>
-            </div>
-
             <div class="packages-section mt-12">
                 <div class="flex flex-col items-center">
                     <div class="pill-badge">
@@ -4565,6 +4532,40 @@
     </script>
     <script src="chatbot.js" defer></script>
     <script src="recommender.js" defer></script>
+
+            <!-- AI Recommendation Section -->
+            <div class="packages-section mt-12 mb-8 bg-teal-50/50 py-10 rounded-3xl border border-teal-100 shadow-sm">
+                <div class="flex flex-col items-center">
+                    <div class="pill-badge" style="color: #0f766e; border-color: rgba(15, 118, 110, 0.2); background: white;">
+                        <span class="sparkle" style="color: #14b8a6;">✦</span> AI-Powered Magic
+                    </div>
+                    <h2 class="packages-section__title">Get a <span style="color: #0d9488;">Smart AI Itinerary</span></h2>
+                    <div class="packages-section__subtitle">
+                        Tell us your preferences and let our AI plan your trip instantly.
+                    </div>
+                    <div class="mt-8 flex flex-col sm:flex-row gap-4 w-full max-w-4xl px-6">
+                        <input type="text" id="ai-destination" placeholder="Where to? (e.g., Tirupati)" value="Tirupati" class="flex-1 rounded-xl border border-slate-200 px-4 py-3 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-all text-sm font-medium">
+                        <input type="number" id="ai-budget" placeholder="Budget (Rs.)" value="5000" class="w-full sm:w-36 rounded-xl border border-slate-200 px-4 py-3 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-all text-sm font-medium">
+                        <select id="ai-interests" class="w-full sm:w-48 rounded-xl border border-slate-200 px-4 py-3 shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 outline-none transition-all text-sm font-medium">
+                            <option value="temples">Temples</option>
+                            <option value="nature">Nature & Adventure</option>
+                            <option value="food">Food & Culture</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="everything">A bit of everything</option>
+                        </select>
+                        <button id="get-recommendations" class="btn-primary-dark whitespace-nowrap flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-xl">auto_awesome</span> Get Itinerary
+                        </button>
+                    </div>
+                    <div id="ai-loading" class="mt-6 text-teal-700 font-semibold text-sm hidden flex items-center gap-2">
+                        <span class="material-symbols-outlined animate-spin" style="animation: pkg-shimmer 1s linear infinite;">refresh</span> Generating your magical itinerary...
+                    </div>
+                    <div id="ai-results" class="mt-10 w-full max-w-4xl px-6 hidden text-left">
+                        <!-- AI Results render here -->
+                    </div>
+                </div>
+            </div>
+
     <footer style="background-color: #0f172a; color: #94a3b8; padding: 3rem 1.5rem; font-family: 'Inter', sans-serif; border-top: 4px solid #b45309; margin-top: auto; z-index: 50; position: relative;">
         <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between;">
             <div style="flex: 1; min-width: 250px;">
