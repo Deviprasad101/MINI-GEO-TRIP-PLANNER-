@@ -10,14 +10,16 @@ load_dotenv()
 
 # Set static_folder='.' to let Flask serve HTML, JS, CSS, and CSV files from the current directory
 app = Flask(__name__, static_url_path='', static_folder='.')
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 CORS(app)
 
 # Disable caching for development to avoid 304 status codes
 @app.after_request
 def add_header(response):
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '-1'
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    response.headers['Cache-Control'] = 'public, max-age=0'
     return response
 
 # Configure the new google-genai client
