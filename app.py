@@ -44,6 +44,12 @@ class User(db.Model):
     is_verified = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+    def __init__(self, username, email, password_hash, is_verified=False):
+        self.username = username
+        self.email = email
+        self.password_hash = password_hash
+        self.is_verified = is_verified
+
 # Create tables
 with app.app_context():
     db.create_all()
@@ -171,19 +177,20 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if not user:
-            print(f"[DEBUG] Login failed: User {email} not found in database.")
+            print(f"[DEBUG] Login failed: Email '{email}' not found in database.")
             return jsonify({"status": "error", "message": "Email not found"}), 401
 
         if check_password_hash(user.password_hash, password):
             session['user_id'] = user.id
-            print(f"[DEBUG] Login successful for {email}")
+            session.permanent = True  # Ensure session persists
+            print(f"[DEBUG] Login successful for: {email}")
             return jsonify({
                 "status": "success", 
                 "user": {"name": user.username, "email": user.email}
             })
         else:
-            print(f"[DEBUG] Login failed: Invalid password for {email}.")
-            return jsonify({"status": "error", "message": "Invalid password"}), 401
+            print(f"[DEBUG] Login failed: Invalid password for '{email}'.")
+            return jsonify({"status": "error", "message": "Incorrect password"}), 401
     except Exception as e:
         print(f"Login Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500

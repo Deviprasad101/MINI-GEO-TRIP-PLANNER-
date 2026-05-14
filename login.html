@@ -580,7 +580,7 @@
         // Login Logic
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
             // Show loading state
@@ -601,7 +601,7 @@
                     localStorage.setItem('currentUser', JSON.stringify(result.user));
                     window.location.href = '/dashboard';
                 } else {
-                    alert("Invalid credentials! " + (result.message || ""));
+                    alert("Login Failed: " + result.message);
                     loginBtn.disabled = false;
                     btnText.style.display = 'block';
                     btnIcon.style.display = 'block';
