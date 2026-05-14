@@ -12,6 +12,14 @@ load_dotenv()
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)
 
+# Disable caching for development to avoid 304 status codes
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
 # Configure the new google-genai client
 api_key = os.getenv("GEMINI_API_KEY")
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
