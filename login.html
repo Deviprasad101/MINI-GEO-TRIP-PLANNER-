@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | GeoTrip Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* Ultra-Realistic Background */
+        .scenery {
+            position: fixed;
+            inset: 0;
+            background: url('images/realistic_travel_bg.png') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+            filter: brightness(0.9);
+            transition: transform 0.5s ease-out;
+        }
+
+        /* Luxury Glassmorphism Card */
+        .glass-card {
+            /* background: rgba(255, 255, 255, 0.95); */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            animation: cardAppear 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .sidebar-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-card p.font-bold {
+            color: #1e293b;
+        }
+
+        .sidebar-card p.text-white\/60 {
+            color: #64748b;
+        }
+
+        .sidebar-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(10px);
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Input Styling */
+        .input-group {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px 14px 48px;
+            color: #1e293b;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .input-group .leading-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+            transition: all 0.3s;
+        }
+
+        .btn-gradient:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3);
+        }
+
+        .social-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .social-btn:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="relative min-h-screen">
+
+    <div class="scenery"></div>
+
+    <div class="scenery"></div>
+
+    <main class="flex-1 flex items-center justify-center relative px-6 py-12 lg:py-20">
+
+        <!-- Left Content (Hidden on Mobile) -->
+        <div class="hidden lg:flex flex-col max-w-sm absolute left-16 top-1/2 -translate-y-1/2 space-y-8 z-50">
+            <div>
+                <h1 class="text-5xl font-extrabold text-white leading-tight">
+                    Plan.<br>Explore.<br>Travel.<br>
+                    <span class="text-purple-400">Memories.</span>
+                </h1>
+                <p class="mt-4 text-white/80 leading-relaxed">
+                    Plan the perfect trip, discover amazing places and make unforgettable memories.
+                </p>
+            </div>
+
+            <div class="space-y-3">
+                <div class="sidebar-card flex items-center gap-4 p-3 rounded-2xl">
+                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">AI-Powered Itineraries</p>
+                        <p class="text-[10px]">Generate custom plans with Gemini AI</p>
+                    </div>
+                </div>
+                <div class="sidebar-card flex items-center gap-4 p-3 rounded-2xl">
+                    <div class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-cloud-sun-rain"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Live Weather Updates</p>
+                        <p class="text-[10px]">Real-time weather for your destinations</p>
+                    </div>
+                </div>
+                <div class="sidebar-card flex items-center gap-4 p-3 rounded-2xl">
+                    <div class="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Budget Splitter</p>
+                        <p class="text-[10px]">Manage and split trip costs easily</p>
+                    </div>
+                </div>
+                <div class="sidebar-card flex items-center gap-4 p-3 rounded-2xl">
+                    <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Interactive Geo-Map</p>
+                        <p class="text-[10px]">Discover attractions on a live map</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Card -->
+        <div class="glass-card p-10 rounded-[2.5rem] w-full max-w-[460px] text-slate-800 z-50">
+            <div class="text-center mb-8">
+                <div
+                    class="inline-flex items-center justify-center w-full max-w-[380px] bg-white rounded-2xl mb-4 shadow-md border border-slate-100 p-4 overflow-hidden mx-auto">
+                    <img src="images/geointellab_logo.jpeg" alt="Logo" class="w-full h-auto rounded-lg">
+                </div>
+                <h2 class="text-3xl font-black tracking-tight mb-1 text-slate-800 ">Geo Trip Planner</h2>
+                <p class="text-slate-500 text-sm font-medium text-white">Login to continue your journey</p>
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-purple-600 uppercase ml-1 text-white">Email Address</label>
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope leading-icon"></i>
+                        <input type="email" required placeholder="hema@gmail.com">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-purple-600 uppercase ml-1 text-white">Password</label>
+                    <div class="input-group flex items-center relative">
+                        <i class="fa-solid fa-lock leading-icon"></i>
+                        <input type="password" id="password" required placeholder="••••••••" class="pr-12">
+                        <i class="fa-solid fa-eye absolute right-4 cursor-pointer text-slate-400 hover:text-slate-600 transition-colors"
+                            id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs mb-4">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" class="w-4 h-4 accent-purple-600 rounded">
+                        <span class="text-white font-medium drop-shadow-sm">Remember Me</span>
+                    </label>
+                    <a href="#" class="text-purple-600 font-bold hover:underline text-white">Forgot Password?</a>
+                </div>
+
+                <button type="submit" id="loginBtn"
+                    class="btn-gradient w-full py-4 rounded-2xl font-bold text-white shadow-lg flex items-center justify-center gap-3 active:scale-95">
+                    <span id="btnText">Login</span>
+                    <i class="fa-solid fa-arrow-right text-xs" id="btnIcon"></i>
+                    <div class="loader" id="loader"></div>
+                </button>
+
+                <p class="text-center text-sm text-white mt-8 font-medium drop-shadow-sm">
+                    Don't have an account? <a href="#"
+                        class="text-purple-600 font-extrabold hover:underline">Register</a>
+                </p>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer Stats -->
+    <footer class="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl px-8 z-50">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-white/80">
+            <div class="flex items-center gap-4 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10">
+                <i class="fa-solid fa-shield-halved text-xl opacity-60"></i>
+                <div>
+                    <p class="text-[11px] font-bold">Secure & Safe</p>
+                    <p class="text-[9px] opacity-60">Your data is protected</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10">
+                <i class="fa-solid fa-headset text-xl opacity-60"></i>
+                <div>
+                    <p class="text-[11px] font-bold">24/7 Support</p>
+                    <p class="text-[9px] opacity-60">We're here to help</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10">
+                <i class="fa-solid fa-tag text-xl opacity-60"></i>
+                <div>
+                    <p class="text-[11px] font-bold">Best Price Guarantee</p>
+                    <p class="text-[9px] opacity-60">Get the best deals</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Password Toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Form Submission
+        const form = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const loader = document.getElementById('loader');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            btnText.style.display = 'none';
+            btnIcon.style.display = 'none';
+            loader.style.display = 'block';
+            loginBtn.disabled = true;
+
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1500);
+        });
+
+        // Parallax
+        document.addEventListener('mousemove', (e) => {
+            const scenery = document.querySelector('.scenery');
+            const x = (window.innerWidth - e.pageX * 2) / 120;
+            const y = (window.innerHeight - e.pageY * 2) / 120;
+            scenery.style.transform = `translateX(${x}px) translateY(${y}px) scale(1.1)`;
+        });
+    </script>
+</body>
+
+</html>

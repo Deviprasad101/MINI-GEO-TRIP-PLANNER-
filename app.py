@@ -19,7 +19,12 @@ client = genai.Client(api_key=api_key) if api_key else None
 
 @app.route('/')
 def home():
-    # Serve main_page.html when someone visits http://127.0.0.1:5000/
+    # Serve login.html as the first page
+    return send_from_directory('.', 'login.html')
+
+@app.route('/dashboard')
+def dashboard():
+    # Serve main_page.html after login
     return send_from_directory('.', 'main_page.html')
 
 @app.route('/weather')
