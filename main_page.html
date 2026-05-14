@@ -2385,6 +2385,48 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Weather Section -->
+                <section class="weather-container rounded-3xl border border-blue-200/50 bg-white/60 backdrop-blur-md p-6 shadow-lg sm:p-8 relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl"></div>
+                    <div class="absolute -left-10 -bottom-10 h-40 w-40 rounded-full bg-amber-400/10 blur-3xl"></div>
+                    
+                    <div class="relative flex flex-col items-center gap-6 text-center lg:flex-row lg:text-left">
+                        <div class="flex-1">
+                            <h2 class="font-headline-lg text-2xl font-black text-slate-800 sm:text-3xl">Live Weather</h2>
+                            <p class="mt-2 max-w-md text-slate-600">Stay prepared! Check real-time weather conditions for Tirupati or your next destination.</p>
+                            
+                            <div class="mt-6 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                                <div class="relative flex-1 min-w-[240px] flex gap-2">
+                                    <div class="relative flex-1">
+                                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">location_on</span>
+                                        <input type="text" id="cityInput" placeholder="Enter city (e.g. Tirupati)" 
+                                            class="w-full rounded-2xl border-slate-200 bg-white/80 py-3.5 pl-11 pr-4 text-slate-800 shadow-sm transition-all focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10" 
+                                            onkeypress="if(event.key === 'Enter') getWeather()">
+                                    </div>
+                                    <button onclick="useLiveLocation()" id="liveLocBtn"
+                                        class="flex items-center justify-center rounded-2xl bg-blue-100 p-3.5 text-blue-700 shadow-sm transition-all hover:bg-blue-200 active:scale-95"
+                                        title="Use Current Location">
+                                        <span class="material-symbols-outlined">my_location</span>
+                                    </button>
+                                </div>
+                                <button onclick="getWeather()" 
+                                    class="group flex items-center gap-2 rounded-2xl bg-amber-600 px-6 py-4 font-bold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-amber-600/20 active:scale-95">
+                                    <span>Check Weather</span>
+                                    <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="weatherResult" class="flex-1 min-w-[300px] w-full">
+                            <!-- Initial state or default weather -->
+                            <div class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 p-8 text-slate-400">
+                                <span class="material-symbols-outlined text-4xl mb-2">cloud_sync</span>
+                                <p class="text-sm font-medium">Results will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 
                 <div id="landingTripForm" class="rounded-3xl border border-blue-300/50 bg-gradient-to-br from-blue-100 via-white to-cyan-100 p-6 shadow-xl sm:p-8">
                     <div class="flex items-center gap-3 mb-4">
@@ -5472,5 +5514,6 @@
         }
     })();
     </script>
+    <script src="weather.js"></script>
 </body>
 </html>

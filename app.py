@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from google import genai
@@ -13,12 +14,36 @@ CORS(app)
 
 # Configure the new google-genai client
 api_key = os.getenv("GEMINI_API_KEY")
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 client = genai.Client(api_key=api_key) if api_key else None
 
 @app.route('/')
 def home():
     # Serve main_page.html when someone visits http://127.0.0.1:5000/
     return send_from_directory('.', 'main_page.html')
+
+@app.route('/weather')
+def get_weather():
+    city = request.args.get('city', 'Tirupati')
+    url = f"http://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={city}"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        if response.status_code != 200:
+            return jsonify({"error": data.get("error", {}).get("message", "Failed to fetch weather data")}), response.status_code
+            
+        weather_data = {
+            "city": data["location"]["name"],
+            "country": data["location"]["country"],
+            "temperature": data["current"]["temp_c"],
+            "condition": data["current"]["condition"]["text"],
+            "icon": data["current"]["condition"]["icon"],
+            "humidity": data["current"]["humidity"],
+            "wind": data["current"]["wind_kph"]
+        }
+        return jsonify(weather_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/recommend', methods=['POST'])
 def recommend():
