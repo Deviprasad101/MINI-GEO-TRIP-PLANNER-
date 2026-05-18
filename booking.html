@@ -1791,18 +1791,7 @@
                     }
 
                     if (action === "search buses") {
-                        const from = document.getElementById('busFrom').value || 'Tirupati';
-                        const to = document.getElementById('busTo').value || 'Bangalore';
-                        const dateVal = document.getElementById('busDate').value;
-                        
-                        let dateStr = "";
-                        if(dateVal) {
-                            const d = new Date(dateVal);
-                            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                            dateStr = `${d.getDate()}-${months[d.getMonth()]}-${d.getFullYear()}`;
-                        }
-
-                        const url = `https://www.redbus.in/search?fromCityName=${encodeURIComponent(from)}&toCityName=${encodeURIComponent(to)}&onward=${dateStr}`;
+                        const url = "https://www.apsrtconline.in/oprs-web/guest/home.do?h=1";
                         setTimeout(() => window.location.href = url, 800);
                         return;
                     }

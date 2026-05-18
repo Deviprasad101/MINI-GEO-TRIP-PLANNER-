@@ -190,10 +190,18 @@
     <div class="scenery"></div>
 
     <header class="absolute top-0 left-0 right-0 z-50 px-6 py-3 sm:py-4 border-b border-white/20 bg-black/40 backdrop-blur-md flex items-center justify-between">
-        <div class="flex items-center gap-3 min-w-0">
-            <span class="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight drop-shadow truncate">Geo Trip Planner</span>
+        <!-- Left Title -->
+        <div class="flex items-center gap-3 min-w-0 z-10">
+            <span class="text-xl sm:text-2xl lg:text-3xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent tracking-tight drop-shadow truncate">Geo Trip Planner</span>
         </div>
-        <div class="flex flex-col items-end shrink min-w-0">
+
+        <!-- Center Title -->
+        <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 pointer-events-none hidden sm:block">
+            <span class="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent tracking-wider drop-shadow-lg uppercase whitespace-nowrap">Login Page</span>
+        </div>
+
+        <!-- Right Logos -->
+        <div class="flex flex-col items-end shrink min-w-0 z-10">
             <span class="flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur px-2.5 py-1 rounded-xl shadow-sm border border-slate-200 shrink min-w-0">
                 <img src="images/iittirupati.png" alt="IIT Tirupati" class="h-12 sm:h-14 w-auto object-contain" />
                 <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
