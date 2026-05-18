@@ -76,6 +76,14 @@ def home():
 def dashboard():
     return send_from_directory('.', 'main_page.html')
 
+@app.route('/.well-known/appspecific/com.chrome.devtools.json')
+def chrome_devtools():
+    return jsonify({})
+
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
 # Authentication Routes
 @app.route('/api/auth/register', methods=['POST'])
 def register():
