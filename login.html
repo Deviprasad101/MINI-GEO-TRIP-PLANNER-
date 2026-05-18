@@ -23,9 +23,9 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 110%;
-            height: 110%;
-            background: url('images/tirupati_travel_bg_v2.png') center/cover no-repeat;
+            width: 100%;
+            height: 100%;
+            background: url('images/tirupati_travel_bg_v2.jpg') center/cover no-repeat;
             z-index: 1;
             transition: transform 0.1s ease-out;
         }
@@ -185,11 +185,27 @@
     </style>
 </head>
 
-<body class="relative min-h-screen">
+<body class="relative min-h-screen flex flex-col">
 
     <div class="scenery"></div>
 
-    <main class="flex-1 flex items-center justify-center relative px-6 py-12 lg:py-20">
+    <header class="absolute top-0 left-0 right-0 z-50 px-6 py-3 sm:py-4 border-b border-white/20 bg-black/40 backdrop-blur-md flex items-center justify-between">
+        <div class="flex items-center gap-3 min-w-0">
+            <span class="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight drop-shadow truncate">Geo Trip Planner</span>
+        </div>
+        <div class="flex flex-col items-end shrink min-w-0">
+            <span class="flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur px-2.5 py-1 rounded-xl shadow-sm border border-slate-200 shrink min-w-0">
+                <img src="images/iittirupati.png" alt="IIT Tirupati" class="h-7 sm:h-9 w-auto object-contain" />
+                <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
+                <img src="images/Powered by Geo-Intel Lab (1).png" alt="Powered by Geo-Intel Lab" class="h-7 sm:h-9 w-auto object-contain" />
+                <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
+                <img src="images/make_in_india_logo.png" alt="Make in India" class="h-7 sm:h-9 w-auto object-contain" />
+            </span>
+            <p class="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-tight text-slate-300 drop-shadow-sm text-center">Powered by Geo-Intel Lab, IITTNIF, Tirupati</p>
+        </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center relative px-6 pt-28 pb-12 lg:pt-32 lg:pb-20">
 
         <!-- Left Content (Hidden on Mobile) -->
         <div class="hidden lg:flex flex-col max-w-sm absolute left-16 top-1/2 -translate-y-1/2 space-y-8 z-50">
@@ -244,16 +260,13 @@
         </div>
 
         <!-- Login Card -->
-        <div class="glass-card p-10 rounded-[2.5rem] w-full max-w-[460px] text-slate-800 z-50">
+        <div class="glass-card p-10 rounded-[2.5rem] w-full max-w-[460px] text-slate-800 z-50 mt-4 sm:mt-0">
             <div class="text-center mb-8">
-                <div class="flex flex-col items-center mb-4">
-                    <div class="inline-flex items-center justify-center w-full max-w-[380px] bg-white rounded-2xl shadow-md border border-slate-100 p-4 overflow-hidden mx-auto mb-1.5">
-                        <img src="images/geointellab_logo.jpeg" alt="Logo" class="w-full h-auto rounded-lg">
-                    </div>
-                    <p class="text-[10px] font-bold uppercase tracking-wide text-slate-300 drop-shadow-sm">Powered by Geo-Intel Lab, IITTNIF, Tirupati</p>
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-2xl shadow-lg mb-4 border border-purple-400/30">
+                    <i class="fa-solid fa-compass text-3xl"></i>
                 </div>
-                <h2 class="text-3xl font-black tracking-tight mb-1 text-white drop-shadow-md">Geo Trip Planner</h2>
-                <p class="text-slate-300 text-sm font-medium drop-shadow-sm">Login to continue your journey</p>
+                <h2 class="text-3xl font-black tracking-tight mb-1 text-white drop-shadow-md">Welcome Back</h2>
+                <p class="text-slate-300 text-sm font-medium drop-shadow-sm">Enter your credentials to access your dashboard</p>
             </div>
 
             <form id="loginForm" class="space-y-4">
