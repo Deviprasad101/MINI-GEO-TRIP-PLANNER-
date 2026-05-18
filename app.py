@@ -208,6 +208,66 @@ def logout():
     session.clear()
     return jsonify({"status": "success", "message": "Logged out successfully"})
 
+@app.route('/api/auth/forgot_password', methods=['POST'])
+def forgot_password():
+    try:
+        data = request.json
+        email = data.get('email', '').strip().lower()
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"status": "error", "message": "Email address not registered"}), 404
+
+        otp = str(random.randint(100000, 999999))
+        session['reset_data'] = {
+            'email': email,
+            'otp': otp,
+            'expiry': (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
+        }
+
+        print(f"[DEBUG] Password reset OTP for {email}: {otp}")
+
+        msg = Message('GeoTrip Planner - Password Reset Verification', recipients=[email])
+        msg.body = f"Hello {user.username},\n\nYou requested a password reset for your GeoTrip Planner account.\nYour reset OTP is: {otp}\n\nThis code expires in 5 minutes. If you did not request this reset, please ignore this email."
+        mail.send(msg)
+
+        return jsonify({"status": "success", "message": "Reset OTP sent to your email"})
+    except Exception as e:
+        print(f"Forgot Password Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/auth/reset_password', methods=['POST'])
+def reset_password():
+    try:
+        data = request.json
+        email = data.get('email', '').strip().lower()
+        user_otp = data.get('otp')
+        new_password = data.get('new_password')
+
+        reset_data = session.get('reset_data')
+        if not reset_data or reset_data['email'] != email:
+            return jsonify({"status": "error", "message": "Reset session expired or invalid. Please request OTP again."}), 400
+
+        expiry = datetime.fromisoformat(reset_data['expiry'])
+        if datetime.now(timezone.utc) > expiry:
+            session.pop('reset_data', None)
+            return jsonify({"status": "error", "message": "OTP expired"}), 400
+
+        if user_otp == reset_data['otp']:
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return jsonify({"status": "error", "message": "User not found"}), 404
+
+            user.password_hash = generate_password_hash(new_password)
+            db.session.commit()
+            session.pop('reset_data', None)
+            print(f"[DEBUG] Password successfully reset for user: {email}")
+            return jsonify({"status": "success", "message": "Password updated successfully! You can now login."})
+        else:
+            return jsonify({"status": "error", "message": "Invalid OTP code"}), 400
+    except Exception as e:
+        print(f"Reset Password Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/weather')
 def get_weather():
     city = request.args.get('city', 'Tirupati')
