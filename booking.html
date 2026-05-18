@@ -1433,13 +1433,19 @@
                 <a class="site-header__link" href="packages.html">Packages</a>
                 <a class="site-header__link" href="budget_calculator.html">Budget calculator &amp; splitter</a>
             </nav>
-            <div class="site-header__end flex flex-col items-center">
-                <span class="site-header__logo-wrap">
-                    <img src="images/geointellab_logo.jpeg"
-                        alt="Geo-Intel Lab, IIT Tirupati Navavishkār I-Hub Foundation" class="site-header__brand-logo"
-                        width="520" height="104" decoding="async" loading="eager" />
-                </span>
-                <p class="mt-1 text-[10px] font-bold uppercase tracking-tight text-slate-500">Powered by Geo-Intel Lab, IITTNIF, Tirupati</p>
+            <div class="site-header__end flex flex-row items-center justify-end gap-3 sm:gap-4 min-w-0 shrink">
+                <div class="flex flex-col items-center shrink min-w-0">
+                    <span class="site-header__logo-wrap">
+                        <img src="images/geointellab_logo.jpeg"
+                            alt="Geo-Intel Lab, IIT Tirupati Navavishkār I-Hub Foundation" class="site-header__brand-logo"
+                            width="520" height="104" decoding="async" loading="eager" />
+                    </span>
+                    <p class="mt-1 text-[10px] font-bold uppercase tracking-tight text-slate-500 text-center">Powered by Geo-Intel Lab, IITTNIF, Tirupati</p>
+                </div>
+                <button onclick="handleLogout()" class="site-header__link !border-red-300 !text-red-700 hover:!bg-red-50 hover:!border-red-500 flex items-center gap-1.5 cursor-pointer font-bold text-xs uppercase tracking-wider shadow-sm transition-all whitespace-nowrap shrink-0 ml-2" title="Logout">
+                    <span class="material-symbols-outlined text-sm font-bold">logout</span>
+                    <span>Logout</span>
+                </button>
             </div>
         </div>
     </header>
@@ -1461,6 +1467,7 @@
                     aria-hidden="true">inventory_2</span> Trip packages</a>
             <a href="budget_calculator.html"><span class="material-symbols-outlined text-xl"
                     aria-hidden="true">calculate</span> Budget calculator &amp; splitter</a>
+            <a href="#" onclick="handleLogout(); return false;" class="!text-red-700 !bg-red-50 !border-red-300 mt-4 flex items-center gap-3 font-bold"><span class="material-symbols-outlined text-xl" aria-hidden="true">logout</span> Logout</a>
         </nav>
         <div class="border-t border-amber-100 p-3">
             <a href="budget_calculator.html"
@@ -2511,6 +2518,18 @@
             &copy; 2026 Official Booking Portal. Secure & Verified Redirection.
         </div>
     </footer>
+    <script>
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                localStorage.removeItem('currentUser');
+                window.location.href = '/';
+            } catch (err) {
+                localStorage.removeItem('currentUser');
+                window.location.href = '/';
+            }
+        }
+    </script>
 </body>
 
 </html>
