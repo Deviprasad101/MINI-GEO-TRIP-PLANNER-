@@ -42,3 +42,7 @@ venv.bak/
 *.swp
 *.swo
 .DS_Store
+
+# Large Media Files
+*.mp4
+images/*.mp4
