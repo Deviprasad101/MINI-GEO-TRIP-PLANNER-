@@ -7,7 +7,7 @@
     <title>Tirupati GeoTrip Planner</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap"
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Poppins:wght@400;500;600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -91,7 +91,8 @@
                         "label-lg": ["Public Sans", "sans-serif"],
                         "display-lg": ["Noto Serif", "serif"],
                         "body-md": ["Public Sans", "sans-serif"],
-                        "headline-lg": ["Noto Serif", "serif"]
+                        "headline-lg": ["Noto Serif", "serif"],
+                        "poppins": ["Poppins", "sans-serif"]
                     },
                     "fontSize": {
                         "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
@@ -235,17 +236,17 @@
         }
 
         .marquee-content span {
-            font-family: "Public Sans", system-ui, sans-serif;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            line-height: 1.4;
+            font-family: "Poppins", system-ui, sans-serif;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
         }
 
         @media (min-width: 640px) {
             .marquee-content span {
-                font-size: 1.0625rem;
-                letter-spacing: 0.08em;
+                font-size: 0.75rem;
+                letter-spacing: 0.03em;
             }
         }
 
@@ -2290,12 +2291,12 @@
             </section>
 
             <!-- Scrolling Marquee (Special Offers) -->
-            <div class="marquee-container overflow-hidden whitespace-nowrap py-2.5">
+            <div class="marquee-container overflow-hidden whitespace-nowrap py-0.5 font-poppins">
                 <div class="marquee-content inline-block animate-marquee">
-                    <span class="mx-10 text-amber-900">
+                    <span class="mx-4 text-amber-900">
                         🔥 Flash Sale: 20% Off on all Heritage Packages • Use Code: <span class="text-amber-700 underline">TRIP20</span> • Limited Time Offer ⚡️ Exclusive: Free Trip Guide with every booking • Weekend Special: Flat Rs. 500 Off on Darshan Tours • Book Now and Save! 🚀
                     </span>
-                    <span class="mx-10 text-amber-900">
+                    <span class="mx-4 text-amber-900">
                         🔥 Flash Sale: 20% Off on all Heritage Packages • Use Code: <span class="text-amber-700 underline">TRIP20</span> • Limited Time Offer ⚡️ Exclusive: Free Trip Guide with every booking • Weekend Special: Flat Rs. 500 Off on Darshan Tours • Book Now and Save! 🚀
                     </span>
                 </div>
