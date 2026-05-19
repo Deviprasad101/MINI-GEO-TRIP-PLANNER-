@@ -73,6 +73,27 @@
             }
         }
 
+        body > header {
+            border-bottom: none;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.1) inset,
+                0 8px 28px rgba(0, 0, 0, 0.35);
+        }
+
+        body > header::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.9), rgba(251, 191, 36, 0.25));
+        }
+
+        body > main {
+            box-shadow: inset 0 12px 28px -16px rgba(0, 0, 0, 0.45);
+        }
+
         /* Input Styling */
         .input-group {
             position: relative;

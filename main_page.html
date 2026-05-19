@@ -234,6 +234,21 @@
             /* Full width, no rounded corners for edge-to-edge */
         }
 
+        .marquee-content span {
+            font-family: "Public Sans", system-ui, sans-serif;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            line-height: 1.4;
+        }
+
+        @media (min-width: 640px) {
+            .marquee-content span {
+                font-size: 1.0625rem;
+                letter-spacing: 0.08em;
+            }
+        }
+
         .animate-marquee {
             animation: marquee 25s linear infinite;
         }
@@ -698,11 +713,24 @@
             top: 0;
             z-index: 50;
             background: #ffffff;
-            border-bottom: 1px solid rgba(217, 119, 6, 0.35);
+            border-bottom: none;
             box-shadow:
                 0 1px 0 rgba(255, 255, 255, 0.85) inset,
                 0 6px 18px rgba(15, 23, 42, 0.08),
                 0 2px 6px rgba(15, 23, 42, 0.05);
+        }
+
+        header.site-header::after {
+            content: "";
+            display: block;
+            height: 4px;
+            background: linear-gradient(90deg, #92400e 0%, #fbbf24 45%, #d97706 55%, #92400e 100%);
+        }
+
+        header.site-header + main,
+        header.site-header ~ main {
+            background: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 12px, #f8fafc 28px);
+            box-shadow: inset 0 10px 18px -14px rgba(15, 23, 42, 0.14);
         }
 
         .site-header__start {
@@ -2264,10 +2292,10 @@
             <!-- Scrolling Marquee (Special Offers) -->
             <div class="marquee-container overflow-hidden whitespace-nowrap py-2.5">
                 <div class="marquee-content inline-block animate-marquee">
-                    <span class="mx-10 text-xs font-black tracking-[0.25em] text-amber-900 sm:text-sm">
+                    <span class="mx-10 text-amber-900">
                         🔥 Flash Sale: 20% Off on all Heritage Packages • Use Code: <span class="text-amber-700 underline">TRIP20</span> • Limited Time Offer ⚡️ Exclusive: Free Trip Guide with every booking • Weekend Special: Flat Rs. 500 Off on Darshan Tours • Book Now and Save! 🚀
                     </span>
-                    <span class="mx-10 text-xs font-black tracking-[0.25em] text-amber-900 sm:text-sm">
+                    <span class="mx-10 text-amber-900">
                         🔥 Flash Sale: 20% Off on all Heritage Packages • Use Code: <span class="text-amber-700 underline">TRIP20</span> • Limited Time Offer ⚡️ Exclusive: Free Trip Guide with every booking • Weekend Special: Flat Rs. 500 Off on Darshan Tours • Book Now and Save! 🚀
                     </span>
                 </div>
