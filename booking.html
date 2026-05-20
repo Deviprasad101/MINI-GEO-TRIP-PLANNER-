@@ -44,6 +44,10 @@
             box-sizing: border-box;
         }
 
+        html {
+            scrollbar-gutter: stable;
+        }
+
         body {
             margin: 0;
             min-height: 100dvh;
@@ -67,12 +71,17 @@
             position: sticky;
             top: 0;
             z-index: 50;
+            flex-shrink: 0;
             background: #ffffff;
             border-bottom: none;
             box-shadow:
                 0 1px 0 rgba(255, 255, 255, 0.85) inset,
                 0 6px 18px rgba(15, 23, 42, 0.08),
                 0 2px 6px rgba(15, 23, 42, 0.05);
+        }
+
+        .site-header__layout {
+            min-height: 4.8rem;
         }
 
         header.site-header::after {
@@ -101,8 +110,12 @@
             display: flex;
             min-width: 0;
             align-items: center;
-            text-decoration: none;
             color: inherit;
+            cursor: default;
+        }
+
+        .site-header__brand--title {
+            pointer-events: none;
         }
 
         .site-header__end {
@@ -359,33 +372,23 @@
             box-sizing: border-box;
         }
 
-        .site-header__link:hover {
+        .site-header__link:hover,
+        .site-header__link:active {
             background: #fffbeb;
             border-color: #d97706;
             color: #78350f;
             box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12);
-            transform: translateY(-1px);
+            transform: none;
         }
 
         .site-header__link:focus-visible {
             outline: 2px solid #d97706;
-            outline-offset: 2px;
+            outline-offset: 0;
         }
 
         .site-header__link[aria-current="page"] {
             background: rgba(254, 243, 199, 0.65);
             color: #451a03;
-        }
-
-        /* Nudge “Booking” slightly right — only this link shifts */
-        .site-header__brand--booking-heading {
-            margin-left: clamp(2.5rem, 9.5vw, 6rem);
-        }
-
-        @media (min-width: 1024px) {
-            .site-header__brand--booking-heading {
-                margin-left: clamp(6.75rem, 19vw, 13rem);
-            }
         }
 
         /* Home — same pattern as budget_calculator.html / packages.html */
@@ -1430,11 +1433,11 @@
                     <span class="material-symbols-outlined text-lg" aria-hidden="true">home</span>
                     <span class="site-header__home-text">HOME</span>
                 </a>
-                <a href="main_page.html" class="site-header__brand site-header__brand--booking-heading min-w-0 shrink">
+                <div class="site-header__brand site-header__brand--title site-header__brand--booking-heading min-w-0 shrink">
                     <span class="site-header__brand-titles font-headline-lg">
                         <span class="site-header__brand-name min-w-0 shrink truncate text-2xl font-bold tracking-tight text-amber-800 sm:text-3xl lg:text-4xl">Booking</span>
                     </span>
-                </a>
+                </div>
             </div>
             <nav class="site-header__nav site-header__nav--primary min-w-0 items-center justify-center gap-1 sm:gap-2"
                 aria-label="Primary site pages">

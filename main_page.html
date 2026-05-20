@@ -108,6 +108,10 @@
         }
     </script>
     <style>
+        html {
+            scrollbar-gutter: stable;
+        }
+
         html,
         body {
             height: 100%;
@@ -810,12 +814,17 @@
             position: sticky;
             top: 0;
             z-index: 50;
+            flex-shrink: 0;
             background: #ffffff;
             border-bottom: none;
             box-shadow:
                 0 1px 0 rgba(255, 255, 255, 0.85) inset,
                 0 6px 18px rgba(15, 23, 42, 0.08),
                 0 2px 6px rgba(15, 23, 42, 0.05);
+        }
+
+        .site-header__layout {
+            min-height: 4.8rem;
         }
 
         header.site-header::after {
@@ -844,8 +853,12 @@
             display: flex;
             min-width: 0;
             align-items: center;
-            text-decoration: none;
             color: inherit;
+            cursor: default;
+        }
+
+        .site-header__brand--title {
+            pointer-events: none;
         }
 
         /* Logo + CTA: grid columns + gap; logo scales to show full strip (contain) */
@@ -1107,17 +1120,18 @@
             align-items: center;
         }
 
-        .site-header__link:hover {
+        .site-header__link:hover,
+        .site-header__link:active {
             background: #fffbeb;
             border-color: #d97706;
             color: #78350f;
             box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12);
-            transform: translateY(-1px);
+            transform: none;
         }
 
         .site-header__link:focus-visible {
             outline: 2px solid #d97706;
-            outline-offset: 2px;
+            outline-offset: 0;
         }
 
         .icon-btn {
@@ -2289,13 +2303,13 @@
         <div
             class="site-header__layout flex min-h-[4.3rem] min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 py-2.5 px-7 sm:min-h-[4.8rem] sm:gap-x-4 overflow:hidden sm:py-3">
             <div class="site-header__start flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
-                <a href="main_page.html" class="site-header__brand min-w-0 shrink">
+                <div class="site-header__brand site-header__brand--title min-w-0 shrink">
                     <span class="site-header__brand-titles font-headline-lg">
                         <span
                             class="site-header__brand-name min-w-0 shrink truncate text-xl font-bold tracking-tight text-amber-800 sm:text-2xl lg:text-4xl">GeoTrip
                             Planner</span>
                     </span>
-                </a>
+                </div>
             </div>
             <nav class="site-header__nav site-header__nav--primary hidden min-w-0 items-center justify-center gap-1 sm:gap-2 lg:flex"
                 aria-label="Primary">
