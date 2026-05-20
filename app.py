@@ -68,6 +68,36 @@ api_key = os.getenv("GEMINI_API_KEY")
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 client = genai.Client(api_key=api_key) if api_key else None
 
+# Configure Ollama (local LLM — runs alongside Gemini, not a replacement)
+OLLAMA_BASE = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
+OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "120"))
+
+
+def ask_ollama(prompt: str) -> str:
+    url = f"{OLLAMA_BASE}/api/generate"
+    payload = {"model": OLLAMA_MODEL, "prompt": prompt, "stream": False}
+    r = requests.post(url, json=payload, timeout=OLLAMA_TIMEOUT)
+    r.raise_for_status()
+    return r.json()["response"]
+
+
+def chat_ollama(messages: list) -> str:
+    url = f"{OLLAMA_BASE}/api/chat"
+    payload = {"model": OLLAMA_MODEL, "messages": messages, "stream": False}
+    r = requests.post(url, json=payload, timeout=OLLAMA_TIMEOUT)
+    r.raise_for_status()
+    return r.json()["message"]["content"]
+
+
+def clean_json_from_llm(text: str) -> str:
+    clean_text = text.strip()
+    if clean_text.startswith("```"):
+        clean_text = clean_text.split("\n", 1)[1].rsplit("\n", 1)[0]
+        if clean_text.startswith("json"):
+            clean_text = clean_text[4:].strip()
+    return clean_text
+
 @app.route('/')
 def home():
     return send_from_directory('.', 'login.html')
@@ -301,18 +331,87 @@ def recommend():
             return jsonify({"status": "error", "message": "Gemini API key not configured"}), 500
             
         response = client.models.generate_content(model='gemini-1.5-flash', contents=prompt)
-        
-        # Clean response text in case of markdown blocks
-        clean_text = response.text.strip()
-        if clean_text.startswith('```'):
-            clean_text = clean_text.split('\n', 1)[1].rsplit('\n', 1)[0]
-            if clean_text.startswith('json'):
-                clean_text = clean_text[4:].strip()
-                
-        return jsonify({"status": "success", "recommendation": json.loads(clean_text)})
+        clean_text = clean_json_from_llm(response.text)
+        return jsonify({"status": "success", "recommendation": json.loads(clean_text), "provider": "gemini"})
     except Exception as e:
         print(f"Recommend Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/recommend-ollama', methods=['POST'])
+def recommend_ollama():
+    try:
+        data = request.json or {}
+        destination = data.get('destination', 'Tirupati')
+        budget = data.get('budget', 'medium')
+        interests = data.get('interests', 'temples, nature')
+
+        prompt = (
+            f"Create a 3-day itinerary for {destination}. Budget: {budget}. Interests: {interests}. "
+            "Return the itinerary ONLY as a JSON array of daily objects, each containing "
+            "'day', 'activities' (array of strings), and 'tips'. No markdown, no extra text."
+        )
+
+        raw = ask_ollama(prompt)
+        clean_text = clean_json_from_llm(raw)
+        return jsonify({
+            "status": "success",
+            "recommendation": json.loads(clean_text),
+            "provider": "ollama",
+            "model": OLLAMA_MODEL,
+        })
+    except requests.exceptions.ConnectionError:
+        return jsonify({
+            "status": "error",
+            "message": "Cannot reach Ollama. Start Ollama (ollama serve) and ensure the model is pulled.",
+        }), 503
+    except requests.exceptions.HTTPError as e:
+        print(f"Ollama HTTP Error: {e}")
+        return jsonify({"status": "error", "message": f"Ollama error: {e}"}), 502
+    except json.JSONDecodeError as e:
+        print(f"Ollama JSON parse Error: {e}")
+        return jsonify({"status": "error", "message": "Ollama returned invalid JSON. Try again."}), 500
+    except Exception as e:
+        print(f"Recommend Ollama Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/chat', methods=['POST'])
+def api_chat():
+    try:
+        data = request.json or {}
+        message = (data.get('message') or '').strip()
+        if not message:
+            return jsonify({"status": "error", "message": "Message is required"}), 400
+
+        system_prompt = (
+            "You are GeoTrip Assistant for Tirupati and Tirumala trip planning in India. "
+            "Help users with temples, darshan timing, local food, transport, budgets, and itinerary tips. "
+            "Keep answers concise, practical, and friendly. If unsure, suggest using the app's planner or booking pages."
+        )
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": message},
+        ]
+        reply = chat_ollama(messages)
+        return jsonify({
+            "status": "success",
+            "reply": reply,
+            "provider": "ollama",
+            "model": OLLAMA_MODEL,
+        })
+    except requests.exceptions.ConnectionError:
+        return jsonify({
+            "status": "error",
+            "message": "Cannot reach Ollama. Start Ollama and verify OLLAMA_BASE_URL in .env.",
+        }), 503
+    except requests.exceptions.HTTPError as e:
+        print(f"Ollama Chat HTTP Error: {e}")
+        return jsonify({"status": "error", "message": f"Ollama error: {e}"}), 502
+    except Exception as e:
+        print(f"Chat Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

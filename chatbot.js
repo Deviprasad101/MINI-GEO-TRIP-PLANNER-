@@ -107,6 +107,10 @@
             text-decoration: underline;
             font-weight: 600;
         }
+        .gt-chat-msg--thinking {
+            opacity: 0.75;
+            font-style: italic;
+        }
         .gt-chatbot-options {
             padding: 16px;
             background: #ffffff;
@@ -116,6 +120,15 @@
             gap: 10px;
             max-height: 220px;
             overflow-y: auto;
+            transition: max-height 0.25s ease, opacity 0.25s ease, padding 0.25s ease;
+        }
+        .gt-chatbot-options.is-hidden {
+            display: none !important;
+        }
+        .gt-chatbot-body.is-ollama-mode {
+            min-height: 420px;
+            height: auto;
+            flex: 1 1 auto;
         }
         .gt-chatbot-option-btn {
             background: #ffffff;
@@ -166,6 +179,33 @@
         .gt-chatbot-quick-btn:hover {
             background: #ffe088;
             transform: translateY(-1px);
+        }
+        .gt-chatbot-ollama-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f9f9fc;
+            border-top: 1px solid #e2e2e5;
+            font-size: 0.8rem;
+            color: #4d4635;
+            cursor: pointer;
+            user-select: none;
+        }
+        .gt-chatbot-ollama-toggle input {
+            width: 16px;
+            height: 16px;
+            accent-color: #735c00;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .gt-chatbot-ollama-toggle span.gt-chatbot-ollama-label {
+            font-weight: 600;
+            color: #554300;
+        }
+        .gt-chatbot-ollama-toggle.is-on {
+            background: linear-gradient(180deg, #fffbeb, #fff4d6);
+            border-top-color: #e5cf8a;
         }
         .gt-chatbot-input-area {
             display: flex;
@@ -275,10 +315,10 @@
     let flatQs = [];
     let htmlOptions = `
         <div class="gt-chatbot-quick-actions">
-            <button class="gt-chatbot-quick-btn" onclick="window.location.href='budget_calculator.html'">📍 Plan My Trip</button>
-            <button class="gt-chatbot-quick-btn" onclick="window.location.href='budget_calculator.html'">💰 Split Budget</button>
-            <button class="gt-chatbot-quick-btn" onclick="window.location.href='booking.html'">🚆 Book Tickets</button>
-            <button class="gt-chatbot-quick-btn" onclick="alert('Checklist coming soon! Remember IDs & Traditional wear.')">✅ Travel Checklist</button>
+            <button class="gt-chatbot-quick-btn" onclick="window.location.href='packages.html'">📦 Packages</button>
+            <button class="gt-chatbot-quick-btn" onclick="window.location.href='budget_calculator.html'">💰 Budget calculator &amp; splitter</button>
+            <button class="gt-chatbot-quick-btn" onclick="window.location.href='booking.html'">🚆 Booking</button>
+            <button class="gt-chatbot-quick-btn" onclick="alert('Checklist coming soon! Remember IDs &amp; traditional wear.')">✅ Checklist Feature</button>
         </div>
     `;
 
@@ -308,8 +348,13 @@
             <div class="gt-chatbot-options" id="gtChatOptions">
                 ${htmlOptions}
             </div>
+            <label class="gt-chatbot-ollama-toggle" id="gtOllamaToggleLabel" for="gtUseOllama">
+                <input type="checkbox" id="gtUseOllama" aria-describedby="gtOllamaHint" />
+                <span class="gt-chatbot-ollama-label">Use Ollama AI</span>
+                <span id="gtOllamaHint" class="text-slate-500" style="font-weight:400;font-size:0.72rem;">(off = quick FAQ answers)</span>
+            </label>
             <div class="gt-chatbot-input-area">
-                <input type="text" id="gtChatInput" placeholder="Type your question manually..." autocomplete="off" />
+                <input type="text" id="gtChatInput" placeholder="Type your question..." autocomplete="off" />
                 <button id="gtChatSend" aria-label="Send Message"><span class="material-symbols-outlined">send</span></button>
             </div>
         </div>
@@ -352,43 +397,128 @@
 
     const chatInput = document.getElementById('gtChatInput');
     const chatSend = document.getElementById('gtChatSend');
+    const useOllamaCheckbox = document.getElementById('gtUseOllama');
+    const ollamaToggleLabel = document.getElementById('gtOllamaToggleLabel');
+    const OLLAMA_PREF_KEY = 'gtChatUseOllama';
 
-    function handleManualInput() {
+    function isOllamaEnabled() {
+        return useOllamaCheckbox && useOllamaCheckbox.checked;
+    }
+
+    const ollamaHint = document.getElementById('gtOllamaHint');
+
+    function syncOllamaToggleUi() {
+        const on = isOllamaEnabled();
+        if (ollamaToggleLabel) {
+            ollamaToggleLabel.classList.toggle('is-on', on);
+        }
+        if (options) {
+            options.classList.toggle('is-hidden', on);
+        }
+        if (body) {
+            body.classList.toggle('is-ollama-mode', on);
+        }
+        if (ollamaHint) {
+            ollamaHint.textContent = on
+                ? '(AI mode — FAQ shortcuts hidden)'
+                : '(off = quick FAQ answers)';
+        }
+        if (chatInput) {
+            chatInput.placeholder = on
+                ? 'Ask Ollama AI about your trip…'
+                : 'Type your question (FAQ mode)…';
+        }
+    }
+
+    if (useOllamaCheckbox) {
+        const saved = localStorage.getItem(OLLAMA_PREF_KEY);
+        useOllamaCheckbox.checked = saved === '1';
+        syncOllamaToggleUi();
+        useOllamaCheckbox.addEventListener('change', () => {
+            localStorage.setItem(OLLAMA_PREF_KEY, useOllamaCheckbox.checked ? '1' : '0');
+            syncOllamaToggleUi();
+        });
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function findFaqAnswer(text) {
+        const lowerText = text.toLowerCase();
+        for (let item of flatQs) {
+            if (lowerText.includes(item.q.toLowerCase()) || item.q.toLowerCase().includes(lowerText)) {
+                return item.a;
+            }
+        }
+        return null;
+    }
+
+    function appendBotMessage(html, isThinking) {
+        const bMsg = document.createElement('div');
+        bMsg.className = 'gt-chat-msg bot' + (isThinking ? ' gt-chat-msg--thinking' : '');
+        bMsg.innerHTML = html;
+        body.appendChild(bMsg);
+        body.scrollTop = body.scrollHeight;
+        return bMsg;
+    }
+
+    async function handleManualInput() {
         const text = chatInput.value.trim();
-        if(!text) return;
-        
+        if (!text) return;
+
+        const useOllama = isOllamaEnabled();
         chatInput.value = '';
-        
-        // Add user msg
+        chatSend.disabled = true;
+
         const uMsg = document.createElement('div');
         uMsg.className = 'gt-chat-msg user';
         uMsg.innerText = text;
         body.appendChild(uMsg);
         body.scrollTop = body.scrollHeight;
 
-        // Try to find matching answer
-        let answer = "I'm sorry, I don't have a specific answer for that. Please try rephrasing or select an option from above.";
-        const lowerText = text.toLowerCase();
-        
-        // Very basic matching based on question keywords
-        for(let item of flatQs) {
-            if(lowerText.includes(item.q.toLowerCase()) || item.q.toLowerCase().includes(lowerText)) {
-                answer = item.a;
-                break;
+        let answer = null;
+        let thinkingEl = null;
+
+        if (useOllama) {
+            thinkingEl = appendBotMessage('Thinking with Ollama…', true);
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text }),
+                });
+                const data = await res.json();
+                if (data.status === 'success' && data.reply) {
+                    answer = escapeHtml(data.reply).replace(/\n/g, '<br>');
+                } else if (data.message) {
+                    answer = escapeHtml(data.message);
+                }
+            } catch (err) {
+                console.warn('Ollama chat unavailable:', err);
             }
+            if (thinkingEl) thinkingEl.remove();
+        } else {
+            answer = findFaqAnswer(text);
         }
 
-        setTimeout(() => {
-            const bMsg = document.createElement('div');
-            bMsg.className = 'gt-chat-msg bot';
-            bMsg.innerHTML = answer;
-            body.appendChild(bMsg);
-            body.scrollTop = body.scrollHeight;
-        }, 500);
+        if (!answer) {
+            answer = useOllama
+                ? "I couldn't reach Ollama. Make sure <code>ollama serve</code> is running and your model name in <code>.env</code> matches <code>ollama list</code>, then try again."
+                : "I don't have a specific FAQ answer for that. Turn on <strong>Use Ollama AI</strong> below for open-ended questions, or pick a suggested question above.";
+        }
+
+        appendBotMessage(answer);
+        chatSend.disabled = false;
+        chatInput.focus();
     }
 
-    chatSend.addEventListener('click', handleManualInput);
+    chatSend.addEventListener('click', () => { handleManualInput(); });
     chatInput.addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') handleManualInput();
+        if (e.key === 'Enter') handleManualInput();
     });
 })();
