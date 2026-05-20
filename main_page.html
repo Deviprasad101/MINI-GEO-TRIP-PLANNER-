@@ -259,6 +259,84 @@
             100% { transform: translateX(-50%); }
         }
 
+        .promo-video-bar {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 20;
+            padding: 0.75rem 1rem 1rem;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.82) 40%, rgba(0, 0, 0, 0.92) 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .promo-video-status {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .promo-video-time {
+            flex-shrink: 0;
+            font-family: "Public Sans", system-ui, sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: rgba(255, 255, 255, 0.9);
+            min-width: 5.5rem;
+            text-align: right;
+        }
+
+        .promo-video-progress {
+            flex: 1;
+            min-width: 0;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.22);
+            cursor: pointer;
+        }
+
+        .promo-video-progress::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fbbf24;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35);
+            cursor: pointer;
+        }
+
+        .promo-video-progress::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fbbf24;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35);
+            cursor: pointer;
+        }
+
+        .promo-video-progress::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(
+                to right,
+                #f59e0b var(--promo-video-pct, 0%),
+                rgba(255, 255, 255, 0.22) var(--promo-video-pct, 0%)
+            );
+        }
+
+        .promo-video-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
         .landing-scroll {
             flex: 1;
             min-height: 0;
@@ -2440,42 +2518,117 @@
                         
                         <div class="relative w-full mx-auto overflow-hidden shadow-2xl border-y border-white/20 bg-black aspect-video group">
                             <video id="promoVideo" autoplay loop muted playsinline poster="images/tirumala-temple.jpg" class="w-full h-full object-contain shadow-inner" preload="metadata">
-                                <source src="images/geo trip planner.mp4" type="video/mp4">
+                                <source src="images/2%20min%20video%20geo%20trip%20planner.mp4" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
                             
-                            <!-- Custom Control Overlay -->
-                            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full flex items-center gap-6 shadow-xl z-20">
-                                <button onclick="skipVideo(-5)" class="text-white hover:text-amber-400 focus:outline-none flex flex-col items-center cursor-pointer transition-transform hover:scale-110 active:scale-95" title="Rewind 5 seconds">
-                                    <span class="material-symbols-outlined text-2xl font-bold">replay_5</span>
-                                </button>
-                                <button onclick="togglePlayPause()" id="playPauseBtn" class="w-12 h-12 bg-amber-500 hover:bg-amber-600 text-black font-extrabold rounded-full flex items-center justify-center shadow-lg focus:outline-none cursor-pointer transition-transform hover:scale-110 active:scale-95" title="Play/Pause">
-                                    <span class="material-symbols-outlined text-2xl" id="playPauseIcon">pause</span>
-                                </button>
-                                <button onclick="skipVideo(5)" class="text-white hover:text-amber-400 focus:outline-none flex flex-col items-center cursor-pointer transition-transform hover:scale-110 active:scale-95" title="Forward 5 seconds">
-                                    <span class="material-symbols-outlined text-2xl font-bold">forward_5</span>
-                                </button>
+                            <!-- Custom controls + status (progress) bar -->
+                            <div class="promo-video-bar" role="group" aria-label="Video player controls">
+                                <div class="promo-video-status">
+                                    <input type="range" id="promoVideoProgress" class="promo-video-progress"
+                                        min="0" max="100" value="0" step="0.1" aria-label="Video progress"
+                                        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" />
+                                    <span class="promo-video-time" id="promoVideoTime" aria-live="polite">0:00 / 0:00</span>
+                                </div>
+                                <div class="promo-video-controls">
+                                    <button type="button" onclick="skipVideo(-5)" class="text-white hover:text-amber-400 focus:outline-none flex flex-col items-center cursor-pointer transition-transform hover:scale-110 active:scale-95" title="Rewind 5 seconds">
+                                        <span class="material-symbols-outlined text-2xl font-bold">replay_5</span>
+                                    </button>
+                                    <button type="button" onclick="togglePlayPause()" id="playPauseBtn" class="w-12 h-12 bg-amber-500 hover:bg-amber-600 text-black font-extrabold rounded-full flex items-center justify-center shadow-lg focus:outline-none cursor-pointer transition-transform hover:scale-110 active:scale-95" title="Play/Pause">
+                                        <span class="material-symbols-outlined text-2xl" id="playPauseIcon">pause</span>
+                                    </button>
+                                    <button type="button" onclick="skipVideo(5)" class="text-white hover:text-amber-400 focus:outline-none flex flex-col items-center cursor-pointer transition-transform hover:scale-110 active:scale-95" title="Forward 5 seconds">
+                                        <span class="material-symbols-outlined text-2xl font-bold">forward_5</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <script>
+                            function formatPromoVideoTime(seconds) {
+                                if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+                                const m = Math.floor(seconds / 60);
+                                const s = Math.floor(seconds % 60);
+                                return m + ':' + String(s).padStart(2, '0');
+                            }
+
+                            function updatePromoVideoStatus() {
+                                const video = document.getElementById('promoVideo');
+                                const progress = document.getElementById('promoVideoProgress');
+                                const timeEl = document.getElementById('promoVideoTime');
+                                if (!video || !progress || !timeEl) return;
+
+                                const duration = video.duration;
+                                const current = video.currentTime;
+                                const pct = duration > 0 ? (current / duration) * 100 : 0;
+
+                                progress.value = String(pct);
+                                progress.setAttribute('aria-valuenow', String(Math.round(pct)));
+                                progress.style.setProperty('--promo-video-pct', pct + '%');
+
+                                timeEl.textContent =
+                                    formatPromoVideoTime(current) + ' / ' + formatPromoVideoTime(duration);
+                            }
+
+                            function seekPromoVideoFromProgress() {
+                                const video = document.getElementById('promoVideo');
+                                const progress = document.getElementById('promoVideoProgress');
+                                if (!video || !progress || !video.duration) return;
+                                video.currentTime = (Number(progress.value) / 100) * video.duration;
+                                updatePromoVideoStatus();
+                            }
+
                             function togglePlayPause() {
                                 const video = document.getElementById('promoVideo');
                                 const icon = document.getElementById('playPauseIcon');
                                 if (!video) return;
                                 if (video.paused) {
                                     video.play();
-                                    icon.textContent = 'pause';
+                                    if (icon) icon.textContent = 'pause';
                                 } else {
                                     video.pause();
-                                    icon.textContent = 'play_arrow';
+                                    if (icon) icon.textContent = 'play_arrow';
                                 }
                             }
+
                             function skipVideo(seconds) {
                                 const video = document.getElementById('promoVideo');
                                 if (!video) return;
-                                video.currentTime += seconds;
+                                const duration = video.duration;
+                                if (Number.isFinite(duration)) {
+                                    video.currentTime = Math.max(0, Math.min(duration, video.currentTime + seconds));
+                                } else {
+                                    video.currentTime = Math.max(0, video.currentTime + seconds);
+                                }
+                                updatePromoVideoStatus();
                             }
+
+                            (function initPromoVideoBar() {
+                                const video = document.getElementById('promoVideo');
+                                const progress = document.getElementById('promoVideoProgress');
+                                if (!video || !progress) return;
+
+                                video.addEventListener('loadedmetadata', updatePromoVideoStatus);
+                                video.addEventListener('durationchange', updatePromoVideoStatus);
+                                video.addEventListener('timeupdate', updatePromoVideoStatus);
+                                video.addEventListener('play', function () {
+                                    const icon = document.getElementById('playPauseIcon');
+                                    if (icon) icon.textContent = 'pause';
+                                });
+                                video.addEventListener('pause', function () {
+                                    const icon = document.getElementById('playPauseIcon');
+                                    if (icon) icon.textContent = 'play_arrow';
+                                });
+                                video.addEventListener('ended', function () {
+                                    const icon = document.getElementById('playPauseIcon');
+                                    if (icon) icon.textContent = 'play_arrow';
+                                });
+
+                                progress.addEventListener('input', seekPromoVideoFromProgress);
+                                progress.addEventListener('change', seekPromoVideoFromProgress);
+
+                                updatePromoVideoStatus();
+                            })();
                         </script>
                     </div>
                 </section>
