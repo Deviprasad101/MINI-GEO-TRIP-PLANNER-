@@ -885,7 +885,7 @@
         }
 
         .site-header__layout {
-            min-height: 4.8rem;
+            min-height: 7rem;
         }
 
         header.site-header::after {
@@ -902,6 +902,38 @@
 
         .site-header__start {
             min-width: 0;
+            flex: 1 1 auto;
+            max-width: 100%;
+        }
+
+        .site-header__aptdc {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            line-height: 0;
+        }
+
+        .site-header__aptdc-logo {
+            display: block;
+            height: 4.5rem;
+            width: auto;
+            max-width: 10rem;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        @media (min-width: 640px) {
+            .site-header__aptdc-logo {
+                height: 5.5rem;
+                max-width: 12rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .site-header__aptdc-logo {
+                height: 6.5rem;
+                max-width: 14rem;
+            }
         }
 
         .site-header__nav {
@@ -912,9 +944,11 @@
         .site-header__brand {
             display: flex;
             min-width: 0;
+            flex: 1 1 auto;
             align-items: center;
             color: inherit;
             cursor: default;
+            overflow: hidden;
         }
 
         .site-header__brand--title {
@@ -1024,27 +1058,33 @@
             }
 
             .site-header__start {
-                order: 2; /* Brand title in the middle, centered */
+                order: 2;
                 width: 100%;
                 display: flex;
                 align-items: center;
-                justify-content: center;
+                justify-content: flex-start;
                 margin: 0.05rem 0;
+                gap: 0.4rem;
+                padding: 0 0.25rem;
+                box-sizing: border-box;
             }
 
             .site-header__brand {
                 margin-left: 0 !important;
                 padding-left: 0 !important;
-                justify-content: center;
-                width: 100%;
+                justify-content: flex-start;
+                width: auto;
+                flex: 1 1 auto;
+                min-width: 0;
             }
 
             .site-header__brand-name {
-                font-size: 1.55rem !important; /* Increased heading size */
-                text-align: center;
+                font-size: 1.2rem !important;
+                text-align: left;
                 line-height: 1.1;
-                white-space: normal;
-                word-break: break-word;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .site-header__nav--primary {
@@ -1121,7 +1161,7 @@
             }
 
             .site-header__brand {
-                margin-left: 7rem;
+                margin-left: 0;
                 padding-left: 0;
             }
 
@@ -3876,8 +3916,11 @@
             <header
                 class="site-header sticky top-0 z-50 shrink-0 border-b border-amber-200/60 bg-white/95 backdrop-blur-md">
                 <div
-                    class="site-header__layout flex min-h-[4.3rem] min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 overflow-hidden px-5 py-2.5 sm:min-h-[4.8rem] sm:gap-x-4 sm:px-7 sm:py-3">
+                    class="site-header__layout flex min-h-[6rem] min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 overflow-hidden px-5 py-2.5 sm:min-h-[7rem] sm:gap-x-4 sm:px-7 sm:py-3">
                     <div class="site-header__start flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
+                        <div class="site-header__aptdc shrink-0" aria-label="APTDC">
+                            <img src="images/aptdc-logo.png" alt="APTDC logo" class="site-header__aptdc-logo" width="224" height="112" decoding="async" />
+                        </div>
                         <a href="main_page.html" class="site-header__home shrink-0 hidden lg:inline-flex"
                             aria-label="Home — GeoTrip main page">
                             <span class="material-symbols-outlined" aria-hidden="true">home</span>
