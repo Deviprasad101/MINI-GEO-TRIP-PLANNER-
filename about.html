@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About us — GeoTrip Planner</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'headline-md': ['Noto Serif', 'Georgia', 'serif'],
+                        'headline-lg': ['Noto Serif', 'Georgia', 'serif'],
+                        'body-md': ['Public Sans', 'system-ui', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --about-ink: #1a1f2e;
+            --about-muted: #5c6578;
+            --about-peach: #f4c4b0;
+            --about-peach-deep: #e8a898;
+            --about-sky: #c8dff0;
+            --about-sky-deep: #a8cce8;
+            --about-navy: #1e3a5f;
+            --about-amber: #f5c842;
+            --about-salmon: #e07a5f;
+        }
+
+        html {
+            scrollbar-gutter: stable;
+        }
+
+        body {
+            font-family: "Public Sans", system-ui, sans-serif;
+            color: var(--about-ink);
+            margin: 0;
+            background: #ffffff;
+        }
+
+        h1, h2, h3, .about-serif {
+            font-family: "Noto Serif", Georgia, serif;
+            font-weight: 600;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .about-page-shell {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Site header */
+        header.site-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            flex-shrink: 0;
+            background: #ffffff;
+            border-bottom: none;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.85) inset,
+                0 6px 18px rgba(15, 23, 42, 0.08),
+                0 2px 6px rgba(15, 23, 42, 0.05);
+        }
+
+        .site-header__layout {
+            min-height: 7rem;
+        }
+
+        header.site-header::after {
+            content: "";
+            display: block;
+            height: 4px;
+            background: linear-gradient(90deg, #92400e 0%, #fbbf24 45%, #d97706 55%, #92400e 100%);
+        }
+
+        header.site-header + main,
+        header.site-header ~ main {
+            background: #ffffff;
+            box-shadow: none;
+        }
+
+        .site-header__start {
+            min-width: 0;
+            flex: 1 1 auto;
+            max-width: 100%;
+        }
+
+        .site-header__aptdc-logo {
+            display: block;
+            height: 4.5rem;
+            width: auto;
+            max-width: 10rem;
+            object-fit: contain;
+        }
+
+        @media (min-width: 640px) {
+            .site-header__aptdc-logo {
+                height: 5.5rem;
+                max-width: 12rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .site-header__aptdc-logo {
+                height: 6.5rem;
+                max-width: 14rem;
+            }
+        }
+
+        .site-header__brand--title {
+            pointer-events: none;
+        }
+
+        .site-header__end {
+            display: inline-flex;
+            flex-wrap: nowrap;
+            gap: 0.65rem;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .site-header__logo-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .site-header__link {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #92400e;
+            text-decoration: none;
+            padding: 0.45rem 0.9rem;
+            border-radius: 9999px;
+            background: #ffffff;
+            border: 1px solid rgba(217, 119, 6, 0.4);
+            white-space: nowrap;
+        }
+
+        .site-header__link:hover,
+        .site-header__link:active {
+            background: #fffbeb;
+            border-color: #d97706;
+            color: #78350f;
+        }
+
+        .site-header__link[aria-current="page"] {
+            background: rgba(254, 243, 199, 0.65);
+            color: #451a03;
+        }
+
+        .site-header__home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.85rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(148, 163, 184, 0.55);
+            background: #fff;
+            font-weight: 800;
+            font-size: 0.75rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #92400e;
+            text-decoration: none;
+        }
+
+        @media (max-width: 1023px) {
+            .site-header__layout {
+                display: flex !important;
+                flex-direction: column;
+                padding: 0.35rem 1rem;
+            }
+
+            .site-header__end {
+                order: 1;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .site-header__start {
+                order: 2;
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .site-header__nav--primary {
+                display: flex !important;
+                order: 3;
+                width: 100%;
+                overflow-x: auto;
+                justify-content: flex-start;
+                gap: 0.35rem;
+                padding: 0.35rem 0;
+                scrollbar-width: none;
+            }
+
+            .site-header__nav--primary::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .site-header__layout {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+                align-items: center;
+                gap: 0.75rem 1rem;
+            }
+
+            .site-header__nav--primary {
+                grid-column: 2;
+                display: flex !important;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.45rem;
+            }
+        }
+
+        /* Corporate about layout */
+        .about-content {
+            flex: 1;
+            width: 100%;
+            max-width: 76rem;
+            margin: 0 auto;
+            padding: 0 clamp(1.25rem, 4vw, 3rem) 4rem;
+            box-sizing: border-box;
+        }
+
+        .about-hero {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+            align-items: center;
+            padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(3rem, 8vw, 6rem);
+            min-height: 0;
+        }
+
+        @media (min-width: 900px) {
+            .about-hero {
+                grid-template-columns: 1fr 1fr;
+                gap: 3rem;
+            }
+        }
+
+        .about-hero__text {
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-hero__text h1 {
+            margin: 0 0 1.25rem;
+            font-size: clamp(2.25rem, 5vw, 3.5rem);
+            line-height: 1.12;
+            color: var(--about-ink);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .about-hero__text p {
+            margin: 0;
+            max-width: 28rem;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--about-muted);
+        }
+
+        .about-hero__visual {
+            position: relative;
+            z-index: 1;
+            min-height: 280px;
+        }
+
+        @media (min-width: 900px) {
+            .about-hero__visual {
+                min-height: 380px;
+            }
+        }
+
+        .about-hero__block {
+            position: absolute;
+            border-radius: 2px;
+            z-index: 0;
+        }
+
+        .about-hero__block--peach {
+            right: 8%;
+            top: 12%;
+            width: 72%;
+            height: 78%;
+            background: var(--about-peach);
+        }
+
+        .about-hero__photo {
+            position: relative;
+            z-index: 1;
+            width: 78%;
+            margin-left: auto;
+            margin-right: 5%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: 2px;
+            box-shadow: 0 24px 48px rgba(30, 58, 95, 0.12);
+        }
+
+        /* Alternating story sections */
+        .about-story {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+            align-items: center;
+            padding: clamp(2.5rem, 5vw, 4.5rem) 0;
+        }
+
+        @media (min-width: 900px) {
+            .about-story {
+                grid-template-columns: 1fr 1fr;
+                gap: 4rem;
+            }
+
+            .about-story--reverse .about-story__visual {
+                order: -1;
+            }
+        }
+
+        .about-story__heading {
+            margin: 0 0 1rem;
+            font-size: clamp(1.75rem, 3.5vw, 2.35rem);
+            line-height: 1.2;
+            color: var(--about-ink);
+            font-weight: 600;
+        }
+
+        .about-story__body {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.75;
+            color: var(--about-muted);
+            max-width: 32rem;
+        }
+
+        /* Image + color block collage */
+        .about-collage {
+            position: relative;
+            min-height: 320px;
+        }
+
+        .about-collage__block {
+            position: absolute;
+            border-radius: 2px;
+        }
+
+        .about-collage__block--peach {
+            left: 0;
+            top: 8%;
+            width: 55%;
+            height: 85%;
+            background: var(--about-peach);
+        }
+
+        .about-collage__block--sky {
+            right: 0;
+            bottom: 0;
+            width: 58%;
+            height: 72%;
+            background: var(--about-sky);
+        }
+
+        .about-collage__block--navy {
+            left: 0;
+            top: 0;
+            width: 28%;
+            height: 100%;
+            background: var(--about-navy);
+        }
+
+        .about-collage__block--amber {
+            left: 22%;
+            top: 0;
+            width: 22%;
+            height: 28%;
+            background: var(--about-amber);
+        }
+
+        .about-collage__img {
+            position: relative;
+            z-index: 1;
+            border-radius: 2px;
+            object-fit: cover;
+            box-shadow: 0 16px 40px rgba(30, 58, 95, 0.1);
+        }
+
+        .about-collage__img--tall {
+            position: absolute;
+            left: 18%;
+            top: 5%;
+            width: 52%;
+            height: 88%;
+        }
+
+        .about-collage__img--wide {
+            position: absolute;
+            left: 8%;
+            top: 12%;
+            width: 88%;
+            height: 76%;
+        }
+
+        /* Dual floating cards on sky block */
+        .about-duo {
+            position: relative;
+            min-height: 340px;
+        }
+
+        .about-duo__sky {
+            position: absolute;
+            right: 0;
+            top: 10%;
+            width: 70%;
+            height: 80%;
+            background: var(--about-sky);
+            border-radius: 2px;
+        }
+
+        .about-duo__card {
+            position: absolute;
+            z-index: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 20px 44px rgba(30, 58, 95, 0.14);
+            background: #fff;
+        }
+
+        .about-duo__card--main {
+            left: 5%;
+            top: 8%;
+            width: 52%;
+        }
+
+        .about-duo__card--sub {
+            right: 8%;
+            bottom: 5%;
+            width: 42%;
+            border: 4px solid #fff;
+        }
+
+        .about-duo__card img {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+        }
+
+        /* Team section */
+        .about-team {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+            align-items: center;
+            padding: clamp(2.5rem, 5vw, 5rem) 0;
+        }
+
+        @media (min-width: 900px) {
+            .about-team {
+                grid-template-columns: 1.1fr 0.9fr;
+                gap: 4rem;
+            }
+        }
+
+        .about-team__collage {
+            position: relative;
+            min-height: 300px;
+        }
+
+        @media (min-width: 900px) {
+            .about-team__collage {
+                min-height: 380px;
+            }
+        }
+
+        .about-team__sub {
+            margin: 2rem 0 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--about-ink);
+            font-family: "Public Sans", sans-serif;
+        }
+
+        .about-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+            padding: 0.85rem 1.75rem;
+            background: var(--about-salmon);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 24px rgba(224, 122, 95, 0.35);
+        }
+
+        .about-btn:hover {
+            background: #c96a52;
+        }
+
+        .about-btn--outline {
+            background: transparent;
+            color: var(--about-navy);
+            border: 2px solid var(--about-navy);
+            box-shadow: none;
+            margin-left: 0.75rem;
+        }
+
+        .about-btn--outline:hover {
+            background: var(--about-navy);
+            color: #fff;
+        }
+
+        .about-org-divider {
+            margin: 0;
+            padding: 0;
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e8ecf2 15%, #e8ecf2 85%, transparent);
+        }
+
+        .about-org-badge {
+            display: inline-block;
+            margin: 0 0 0.75rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--about-navy);
+            background: rgba(200, 223, 240, 0.5);
+            border-radius: 4px;
+        }
+
+        .about-story__body + .about-story__body {
+            margin-top: 1rem;
+        }
+
+        .about-story__body a {
+            color: var(--about-salmon);
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .about-story__body a:hover {
+            color: #c96a52;
+        }
+
+        .about-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.25rem;
+        }
+
+        .about-pill {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--about-navy);
+            background: #f0f4f8;
+            border: 1px solid #dce4ec;
+            border-radius: 999px;
+        }
+
+        .about-pill--accent {
+            background: rgba(244, 196, 176, 0.35);
+            border-color: var(--about-peach-deep);
+            color: #78350f;
+        }
+
+        .about-pillars {
+            padding: clamp(2rem, 4vw, 3.5rem) 0;
+        }
+
+        .about-pillars__intro {
+            text-align: center;
+            max-width: 40rem;
+            margin: 0 auto 2rem;
+        }
+
+        .about-pillars__intro h2 {
+            margin: 0 0 0.75rem;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            color: var(--about-ink);
+        }
+
+        .about-pillars__intro p {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.65;
+            color: var(--about-muted);
+        }
+
+        .about-pillars__grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (min-width: 640px) {
+            .about-pillars__grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .about-pillars__grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .about-pillar {
+            padding: 1.35rem 1.25rem;
+            background: #fafbfc;
+            border: 1px solid #e8ecf2;
+            border-radius: 6px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .about-pillar:hover {
+            border-color: var(--about-sky-deep);
+            box-shadow: 0 12px 28px rgba(30, 58, 95, 0.06);
+        }
+
+        .about-pillar .material-symbols-outlined {
+            font-size: 1.75rem;
+            color: #0d9488;
+            margin-bottom: 0.65rem;
+        }
+
+        .about-pillar h3 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            color: var(--about-ink);
+        }
+
+        .about-pillar p {
+            margin: 0;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: var(--about-muted);
+        }
+
+        .about-highlight {
+            margin: 2rem 0 0;
+            padding: 1.25rem 1.35rem;
+            background: linear-gradient(135deg, rgba(30, 58, 95, 0.06) 0%, rgba(200, 223, 240, 0.35) 100%);
+            border-left: 4px solid var(--about-navy);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .about-highlight strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.95rem;
+            color: var(--about-ink);
+            font-family: "Public Sans", sans-serif;
+        }
+
+        .about-highlight p {
+            margin: 0;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: var(--about-muted);
+        }
+
+        .about-logo-frame {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+            padding: 2rem;
+        }
+
+        .about-logo-frame__block {
+            position: absolute;
+            inset: 12% 10% 8% 10%;
+            background: var(--about-sky);
+            border-radius: 2px;
+        }
+
+        .about-logo-frame img {
+            position: relative;
+            z-index: 1;
+            max-width: 85%;
+            max-height: 200px;
+            object-fit: contain;
+        }
+
+        .about-cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Partners strip */
+        .about-partners {
+            padding: 3rem 0 2rem;
+            border-top: 1px solid #e8ecf2;
+            text-align: center;
+        }
+
+        .about-partners__label {
+            margin: 0 0 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .about-partners__row {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25rem 2rem;
+            max-width: 100%;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+            scrollbar-width: thin;
+        }
+
+        .about-partners__aptdc {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .about-partners__aptdc img {
+            height: 4.5rem;
+            width: auto;
+            object-fit: contain;
+        }
+
+        @media (min-width: 640px) {
+            .about-partners__aptdc img {
+                height: 5.5rem;
+            }
+        }
+
+        .about-logo-bar {
+            display: inline-flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem 1rem;
+            padding: 0.75rem 1.25rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+            flex-shrink: 0;
+        }
+
+        .about-logo-bar img {
+            height: 3.5rem;
+            width: auto;
+            object-fit: contain;
+        }
+
+        @media (min-width: 640px) {
+            .about-logo-bar img {
+                height: 4.25rem;
+            }
+        }
+
+        .about-logo-bar__divider {
+            width: 1px;
+            height: 2.5rem;
+            background: #e2e8f0;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 640px) {
+            .about-logo-bar__divider {
+                height: 3.25rem;
+            }
+        }
+
+        .about-logo-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .about-logo-bar__caption {
+            margin: 0.65rem 0 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        /* Footer — multi-column like reference */
+        .about-footer {
+            margin-top: auto;
+            background: #fafbfc;
+            border-top: 1px solid #e8ecf2;
+            color: var(--about-muted);
+            font-size: 0.875rem;
+        }
+
+        .about-footer__grid {
+            max-width: 76rem;
+            margin: 0 auto;
+            padding: 3rem clamp(1.25rem, 4vw, 3rem) 2rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .about-footer__grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 900px) {
+            .about-footer__grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1100px) {
+            .about-footer__grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        .about-footer__col h3 {
+            margin: 0 0 1rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--about-ink);
+            font-family: "Public Sans", sans-serif;
+        }
+
+        .about-footer__col ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .about-footer__col li {
+            margin-bottom: 0.5rem;
+        }
+
+        .about-footer__col a {
+            color: var(--about-muted);
+            text-decoration: none;
+        }
+
+        .about-footer__col a:hover {
+            color: var(--about-salmon);
+        }
+
+        .about-footer__contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .about-footer__contact-item .material-symbols-outlined {
+            font-size: 1.1rem;
+            color: var(--about-salmon);
+        }
+
+        .about-footer__bottom {
+            max-width: 76rem;
+            margin: 0 auto;
+            padding: 1.25rem clamp(1.25rem, 4vw, 3rem) 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            border-top: 1px solid #e8ecf2;
+            font-size: 0.8rem;
+        }
+
+        .about-footer__bottom a {
+            color: var(--about-muted);
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+
+        .about-footer__bottom a:hover {
+            color: var(--about-ink);
+        }
+
+        .about-footer__social {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .about-footer__social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: #e8ecf2;
+            color: var(--about-ink);
+            text-decoration: none;
+        }
+
+        .about-footer__social a:hover {
+            background: var(--about-peach);
+        }
+    </style>
+</head>
+
+<body class="about-page-shell text-slate-900 antialiased">
+    <header class="site-header sticky top-0 z-50 shrink-0 border-b border-amber-200/60 bg-white/95 backdrop-blur-md">
+        <div
+            class="site-header__layout flex min-h-[6rem] min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 overflow-hidden px-5 py-2.5 sm:min-h-[7rem] sm:gap-x-4 sm:px-7 sm:py-3">
+            <div class="site-header__start flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
+                <div class="site-header__aptdc shrink-0" aria-label="APTDC">
+                    <img src="images/aptdc-logo.png" alt="APTDC logo" class="site-header__aptdc-logo" width="224"
+                        height="112" decoding="async" />
+                </div>
+                <a href="main_page.html" class="site-header__home shrink-0 hidden lg:inline-flex"
+                    aria-label="Home — GeoTrip main page">
+                    <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                    <span>HOME</span>
+                </a>
+                <div class="site-header__brand site-header__brand--title min-w-0 shrink">
+                    <span class="site-header__brand-titles font-headline-lg">
+                        <span
+                            class="site-header__brand-name min-w-0 shrink truncate text-2xl font-bold tracking-tight text-amber-800 sm:text-3xl lg:text-4xl">About
+                            us</span>
+                    </span>
+                </div>
+            </div>
+            <nav class="site-header__nav site-header__nav--primary hidden min-w-0 items-center justify-center gap-1 sm:gap-2 lg:flex"
+                aria-label="Primary">
+                <a href="main_page.html" class="site-header__home shrink-0 lg:hidden" aria-label="Home">
+                    <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                    <span>HOME</span>
+                </a>
+                <a class="site-header__link" href="packages.html">Packages</a>
+                <a class="site-header__link" href="budget_calculator.html">Smart Budget Planner</a>
+                <a class="site-header__link" href="booking.html">Booking</a>
+                <a class="site-header__link" href="about.html">About us</a>
+            </nav>
+            <div class="site-header__end flex flex-row items-center justify-end gap-3 sm:gap-4 min-w-0 shrink">
+                <div class="flex flex-col items-center shrink min-w-0">
+                    <span
+                        class="site-header__logo-wrap flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur px-2.5 py-1 rounded-xl shadow-sm border border-slate-200">
+                        <img src="images/iittirupati.png" alt="IIT Tirupati" class="h-12 sm:h-14 w-auto object-contain" />
+                        <div class="h-6 w-[1px] bg-slate-200"></div>
+                        <img src="images/Powered by Geo-Intel Lab (1).png" alt="Powered by Geo-Intel Lab"
+                            class="h-12 sm:h-14 w-auto object-contain" />
+                        <div class="h-6 w-[1px] bg-slate-200"></div>
+                        <img src="images/make_in_india_logo.png" alt="Make in India"
+                            class="h-12 sm:h-14 w-auto object-contain" />
+                    </span>
+                    <p class="mt-1 text-[10px] font-bold uppercase tracking-tight text-slate-500 text-center">Powered
+                        by Geo-Intel Lab, IITTNIF, Tirupati</p>
+                </div>
+                <button onclick="handleLogout()"
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold text-xs uppercase px-3.5 py-2 sm:py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-md whitespace-nowrap shrink-0 border border-red-400"
+                    title="Logout">
+                    <span class="material-symbols-outlined text-sm font-bold">logout</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="about-content" id="mainContent">
+        <!-- Hero -->
+        <section class="about-hero" aria-labelledby="aboutHeroTitle">
+            <div class="about-hero__text">
+                <h1 id="aboutHeroTitle">We're designing a new way to plan your pilgrimage.</h1>
+                <p>
+                    GeoTrip Planner brings maps, packages, budgets, and booking links into one calm experience — built
+                    at the <strong>Geo-Intel Lab</strong> within
+                    <a href="https://iittnif.com/" target="_blank" rel="noopener noreferrer">IITTNiF</a>, IIT Tirupati's
+                    Technology Innovation Hub for positioning and precision technologies.
+                </p>
+            </div>
+            <div class="about-hero__visual">
+                <div class="about-hero__block about-hero__block--peach" aria-hidden="true"></div>
+                <img class="about-hero__photo" src="images/tirupati_travel_bg_v2.jpg"
+                    alt="Travellers planning a trip to Tirupati" width="640" height="480" loading="eager"
+                    decoding="async" />
+            </div>
+        </section>
+
+        <!-- Block 1: image left, text right -->
+        <section class="about-story" aria-labelledby="aboutEasyTitle">
+            <div class="about-collage">
+                <div class="about-collage__block about-collage__block--peach" aria-hidden="true"></div>
+                <img class="about-collage__img about-collage__img--tall" src="images/temple image.jpg"
+                    alt="Temple visit in Tirupati region" width="400" height="520" loading="lazy" decoding="async" />
+            </div>
+            <div>
+                <h2 id="aboutEasyTitle" class="about-story__heading">Making it easy to say yes to your trip</h2>
+                <p class="about-story__body">
+                    Compare curated packages by budget and group size, see what's included at a glance, and move from
+                    browsing to a real plan without juggling spreadsheets or scattered notes.
+                </p>
+            </div>
+        </section>
+
+        <!-- Block 2: text left, dual images right -->
+        <section class="about-story about-story--reverse" aria-labelledby="aboutSecureTitle">
+            <div>
+                <h2 id="aboutSecureTitle" class="about-story__heading">Solutions based on maps and simplicity</h2>
+                <p class="about-story__body">
+                    The Smart Budget Planner puts routes on the map, splits costs fairly across travellers, and keeps
+                    darshan timings and distances in view — so your itinerary stays practical, not theoretical.
+                </p>
+            </div>
+            <div class="about-duo">
+                <div class="about-duo__sky" aria-hidden="true"></div>
+                <div class="about-duo__card about-duo__card--main">
+                    <img src="images/how_step_3.png" alt="Route planning on the map" width="320" height="240"
+                        loading="lazy" decoding="async" />
+                </div>
+                <div class="about-duo__card about-duo__card--sub">
+                    <img src="images/how_step_1.png" alt="Budget breakdown overview" width="260" height="195"
+                        loading="lazy" decoding="async" />
+                </div>
+            </div>
+        </section>
+
+        <!-- Block 3: GeoTrip + lab intro -->
+        <section class="about-team" aria-labelledby="aboutTeamTitle">
+            <div class="about-team__collage about-collage">
+                <div class="about-collage__block about-collage__block--navy" aria-hidden="true"></div>
+                <div class="about-collage__block about-collage__block--amber" aria-hidden="true"></div>
+                <img class="about-collage__img about-collage__img--wide" src="images/tirumala-temple.jpg"
+                    alt="Tirumala temple and surrounding hills" width="720" height="400" loading="lazy"
+                    decoding="async" />
+            </div>
+            <div>
+                <h2 id="aboutTeamTitle" class="about-story__heading">From lab research to journeys on the ground</h2>
+                <p class="about-story__body">
+                    GeoTrip Planner translates geospatial intelligence from the Geo-Intel Lab into everyday tools —
+                    curated packages, map-based routing, fair budget splitting, and trusted booking links for Tirupati
+                    and Tirumala.
+                </p>
+                <p class="about-team__sub">Plan your trip</p>
+                <div class="about-cta-row">
+                    <a href="main_page.html" class="about-btn">
+                        Start planning
+                        <span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <hr class="about-org-divider" />
+
+        <!-- IITTNiF / TIH -->
+        <section class="about-story" aria-labelledby="aboutIittnifTitle">
+            <div class="about-logo-frame">
+                <div class="about-logo-frame__block" aria-hidden="true"></div>
+                <img src="images/IITTNiF logo.png" alt="IIT Tirupati Navavishkar I-Hub Foundation (IITTNiF)"
+                    width="320" height="120" loading="lazy" decoding="async" />
+            </div>
+            <div>
+                <span class="about-org-badge">Technology Innovation Hub (TIH)</span>
+                <h2 id="aboutIittnifTitle" class="about-story__heading">IIT Tirupati Navavishkar I-Hub Foundation (IITTNiF)</h2>
+                <p class="about-story__body">
+                    <a href="https://iittnif.com/" target="_blank" rel="noopener noreferrer">IITTNiF</a> is IIT
+                    Tirupati's dedicated Technology Innovation Hub (TIH) under the National Mission on Interdisciplinary
+                    Cyber-Physical Systems (NM-ICPS), funded by the Department of Science and Technology (DST), India.
+                    It empowers innovation in <strong>Positioning and Precision Technology (PPT)</strong> — from
+                    foundational research to prototypes and market-ready solutions.
+                </p>
+                <p class="about-story__body">
+                    IITTNiF advances translational development across GNSS, GIS, LiDAR, quantum navigation, computer
+                    vision, AI/ML, and geospatial systems — while nurturing startups, fellowships, and skill development
+                    for sustained technology growth.
+                </p>
+                <div class="about-highlight" role="note">
+                    <strong>Operation Dronagiri</strong>
+                    <p>
+                        A national initiative highlighted on IITTNiF's platform, driving geospatial innovation across
+                        agriculture, infrastructure, and skilling — connecting startups, industry, and academia to
+                        real-world challenges in India.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Geo-Intel Lab -->
+        <section class="about-story about-story--reverse" aria-labelledby="aboutGeointelTitle">
+            <div>
+                <span class="about-org-badge">Technology Development</span>
+                <h2 id="aboutGeointelTitle" class="about-story__heading">Geo-Intel Lab</h2>
+                <p class="about-story__body">
+                    Geo-Intel Lab is part of IITTNiF's <strong>Technology Development</strong> portfolio — alongside
+                    translational R&amp;D in GNSS, GIS, LiDAR, quantum navigation, computer vision, and AI/ML. The lab
+                    focuses on <strong>geospatial tools</strong> and intelligent systems that turn location data into
+                    decisions people can trust.
+                </p>
+                <p class="about-story__body">
+                    GeoTrip Planner is a flagship application from this work: combining accurate coordinates, sensible
+                    route ordering, and user-centred design for pilgrims and visitors — aligned with IITTNiF's applied
+                    areas such as navigation, smart cities, and disaster-aware planning.
+                </p>
+                <div class="about-pills" aria-label="Core technology areas at IITTNiF">
+                    <span class="about-pill about-pill--accent">Geospatial Tools</span>
+                    <span class="about-pill">GIS</span>
+                    <span class="about-pill">GNSS</span>
+                    <span class="about-pill">Computer Vision</span>
+                    <span class="about-pill">AI / ML</span>
+                    <span class="about-pill">Data Science</span>
+                    <span class="about-pill">Indoor Mapping</span>
+                    <span class="about-pill">Navigation</span>
+                </div>
+            </div>
+            <div class="about-logo-frame">
+                <div class="about-logo-frame__block" style="background: var(--about-peach);" aria-hidden="true"></div>
+                <img src="images/geointellab_logo.jpeg" alt="Geo-Intel Lab logo" width="280" height="140"
+                    loading="lazy" decoding="async" />
+            </div>
+        </section>
+
+        <!-- IITTNiF activities -->
+        <section class="about-pillars" aria-labelledby="aboutActivitiesTitle">
+            <div class="about-pillars__intro">
+                <h2 id="aboutActivitiesTitle">What IITTNiF does beyond GeoTrip</h2>
+                <p>
+                    As described on the official IITTNiF website, the hub connects research, prototypes, and
+                    entrepreneurship across positioning, precision, and geospatial domains.
+                </p>
+            </div>
+            <div class="about-pillars__grid">
+                <article class="about-pillar">
+                    <span class="material-symbols-outlined" aria-hidden="true">science</span>
+                    <h3>Technology Development</h3>
+                    <p>Translational R&amp;D in GNSS, GIS, LiDAR, quantum navigation, computer vision, AI/ML, and the
+                        Geo-Intel Lab — turning research into working systems.</p>
+                </article>
+                <article class="about-pillar">
+                    <span class="material-symbols-outlined" aria-hidden="true">rocket_launch</span>
+                    <h3>Startups &amp; Entrepreneurship</h3>
+                    <p>Supports innovations, grand challenges, and a startup ecosystem to bring prototypes to market.
+                    </p>
+                </article>
+                <article class="about-pillar">
+                    <span class="material-symbols-outlined" aria-hidden="true">school</span>
+                    <h3>HR &amp; Skill Development</h3>
+                    <p>Fellowships, internships, UG/PG/Ph.D pathways, postdocs, and programmes such as Nav-i-FOSSEE and
+                        Nav-i-GEE.</p>
+                </article>
+                <article class="about-pillar">
+                    <span class="material-symbols-outlined" aria-hidden="true">handshake</span>
+                    <h3>Collaborations &amp; Resources</h3>
+                    <p>Industry and academic partnerships, plus metadata resources including the NavIC (IRNSS) community
+                        and Nav-i-GIST.</p>
+                </article>
+            </div>
+            <div class="about-pillars__intro" style="margin-top: 2rem;">
+                <p class="about-story__body" style="margin: 0 auto;">
+                    <strong>Applied focus areas</strong> at IITTNiF include precision agriculture, disaster management,
+                    smart cities and villages, land records and insurance, navigation, robotics, defence, and policy —
+                    reflecting the breadth of PPT impact across India.
+                </p>
+                <div class="about-cta-row" style="justify-content: center; margin-top: 1.25rem;">
+                    <a href="https://iittnif.com/" target="_blank" rel="noopener noreferrer" class="about-btn">
+                        Visit IITTNiF
+                        <span class="material-symbols-outlined text-lg" aria-hidden="true">open_in_new</span>
+                    </a>
+                    <a href="https://iittnif.com/contact/" target="_blank" rel="noopener noreferrer"
+                        class="about-btn about-btn--outline">Contact IITTNiF</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-partners" aria-label="Partners and institutions">
+            <p class="about-partners__label">In collaboration with</p>
+            <div class="about-partners__row">
+                <div class="about-partners__aptdc">
+                    <img src="images/aptdc-logo.png" alt="Andhra Pradesh Tourism Development Corporation (APTDC)" />
+                </div>
+                <div class="about-logo-bar-wrap">
+                    <div class="about-logo-bar" role="group" aria-label="IIT Tirupati, Geo-Intel Lab, and Make in India">
+                        <img src="images/iittirupati.png" alt="Indian Institute of Technology Tirupati" />
+                        <span class="about-logo-bar__divider" aria-hidden="true"></span>
+                        <img src="images/Powered by Geo-Intel Lab (1).png"
+                            alt="IIT Tirupati Navavishkar I-Hub Foundation — Geo-Intel Lab" />
+                        <span class="about-logo-bar__divider" aria-hidden="true"></span>
+                        <img src="images/make_in_india_logo.png" alt="Make in India" />
+                    </div>
+                    <p class="about-logo-bar__caption">Powered by Geo-Intel Lab, IITTNIF, Tirupati</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="about-footer" role="contentinfo">
+        <div class="about-footer__grid">
+            <div class="about-footer__col">
+                <h3>GeoTrip</h3>
+                <ul>
+                    <li><a href="about.html">About us</a></li>
+                    <li><a href="main_page.html">GeoTrip home</a></li>
+                    <li><a href="packages.html">Packages</a></li>
+                </ul>
+            </div>
+            <div class="about-footer__col">
+                <h3>IITTNiF</h3>
+                <ul>
+                    <li><a href="https://iittnif.com/" target="_blank" rel="noopener noreferrer">IITTNiF home</a></li>
+                    <li><a href="https://iittnif.com/about-us/" target="_blank" rel="noopener noreferrer">About IITTNiF</a></li>
+                    <li><a href="https://iittnif.com/activities/" target="_blank" rel="noopener noreferrer">Technology Development</a></li>
+                </ul>
+            </div>
+            <div class="about-footer__col">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="budget_calculator.html">Smart Budget Planner</a></li>
+                    <li><a href="booking.html">Booking</a></li>
+                    <li><a href="main_page.html#how-it-works">How it works</a></li>
+                </ul>
+            </div>
+            <div class="about-footer__col">
+                <h3>Planning</h3>
+                <ul>
+                    <li><a href="packages.html">Trip packages</a></li>
+                    <li><a href="budget_calculator.html">Budget splitter</a></li>
+                    <li><a href="main_page.html">AI recommendations</a></li>
+                </ul>
+            </div>
+            <div class="about-footer__col">
+                <h3>Trust</h3>
+                <ul>
+                    <li>Local place data</li>
+                    <li>Map-based routing</li>
+                    <li>Official booking links</li>
+                </ul>
+            </div>
+            <div class="about-footer__col">
+                <h3>Contact</h3>
+                <div class="about-footer__contact-item">
+                    <span class="material-symbols-outlined" aria-hidden="true">call</span>
+                    <span><a href="tel:+918772503737">0877 2503737</a> (IITTNiF)</span>
+                </div>
+                <div class="about-footer__contact-item">
+                    <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                    <span>Geo-Intel Lab, IITTNiF<br />IIT Tirupati, Andhra Pradesh</span>
+                </div>
+                <div class="about-footer__contact-item">
+                    <span class="material-symbols-outlined" aria-hidden="true">language</span>
+                    <span><a href="https://iittnif.com/" target="_blank" rel="noopener noreferrer">iittnif.com</a></span>
+                </div>
+            </div>
+        </div>
+        <div class="about-footer__bottom">
+            <div class="about-footer__social" aria-label="Social links">
+                <a href="#" aria-label="LinkedIn"><span class="material-symbols-outlined text-sm"
+                        aria-hidden="true">work</span></a>
+                <a href="#" aria-label="Share"><span class="material-symbols-outlined text-sm"
+                        aria-hidden="true">share</span></a>
+            </div>
+            <span>© <span id="footerYear"></span> GeoTrip Planner · Geo-Intel Lab, IITTNIF</span>
+            <span>
+                <a href="main_page.html">Home</a>
+                <a href="packages.html">Packages</a>
+            </span>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                localStorage.removeItem('currentUser');
+                window.location.href = '/';
+            } catch (err) {
+                localStorage.removeItem('currentUser');
+                window.location.href = '/';
+            }
+        }
+    </script>
+    <script src="chatbot.js" defer></script>
+</body>
+
+</html>
