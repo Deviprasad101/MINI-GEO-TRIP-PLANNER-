@@ -121,15 +121,196 @@
         }
 
         @media (min-width: 900px) {
-            .pricing-grid {
+            .pricing-grid:not(.pricing-grid--budget-driven) {
                 grid-template-columns: repeat(4, minmax(0, 18.75rem));
                 justify-content: center;
                 align-items: stretch;
                 max-width: 80rem;
-                /* Perfectly matches the 4 columns + gaps */
                 margin-left: auto;
                 margin-right: auto;
             }
+        }
+
+        .pricing-grid--budget-driven {
+            grid-template-columns: 1fr;
+            max-width: 38rem;
+            margin-left: auto;
+            margin-right: auto;
+            min-height: 0;
+            gap: 0;
+        }
+
+        .pricing-grid.pricing-grid--budget-driven.mt-10 {
+            margin-top: 1.25rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card {
+            display: none;
+            animation: none;
+            max-width: 100%;
+        }
+
+        .pricing-grid--budget-driven .pricing-card.is-budget-active {
+            display: flex;
+            animation: pkg-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+            max-width: 100%;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__header {
+            padding: 1.15rem 1.5rem 0.35rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__icon-wrap {
+            width: 5rem;
+            height: 5rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__icon-main {
+            font-size: 2.35rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__tagline {
+            font-size: clamp(1.35rem, 4vw, 1.65rem);
+            max-width: 22rem;
+            margin-top: 0.15rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__body {
+            padding: 0 1.5rem 1rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__friendly {
+            font-size: 0.95rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__friendly-list {
+            gap: 0.2rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__features {
+            flex: none;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__features li {
+            font-size: 1rem;
+            padding: 0.35rem 0;
+            margin-bottom: 0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__cta {
+            margin-top: 0.65rem;
+            padding: 0.85rem 1.2rem;
+            font-size: 1rem;
+        }
+
+        /* Plan picker header + slider — same width as budget-driven cards */
+        .packages-section > .flex.flex-col.items-center {
+            width: 100%;
+            max-width: 38rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 1rem;
+        }
+
+        .packages-section > .flex.flex-col.items-center .packages-section__subtitle {
+            font-size: 1.125rem;
+            margin-top: 0.75rem;
+            gap: 0.65rem;
+        }
+
+        .packages-section > .flex.flex-col.items-center .packages-section__subtitle .sparkle {
+            font-size: 1.35rem;
+        }
+
+        .packages-section > .flex.flex-col.items-center .pill-badge {
+            font-size: 0.85rem;
+            padding: 0.6rem 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .plan-budget-slider-wrap {
+            width: 100%;
+            max-width: 38rem;
+            margin: 1.75rem auto 0;
+            padding: 0 0.5rem;
+        }
+
+        .plan-budget-slider__track-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.55rem;
+        }
+
+        .plan-budget-range {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #fef3c7, #fbbf24, #d97706);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .plan-budget-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid #d97706;
+            box-shadow: 0 3px 12px rgba(217, 119, 6, 0.45);
+            cursor: grab;
+        }
+
+        .plan-budget-range::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid #d97706;
+            box-shadow: 0 3px 12px rgba(217, 119, 6, 0.45);
+            cursor: grab;
+        }
+
+        .plan-budget-slider__value {
+            margin: 1rem 0 0;
+            text-align: center;
+            font-size: 1.05rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .plan-budget-slider__value strong {
+            color: #92400e;
+            font-size: 1.35rem;
+        }
+
+        .plan-budget-slider__tier {
+            display: block;
+            margin-top: 0.45rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #7c3aed;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         .pricing-grid .pricing-card {
@@ -159,7 +340,7 @@
             flex-direction: column;
             width: 100%;
             max-width: 26.5rem;
-            border-radius: 1.35rem;
+            border-radius: 1.5rem;
             background: #ffffff;
             box-shadow: 0 8px 32px rgba(15, 23, 42, 0.07), 0 0 0 1px rgba(226, 232, 240, 0.95);
             overflow: hidden;
@@ -223,7 +404,8 @@
         }
 
         .pricing-card--basic .pricing-card__top-wrap,
-        .pricing-card--standard .pricing-card__top-wrap {
+        .pricing-card--standard .pricing-card__top-wrap,
+        .pricing-card--elite .pricing-card__top-wrap {
             background: #ffffff;
         }
 
@@ -248,30 +430,54 @@
             padding-top: 1.75rem;
         }
 
-        .pricing-card__header h3 {
-            margin: 0;
+        .pricing-card__tagline {
+            margin: 0.2rem 0 0;
             font-family: "Public Sans", system-ui, sans-serif;
-            font-size: 1.1875rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            text-transform: none;
-            max-width: 100%;
-            color: inherit;
+            font-size: 1.125rem;
+            font-weight: 700;
+            line-height: 1.4;
+            letter-spacing: 0.01em;
+            max-width: 20rem;
         }
 
-        .pricing-card__header p {
-            margin: 0.32rem 0 0;
-            font-size: 0.84375rem;
-            font-weight: 500;
-            line-height: 1.38;
-            max-width: 19rem;
-            color: #64748b;
-            opacity: 1;
+        .pricing-card--basic .pricing-card__tagline {
+            color: #ea580c;
+            background: linear-gradient(135deg, #fb923c 0%, #fdba74 55%, #fed7aa 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .pricing-card--premium .pricing-card__header p,
-        .pricing-card--superpremium .pricing-card__header p {
-            color: rgba(255, 255, 255, 0.88);
+        .pricing-card--standard .pricing-card__tagline {
+            color: #2563eb;
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 55%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pricing-card--premium .pricing-card__tagline {
+            color: #059669;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 55%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pricing-card--superpremium .pricing-card__tagline {
+            color: #7c3aed;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 55%, #c4b5fd 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pricing-card--elite .pricing-card__tagline {
+            color: #b45309;
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fde68a 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .pricing-card__badge {
@@ -477,6 +683,11 @@
             box-shadow: 0 10px 30px rgba(139, 92, 246, 0.16), 0 0 0 1px rgba(196, 181, 253, 0.28);
         }
 
+        .pricing-card--elite {
+            background: linear-gradient(165deg, #fffbeb 0%, #fef3c7 100%);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.16), 0 0 0 1px rgba(253, 230, 138, 0.45);
+        }
+
         .pricing-card--premium .pricing-card__header,
         .pricing-card--superpremium .pricing-card__header,
         .pricing-card--premium .pricing-card__header p,
@@ -568,6 +779,17 @@
             --icon-text: #7c3aed;
         }
 
+        .pricing-card--elite {
+            --offer-bg: #fffbeb;
+            --offer-border: #f59e0b;
+            --offer-text: #b45309;
+            --check-color: #d97706;
+            --cta-bg: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            --cta-text: #78350f;
+            --icon-bg: #fef3c7;
+            --icon-text: #92400e;
+        }
+
         .pricing-card__icon-wrap {
             display: inline-flex;
             align-items: center;
@@ -583,6 +805,26 @@
             position: relative;
         }
 
+        .pricing-card__icon-main {
+            color: var(--icon-text);
+            -webkit-text-fill-color: var(--icon-text);
+            background: none;
+            -webkit-background-clip: border-box;
+            background-clip: border-box;
+            font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 48;
+            position: relative;
+            z-index: 3;
+        }
+
+        .pricing-card--elite .pricing-card__icon-wrap {
+            color: #92400e;
+        }
+
+        .pricing-card--elite .pricing-card__icon-main {
+            color: #92400e;
+            -webkit-text-fill-color: #92400e;
+        }
+
         .pricing-card__header-bg {
             position: absolute;
             top: -50px;
@@ -596,32 +838,8 @@
             z-index: 1;
         }
 
-        /* Unified Ribbon Style - All on Top Left */
         .pricing-card__ribbon {
-            position: absolute;
-            top: 18px;
-            left: -32px;
-            width: 130px;
-            text-align: center;
-            background: var(--cta-bg); /* Use the theme gradient */
-            color: white;
-            padding: 5px 0;
-            font-size: 0.65rem;
-            font-weight: 900;
-            transform: rotate(-45deg);
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            letter-spacing: 0.05em;
-        }
-
-        /* Specific color overrides if needed, but using var(--cta-bg) is smarter */
-        .pricing-card--standard .pricing-card__ribbon {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            display: none;
         }
 
         .pill-badge {
@@ -690,7 +908,7 @@
         }
 
         .pricing-card__friendly {
-            margin: 0 0 0.8rem;
+            margin: 0 0 0.5rem;
             font-size: 0.83rem;
             line-height: 1.45;
             color: #475569;
@@ -703,7 +921,7 @@
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 0.35rem;
+            gap: 0.2rem;
         }
 
         .pricing-card__friendly-list li {
@@ -727,8 +945,8 @@
         .pricing-card__features li {
             display: flex;
             align-items: center;
-            gap: 0.65rem;
-            padding: 0.5rem 0;
+            gap: 0.5rem;
+            padding: 0.35rem 0;
             border-bottom: 1px solid rgba(0,0,0,0.05);
             font-size: 0.88rem;
             font-weight: 600;
@@ -1761,6 +1979,16 @@
             letter-spacing: -0.03em;
             color: #0f172a;
             text-align: center;
+        }
+
+        #sec-tiers {
+            white-space: nowrap;
+            font-size: clamp(1.15rem, 3.2vw, 2.5rem);
+            line-height: 1.2;
+        }
+
+        #sec-tiers .text-purple-600 {
+            display: inline;
         }
 
         .packages-section__subtitle {
@@ -3058,11 +3286,23 @@
                         <span class="sparkle">✦</span> Smart plans, memorable journeys
                     </div>
                     <h2 id="sec-tiers" class="packages-section__title">Choose the <span class="text-purple-600">perfect plan</span> for your trip</h2>
-                    <div class="packages-section__subtitle">
-                        <span class="sparkle">✦</span> Flexible options. Epic experiences. Unbeatable value. <span class="sparkle">✦</span>
+                    <div class="plan-budget-slider-wrap" aria-labelledby="planBudgetSliderLabel">
+                        <p id="planBudgetSliderLabel" class="sr-only">Trip budget from 1000 to 30000 rupees</p>
+                        <div class="plan-budget-slider__track-labels">
+                            <span>₹1,000</span>
+                            <span>₹30,000</span>
+                        </div>
+                        <input type="range" id="planBudgetRange" class="plan-budget-range" min="1000" max="30000"
+                            step="500" value="3000" aria-valuemin="1000" aria-valuemax="30000" aria-valuenow="3000"
+                            aria-label="Select your trip budget" />
+                        <p class="plan-budget-slider__value">
+                            Your budget: <strong id="planBudgetValue">₹3,000</strong>
+                            <span class="plan-budget-slider__tier" id="planBudgetTierLabel">Basic package</span>
+                        </p>
                     </div>
                 </div>
-                <section class="pricing-grid mt-10" id="packageCards" aria-label="Package tiers"></section>
+                <section class="pricing-grid pricing-grid--budget-driven mt-10" id="packageCards"
+                    aria-label="Package tier for your budget" aria-live="polite"></section>
 
                 <div class="bottom-features">
                     <div class="feature-item">
@@ -3394,10 +3634,8 @@
                     title: 'Basic Package',
                     displayRange: '₹1,000 – ₹5,000',
                     pickLimit: 5,
-                    offerLine: '<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 6px;">sell</span> Offer: Save up to 10% on weekday bookings.',
                     friendlyLine1: 'Great choice for a quick, low-stress local trip.',
                     friendlyLine2: 'Pick your places and we map the easiest route for you.',
-                    tagline: '<span class="material-symbols-outlined">account_balance_wallet</span> Budget: ₹1,000 – ₹5,000',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 1 – 2',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 1 Day',
                     placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select exactly 5 stops',
@@ -3412,10 +3650,8 @@
                     title: 'Standard Package',
                     displayRange: '₹5,000 – ₹10,000',
                     pickLimit: 10,
-                    offerLine: '<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 6px;">sell</span> Offer: Flat 12% off for early confirmations.',
                     friendlyLine1: 'Balanced plan for couples, friends, and small families.',
                     friendlyLine2: 'More places, clear budget, and smooth trip flow.',
-                    tagline: '<span class="material-symbols-outlined">account_balance_wallet</span> Budget: ₹5,000 – ₹10,000',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 2 – 4',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 1 – 2 Days',
                     placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select exactly 10 stops',
@@ -3428,12 +3664,10 @@
                     shortTitle: 'Premium',
                     subtitle: 'Comfort. Flexibility. Value.',
                     title: 'Premium Package',
-                    displayRange: '₹15,000+',
+                    displayRange: '₹10,000 – ₹15,000',
                     pickLimit: 20,
-                    offerLine: '<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 6px;">sell</span> Offer: 15% off + priority support.',
                     friendlyLine1: 'Perfect when you want comfort, coverage, and flexibility.',
                     friendlyLine2: 'Plan bigger days without worrying about route complexity.',
-                    tagline: '<span class="material-symbols-outlined">account_balance_wallet</span> Budget: ₹15,000+',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 6 – 8',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 3 – 5 Days',
                     placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 20 stops',
@@ -3446,20 +3680,85 @@
                     shortTitle: 'Super Premium',
                     subtitle: 'Maximum Control. VIP Experience.',
                     title: 'Super Premium Package',
-                    displayRange: '₹25,000+',
+                    displayRange: '₹15,000 – ₹25,000',
                     pickLimit: 30,
-                    offerLine: '<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 6px;">sell</span> Offer: 22% off + Priority VIP support.',
                     friendlyLine1: 'Best for grand trips with maximum place coverage.',
                     friendlyLine2: 'More control, more stops, and premium trip planning feel.',
-                    tagline: '<span class="material-symbols-outlined">account_balance_wallet</span> Budget: ₹25,000+',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 8+',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 5 – 7 Days',
-                    placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 30+ stops',
+                    placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 30 stops',
                     themeClass: 'pricing-card--superpremium',
                     ribbonType: 'bestvalue',
                     ribbonText: '<span style="font-size: 0.8rem;">✦</span> BEST VALUE <span style="font-size: 0.8rem;">✦</span>'
+                },
+                {
+                    id: 'elite',
+                    icon: 'workspace_premium',
+                    shortTitle: 'Elite',
+                    subtitle: 'Ultimate VIP. Maximum coverage.',
+                    title: 'Elite Package',
+                    displayRange: '₹25,000 – ₹30,000+',
+                    pickLimit: 35,
+                    friendlyLine1: 'Our top tier for large groups and luxury pilgrimages.',
+                    friendlyLine2: 'Every stop mapped with priority routing and full support.',
+                    peopleLine: '<span class="material-symbols-outlined">group</span> People: 10+',
+                    durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 7+ Days',
+                    placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 35 stops',
+                    themeClass: 'pricing-card--elite',
+                    ribbonText: 'VIP ELITE'
                 }
             ];
+
+            var PLAN_BUDGET_MIN = 1000;
+            var PLAN_BUDGET_MAX = 30000;
+
+            function formatPlanBudgetInr(n) {
+                return '₹' + Number(n).toLocaleString('en-IN');
+            }
+
+            function tierIndexForBudget(amount) {
+                var v = Math.max(PLAN_BUDGET_MIN, Math.min(PLAN_BUDGET_MAX, Number(amount) || PLAN_BUDGET_MIN));
+                if (v <= 5000) return 0;
+                if (v <= 10000) return 1;
+                if (v <= 15000) return 2;
+                if (v <= 25000) return 3;
+                return 4;
+            }
+
+            function showPackageCardForBudget(amount) {
+                var idx = tierIndexForBudget(amount);
+                var root = document.getElementById('packageCards');
+                if (!root) return;
+                var cards = root.querySelectorAll('.pricing-card');
+                cards.forEach(function (card, i) {
+                    var active = i === idx;
+                    card.classList.toggle('is-budget-active', active);
+                    card.setAttribute('aria-hidden', active ? 'false' : 'true');
+                });
+                var tier = TIERS[idx];
+                var valEl = document.getElementById('planBudgetValue');
+                var labEl = document.getElementById('planBudgetTierLabel');
+                var rangeEl = document.getElementById('planBudgetRange');
+                if (valEl) valEl.textContent = formatPlanBudgetInr(amount);
+                if (labEl && tier) {
+                    labEl.textContent = tier.title + ' · ' + tier.displayRange;
+                }
+                if (rangeEl) rangeEl.setAttribute('aria-valuenow', String(amount));
+                document.querySelectorAll('.pricing-card').forEach(function (c) {
+                    c.classList.remove('is-selected');
+                });
+            }
+
+            function initPlanBudgetSlider() {
+                var range = document.getElementById('planBudgetRange');
+                if (!range) return;
+                var onInput = function () {
+                    showPackageCardForBudget(parseInt(range.value, 10));
+                };
+                range.addEventListener('input', onInput);
+                range.addEventListener('change', onInput);
+                showPackageCardForBudget(parseInt(range.value, 10));
+            }
 
             function escapeHtml(s) {
                 var d = document.createElement('div');
@@ -3612,35 +3911,26 @@
                 var root = document.getElementById('packageCards');
                 if (!root) return;
                 root.innerHTML = '';
-                TIERS.forEach(function (tier) {
+                TIERS.forEach(function (tier, tierIdx) {
                     var lim = tier.pickLimit;
                     var card = document.createElement('article');
                     card.className = 'pricing-card ' + tier.themeClass;
                     card.setAttribute('data-package-id', tier.id);
-
-                    var ribbonHtml = '';
-                    if (tier.ribbonText) {
-                        ribbonHtml = '<div class="pricing-card__ribbon">' + tier.ribbonText + '</div>';
-                    }
+                    card.setAttribute('data-tier-index', String(tierIdx));
 
                     card.innerHTML =
-                        ribbonHtml +
                         '<div class="pricing-card__top-wrap">' +
                         '<div class="pricing-card__header-bg"></div>' +
                         '<div class="pricing-card__header">' +
                         '<div class="pricing-card__icon-wrap">' +
                         '<span class="material-symbols-outlined" style="position: absolute; top: -10px; right: -10px; font-size: 1.2rem; color: #fbbf24;">auto_awesome</span>' +
-                        '<span class="material-symbols-outlined">' + tier.icon + '</span>' +
+                        '<span class="material-symbols-outlined pricing-card__icon-main">' + tier.icon + '</span>' +
                         '</div>' +
-                        '<h3>' +
-                        escapeHtml(tier.shortTitle) +
-                        '</h3>' +
-                        '<p>' + escapeHtml(tier.subtitle) + '</p>' +
+                        '<p class="pricing-card__tagline">' + escapeHtml(tier.subtitle) + '</p>' +
                         '</div>' +
                         waveSvg() +
                         '</div>' +
                         '<div class="pricing-card__body">' +
-                        '<p class="pricing-card__offer-line">' + tier.offerLine + '</p>' +
                         '<div class="pricing-card__friendly">' +
                         '<ul class="pricing-card__friendly-list">' +
                         '<li>' + escapeHtml(tier.friendlyLine1 || '') + '</li>' +
@@ -3648,7 +3938,6 @@
                         '</ul>' +
                         '</div>' +
                         '<ul class="pricing-card__features">' +
-                        '<li>' + tier.tagline + '</li>' +
                         '<li>' + tier.peopleLine + '</li>' +
                         '<li>' + tier.durationLine + '</li>' +
                         '<li>' + tier.placesLine + '</li>' +
@@ -3665,8 +3954,10 @@
                             openPlacePicker(tier.id);
                         });
                     }
+                    card.setAttribute('aria-hidden', 'true');
                     root.appendChild(card);
                 });
+                initPlanBudgetSlider();
             }
 
             function getTierById(id) {
