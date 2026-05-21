@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trip itinerary — GeoTrip Planner</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@600;700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        :root {
+            --ink: #0f172a;
+            --muted: #64748b;
+            --teal: #0d9488;
+            --amber: #d97706;
+            --surface: #f8fafc;
+            --card: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Public Sans", system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(900px 400px at 10% 0%, rgba(13, 148, 136, 0.12), transparent 55%),
+                radial-gradient(700px 360px at 90% 5%, rgba(251, 191, 36, 0.14), transparent 50%),
+                linear-gradient(180deg, #f1f5f9 0%, #fff 40%);
+            min-height: 100vh;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .share-shell {
+            max-width: 42rem;
+            margin: 0 auto;
+            padding: 1.5rem 1.25rem 3rem;
+        }
+
+        .share-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--amber);
+        }
+
+        .share-hero {
+            background: linear-gradient(135deg, #0f766e 0%, #134e4a 45%, #78350f 100%);
+            color: #fff;
+            border-radius: 1.25rem;
+            padding: 1.75rem 1.5rem;
+            box-shadow: 0 20px 48px rgba(15, 118, 110, 0.28);
+        }
+
+        .share-hero__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .share-hero h1 {
+            margin: 0.85rem 0 0.35rem;
+            font-family: "Noto Serif", Georgia, serif;
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            line-height: 1.15;
+        }
+
+        .share-hero p {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        .share-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .share-meta__card {
+            background: var(--card);
+            border: 1px solid #e2e8f0;
+            border-radius: 0.85rem;
+            padding: 0.85rem 1rem;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .share-meta__card--wide {
+            grid-column: 1 / -1;
+        }
+
+        .share-meta__label {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .share-meta__label .material-symbols-outlined {
+            font-size: 1rem;
+            color: var(--teal);
+        }
+
+        .share-meta__value {
+            margin-top: 0.35rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .share-map-section {
+            margin-top: 1.25rem;
+            background: var(--card);
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 32px rgba(15, 23, 42, 0.08);
+        }
+
+        .share-map-section__head {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .share-map-section__head h2 {
+            margin: 0;
+            font-family: "Noto Serif", Georgia, serif;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .share-map-section__head p {
+            margin: 0.35rem 0 0;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        #shareTripMap {
+            width: 100%;
+            height:  min(52vh, 22rem);
+            min-height: 240px;
+            background: #e2e8f0;
+        }
+
+        .share-map-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            padding: 0.65rem 1rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--muted);
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .share-map-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .share-map-legend__dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .share-map-legend__dot--start {
+            background: #0f172a;
+        }
+
+        .share-map-legend__dot--stop {
+            background: var(--teal);
+        }
+
+        .share-map-legend__line {
+            width: 18px;
+            height: 3px;
+            background: #0f766e;
+            border-radius: 2px;
+        }
+
+        .share-stops-title {
+            margin: 1.75rem 0 1rem;
+            font-family: "Noto Serif", Georgia, serif;
+            font-size: 1.25rem;
+            color: var(--ink);
+        }
+
+        .share-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .share-stop {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.85rem;
+            background: var(--card);
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1rem 1.1rem;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .share-stop__num {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 999px;
+            background: var(--teal);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .share-stop__name {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .share-stop__cat {
+            display: inline-block;
+            margin-top: 0.25rem;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: #ecfdf5;
+            color: #065f46;
+        }
+
+        .share-stop__cat--temple {
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .share-stop__cat--food {
+            background: #fff7ed;
+            color: #9a3412;
+        }
+
+        .share-stop__detail {
+            margin: 0.5rem 0 0;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: var(--muted);
+        }
+
+        .share-stop__time {
+            margin-top: 0.35rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .share-foot {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .share-foot a {
+            color: var(--amber);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .share-loading,
+        .share-error {
+            text-align: center;
+            padding: 4rem 1.5rem;
+        }
+
+        .share-error {
+            color: #b91c1c;
+            background: #fef2f2;
+            border-radius: 1rem;
+            border: 1px solid #fecaca;
+        }
+
+        .share-spinner {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 3px solid #e2e8f0;
+            border-top-color: var(--teal);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="share-shell">
+        <div id="shareLoading" class="share-loading">
+            <div class="share-spinner" aria-hidden="true"></div>
+            <p>Loading your trip itinerary…</p>
+        </div>
+        <div id="shareError" class="share-error hidden" role="alert"></div>
+        <div id="shareContent" class="hidden">
+            <p class="share-brand">
+                <span class="material-symbols-outlined" aria-hidden="true">temple_hindu</span>
+                GeoTrip Planner
+            </p>
+            <header class="share-hero">
+                <span class="share-hero__badge">
+                    <span class="material-symbols-outlined" style="font-size:1rem" aria-hidden="true">qr_code_2</span>
+                    Shared itinerary
+                </span>
+                <h1 id="sharePackageTitle">Trip package</h1>
+                <p id="sharePackageSub"></p>
+            </header>
+            <div class="share-meta" id="shareMeta"></div>
+            <section class="share-map-section" aria-labelledby="shareMapTitle">
+                <div class="share-map-section__head">
+                    <h2 id="shareMapTitle">
+                        <span class="material-symbols-outlined text-teal-700" aria-hidden="true">map</span>
+                        Trip map
+                    </h2>
+                    <p id="shareMapHint">Route order from your start through each selected stop.</p>
+                </div>
+                <div id="shareTripMap" role="img" aria-label="Map of your trip route"></div>
+                <div class="share-map-legend">
+                    <span><span class="share-map-legend__dot share-map-legend__dot--start" aria-hidden="true"></span> Start</span>
+                    <span><span class="share-map-legend__dot share-map-legend__dot--stop" aria-hidden="true"></span> Stops (in order)</span>
+                    <span><span class="share-map-legend__line" aria-hidden="true"></span> Driving route</span>
+                </div>
+            </section>
+            <h2 class="share-stops-title">Your route stops</h2>
+            <div class="share-timeline" id="shareStops"></div>
+            <p class="share-foot">
+                Powered by <strong>Geo-Intel Lab</strong>, IITTNiF, IIT Tirupati ·
+                <a href="packages.html">Plan on GeoTrip</a>
+            </p>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        (function () {
+            var OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving';
+            var shareId = (window.location.pathname.match(/\/trip\/([^/]+)/) || [])[1];
+            var loading = document.getElementById('shareLoading');
+            var errEl = document.getElementById('shareError');
+            var content = document.getElementById('shareContent');
+            var shareMap = null;
+
+            function escapeHtml(s) {
+                if (!s) return '';
+                var d = document.createElement('div');
+                d.textContent = String(s);
+                return d.innerHTML;
+            }
+
+            function catClass(key) {
+                if (key === 'temple') return 'share-stop__cat--temple';
+                if (key === 'food') return 'share-stop__cat--food';
+                return '';
+            }
+
+            function showError(msg) {
+                loading.classList.add('hidden');
+                content.classList.add('hidden');
+                errEl.classList.remove('hidden');
+                errEl.textContent = msg;
+            }
+
+            function renderMeta(trip) {
+                var pkg = trip.package || {};
+                var t = trip.trip || {};
+                var meta = document.getElementById('shareMeta');
+                var items = [];
+                if (pkg.displayRange) {
+                    items.push({ icon: 'payments', label: 'Budget', value: pkg.displayRange });
+                }
+                if (t.days) {
+                    items.push({ icon: 'calendar_month', label: 'Duration', value: t.days + ' day' + (t.days > 1 ? 's' : '') });
+                }
+                if (t.people) {
+                    items.push({ icon: 'group', label: 'Travellers', value: t.people + ' people' });
+                }
+                if (t.startLabel) {
+                    items.push({ icon: 'trip_origin', label: 'Start', value: t.startLabel, wide: true });
+                }
+                if (trip.routeNote) {
+                    items.push({ icon: 'route', label: 'Route', value: trip.routeNote, wide: true });
+                }
+                meta.innerHTML = items.map(function (it) {
+                    return (
+                        '<div class="share-meta__card' + (it.wide ? ' share-meta__card--wide' : '') + '">' +
+                        '<div class="share-meta__label"><span class="material-symbols-outlined" aria-hidden="true">' +
+                        it.icon + '</span>' + escapeHtml(it.label) + '</div>' +
+                        '<div class="share-meta__value">' + escapeHtml(it.value) + '</div></div>'
+                    );
+                }).join('');
+            }
+
+            function fetchOsrmRoute(latlngs) {
+                if (!latlngs || latlngs.length < 2) return Promise.resolve(null);
+                var path = latlngs
+                    .slice(0, 90)
+                    .map(function (p) {
+                        return p[1] + ',' + p[0];
+                    })
+                    .join(';');
+                return fetch(OSRM_BASE + '/' + path + '?overview=full&geometries=geojson')
+                    .then(function (r) {
+                        return r.json();
+                    })
+                    .then(function (j) {
+                        if (j.code !== 'Ok' || !j.routes || !j.routes[0]) return null;
+                        return j.routes[0].geometry.coordinates.map(function (c) {
+                            return [c[1], c[0]];
+                        });
+                    })
+                    .catch(function () {
+                        return null;
+                    });
+            }
+
+            function renderShareMap(trip) {
+                if (typeof L === 'undefined') return;
+                var t = trip.trip || {};
+                var stops = (trip.stops || []).filter(function (s) {
+                    return s.lat != null && s.lng != null && !isNaN(s.lat) && !isNaN(s.lng);
+                });
+                if (!stops.length && (t.startLat == null || t.startLng == null)) return;
+
+                var el = document.getElementById('shareTripMap');
+                if (!el) return;
+
+                if (shareMap) {
+                    shareMap.remove();
+                    shareMap = null;
+                }
+
+                shareMap = L.map(el, { zoomControl: true, scrollWheelZoom: true });
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap',
+                    maxZoom: 18
+                }).addTo(shareMap);
+
+                var bounds = [];
+                var hasStart = t.startLat != null && t.startLng != null && !isNaN(t.startLat) && !isNaN(t.startLng);
+
+                if (hasStart) {
+                    var startIcon = L.divIcon({
+                        className: '',
+                        html:
+                            '<div style="width:32px;height:32px;border-radius:50%;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;">⌂</div>',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    });
+                    L.marker([t.startLat, t.startLng], { icon: startIcon, zIndexOffset: 800 })
+                        .bindPopup('<strong>Start</strong><br>' + escapeHtml(t.startLabel || 'Your start point'))
+                        .addTo(shareMap);
+                    bounds.push([t.startLat, t.startLng]);
+                }
+
+                stops.forEach(function (s) {
+                    var num = s.order || '';
+                    var icon = L.divIcon({
+                        className: '',
+                        html:
+                            '<div style="min-width:26px;height:26px;padding:0 6px;border-radius:999px;background:#0d9488;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);">' +
+                            num +
+                            '</div>',
+                        iconSize: [26, 26],
+                        iconAnchor: [13, 13]
+                    });
+                    L.marker([s.lat, s.lng], { icon: icon, zIndexOffset: 400 + num })
+                        .bindPopup(
+                            '<strong>Stop ' + escapeHtml(String(num)) + '</strong><br>' + escapeHtml(s.name)
+                        )
+                        .addTo(shareMap);
+                    bounds.push([s.lat, s.lng]);
+                });
+
+                var waypoints = [];
+                if (hasStart) waypoints.push([t.startLat, t.startLng]);
+                stops.forEach(function (s) {
+                    waypoints.push([s.lat, s.lng]);
+                });
+
+                function drawPath(path, dashed) {
+                    if (!path || path.length < 2) return;
+                    L.polyline(path, {
+                        color: dashed ? '#94a3b8' : '#0f766e',
+                        weight: dashed ? 3 : 5,
+                        opacity: dashed ? 0.75 : 0.9,
+                        dashArray: dashed ? '8 6' : null
+                    }).addTo(shareMap);
+                }
+
+                if (trip.routePath && trip.routePath.length >= 2) {
+                    drawPath(trip.routePath, false);
+                } else if (waypoints.length >= 2) {
+                    fetchOsrmRoute(waypoints).then(function (coords) {
+                        drawPath(coords && coords.length >= 2 ? coords : waypoints, !(coords && coords.length >= 2));
+                    });
+                }
+
+                if (bounds.length) {
+                    shareMap.fitBounds(bounds, { padding: [28, 28], maxZoom: 13 });
+                } else {
+                    shareMap.setView([13.6288, 79.4192], 11);
+                }
+                window.setTimeout(function () {
+                    if (shareMap) shareMap.invalidateSize();
+                }, 300);
+            }
+
+            function renderStops(stops) {
+                var root = document.getElementById('shareStops');
+                root.innerHTML = '';
+                (stops || []).forEach(function (s) {
+                    var el = document.createElement('article');
+                    el.className = 'share-stop';
+                    var timings = (s.timings || '').replace(/\|/g, ', ');
+                    el.innerHTML =
+                        '<div class="share-stop__num">' + (s.order || '') + '</div>' +
+                        '<div><h3 class="share-stop__name">' + escapeHtml(s.name) + '</h3>' +
+                        '<span class="share-stop__cat ' + catClass(s.categoryKey) + '">' + escapeHtml(s.category || 'Place') + '</span>' +
+                        (s.description ? '<p class="share-stop__detail">' + escapeHtml(s.description) + '</p>' : '') +
+                        (timings ? '<p class="share-stop__time"><span class="material-symbols-outlined" style="font-size:1rem" aria-hidden="true">schedule</span>' +
+                            escapeHtml(timings) + '</p>' : '') +
+                        '</div>';
+                    root.appendChild(el);
+                });
+            }
+
+            if (!shareId) {
+                showError('Invalid share link.');
+                return;
+            }
+
+            fetch('/api/package-share/' + encodeURIComponent(shareId))
+                .then(function (r) {
+                    return r.json().then(function (data) {
+                        return { ok: r.ok, data: data };
+                    });
+                })
+                .then(function (res) {
+                    if (!res.ok || !res.data.trip) {
+                        showError((res.data && res.data.message) || 'This trip link is no longer available.');
+                        return;
+                    }
+                    var trip = res.data.trip;
+                    var pkg = trip.package || {};
+                    document.getElementById('sharePackageTitle').textContent =
+                        pkg.title || pkg.shortTitle || 'Your GeoTrip package';
+                    document.getElementById('sharePackageSub').textContent =
+                        (pkg.displayRange ? pkg.displayRange + ' · ' : '') +
+                        (trip.stops ? trip.stops.length : 0) + ' stops · nearest-next route from your start';
+                    renderMeta(trip);
+                    renderStops(trip.stops);
+                    loading.classList.add('hidden');
+                    content.classList.remove('hidden');
+                    renderShareMap(trip);
+                })
+                .catch(function () {
+                    showError('Could not load trip details. Check your connection and try again.');
+                });
+        })();
+    </script>
+</body>
+
+</html>

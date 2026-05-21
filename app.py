@@ -1,9 +1,14 @@
 import os
+import io
 import json
+import socket
 import requests
 import random
+import uuid
+from threading import Lock
+from urllib.parse import quote, urlparse
 from datetime import datetime, timedelta, timezone
-from flask import Flask, request, jsonify, send_from_directory, session
+from flask import Flask, request, jsonify, send_from_directory, send_file, redirect, session
 from flask_cors import CORS
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -113,6 +118,134 @@ def chrome_devtools():
 @app.route('/favicon.ico')
 def favicon():
     return '', 204
+
+# In-memory store for package trip QR shares (scan opens /trip/<id>)
+_package_shares = {}
+_package_shares_lock = Lock()
+
+_LOCAL_HOSTS = frozenset({'127.0.0.1', 'localhost', '::1'})
+
+
+def _get_lan_ip():
+    """Best-effort LAN IPv4 so phone QR scans work (not localhost)."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(0.4)
+        sock.connect(('8.8.8.8', 80))
+        ip = sock.getsockname()[0]
+        sock.close()
+        return ip
+    except OSError:
+        return None
+
+
+def get_share_base_url(client_origin=None):
+    """
+    Base URL encoded in QR codes. Phones cannot open 127.0.0.1 on your PC.
+    Priority: PUBLIC_BASE_URL env > client origin (if not local) > LAN IP > request host.
+    """
+    explicit = (os.getenv('PUBLIC_BASE_URL') or '').strip().rstrip('/')
+    if explicit:
+        return explicit
+
+    try:
+        port = str(urlparse(request.host_url).port or int(os.getenv('PORT', '5000')))
+    except (TypeError, ValueError):
+        port = os.getenv('PORT', '5000')
+
+    if client_origin:
+        try:
+            parsed = urlparse(client_origin)
+            host = (parsed.hostname or '').lower()
+            if host and host not in _LOCAL_HOSTS:
+                scheme = parsed.scheme or 'http'
+                netloc = parsed.netloc or host
+                return f'{scheme}://{netloc}'.rstrip('/')
+        except Exception:
+            pass
+
+    req_host = (request.host or '').split(':')[0].lower()
+    if req_host in _LOCAL_HOSTS:
+        lan = _get_lan_ip()
+        if lan:
+            return f'http://{lan}:{port}'
+
+    return request.host_url.rstrip('/')
+
+
+def _trip_share_url(share_id, payload=None, client_origin=None):
+    if payload and payload.get('shareUrl'):
+        return payload['shareUrl']
+    return f"{get_share_base_url(client_origin)}/trip/{share_id}"
+
+
+@app.route('/api/package-share', methods=['POST'])
+def create_package_share():
+    data = request.get_json(silent=True) or {}
+    stops = data.get('stops')
+    if not stops or not isinstance(stops, list):
+        return jsonify({'status': 'error', 'message': 'Trip must include at least one stop.'}), 400
+    share_id = uuid.uuid4().hex[:12]
+    client_origin = data.get('clientOrigin')
+    trip_url = _trip_share_url(share_id, client_origin=client_origin)
+    data['sharedAt'] = datetime.now(timezone.utc).isoformat()
+    data['shareUrl'] = trip_url
+    with _package_shares_lock:
+        _package_shares[share_id] = data
+    return jsonify({
+        'status': 'ok',
+        'shareId': share_id,
+        'url': trip_url,
+        'scanHint': 'Phone must be on the same Wi‑Fi as this computer.',
+    })
+
+
+@app.route('/api/package-share/<share_id>', methods=['GET', 'PATCH'])
+def package_share_detail(share_id):
+    if request.method == 'PATCH':
+        patch = request.get_json(silent=True) or {}
+        with _package_shares_lock:
+            payload = _package_shares.get(share_id)
+            if not payload:
+                return jsonify({'status': 'error', 'message': 'Share not found.'}), 404
+            if 'routePath' in patch and isinstance(patch['routePath'], list):
+                payload['routePath'] = patch['routePath']
+            if 'trip' in patch and isinstance(patch['trip'], dict):
+                payload.setdefault('trip', {}).update(patch['trip'])
+        return jsonify({'status': 'ok'})
+
+    with _package_shares_lock:
+        payload = _package_shares.get(share_id)
+    if not payload:
+        return jsonify({'status': 'error', 'message': 'Share link expired or not found.'}), 404
+    return jsonify({'status': 'ok', 'trip': payload})
+
+
+@app.route('/trip/<share_id>')
+def trip_share_page(share_id):
+    return send_from_directory('.', 'trip-share.html')
+
+
+@app.route('/api/package-share/<share_id>/qr.png')
+def package_share_qr_png(share_id):
+    with _package_shares_lock:
+        payload = _package_shares.get(share_id)
+    if not payload:
+        return jsonify({'status': 'error', 'message': 'Share not found.'}), 404
+    trip_url = _trip_share_url(share_id, payload=payload)
+    try:
+        import qrcode
+        buf = io.BytesIO()
+        qrcode.make(trip_url).save(buf, format='PNG')
+        buf.seek(0)
+        return send_file(buf, mimetype='image/png', max_age=300)
+    except Exception:
+        return redirect(
+            'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data='
+            + quote(trip_url, safe=''),
+            code=302,
+        )
+
 
 # Authentication Routes
 @app.route('/api/auth/register', methods=['POST'])
