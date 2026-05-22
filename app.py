@@ -546,9 +546,15 @@ def package_share_detail(share_id):
     return jsonify({'status': 'ok', 'trip': payload})
 
 
+@app.route('/trip/<share_id>/<path:subpath>')
+def trip_share_nested_assets(share_id, subpath):
+    """Serve images, scripts, CSV, etc. when the share page is opened at /trip/<id> (relative URLs)."""
+    return send_from_directory('.', subpath)
+
+
 @app.route('/trip/<share_id>')
 def trip_share_page(share_id):
-    return send_from_directory('.', 'trip-share.html')
+    return send_from_directory('.', 'packages.html')
 
 
 @app.route('/api/package-share/<share_id>/qr.png')
