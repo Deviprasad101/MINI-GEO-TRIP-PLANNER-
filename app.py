@@ -727,6 +727,19 @@ def auth_me():
 
 
 # --- Temple QR visit flow ---
+@app.route('/user/<identifier>/<path:subpath>')
+def user_scan_nested_assets(identifier, subpath):
+    """Serve images/scripts when staff opens /user/<token> (relative URLs on main_page)."""
+    if not is_valid_qr_token(identifier):
+        return (
+            '<!DOCTYPE html><html><body style="font-family:sans-serif;padding:2rem;text-align:center">'
+            '<h1>Invalid QR link</h1><p>This personal temple QR link is not valid.</p></body></html>',
+            400,
+            {'Content-Type': 'text/html; charset=utf-8'},
+        )
+    return send_from_directory('.', subpath)
+
+
 @app.route('/user/<identifier>')
 def user_scan_page(identifier):
     if not is_valid_qr_token(identifier):
@@ -736,7 +749,7 @@ def user_scan_page(identifier):
             400,
             {'Content-Type': 'text/html; charset=utf-8'},
         )
-    return send_from_directory('.', 'temple-scan.html')
+    return send_from_directory('.', 'main_page.html')
 
 
 @app.route('/api/qr/validate/<token>', methods=['GET'])

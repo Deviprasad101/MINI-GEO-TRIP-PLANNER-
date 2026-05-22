@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <base href="/" id="appDocumentBase" />
     <title>Tirupati GeoTrip Planner</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
@@ -1219,13 +1220,8 @@
 
             .mobile-nav-backdrop,
             .mobile-nav-panel,
-            .cat-rail-card,
-            .testimonial-card {
+            .cat-rail-card {
                 transition: none;
-            }
-
-            .testimonial-card:hover {
-                transform: none;
             }
         }
 
@@ -1250,112 +1246,6 @@
 
         .drawer-nav a:hover {
             background: #fef3c7;
-        }
-
-        .testimonial-card {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            border-radius: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.08);
-            padding: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-        }
-
-        .testimonial-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            border-radius: 1.5rem 1.5rem 0 0;
-            background: linear-gradient(90deg, #d97706, #fbbf24);
-            opacity: 0.7;
-        }
-
-        .testimonial-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px -15px rgba(217, 119, 6, 0.15);
-            background: #ffffff;
-            border-color: #fcd34d;
-        }
-
-        .testimonial-card__quote-icon {
-            font-size: 2rem !important;
-            color: #d97706;
-            opacity: 0.15;
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-        }
-
-        .testimonial-card__stars {
-            color: #f59e0b;
-            letter-spacing: 0.1em;
-            font-size: 0.8rem;
-            margin-bottom: 0.75rem;
-            display: flex;
-            gap: 2px;
-        }
-
-        .testimonial-card__quote {
-            margin: 0;
-            flex: 1;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #1f2937;
-            font-style: italic;
-            position: relative;
-            z-index: 1;
-        }
-
-        .testimonial-card__footer {
-            margin-top: 1.25rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(243, 244, 246, 1);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .testimonial-card__avatar {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 9999px;
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            color: #92400e;
-            font-size: 0.75rem;
-            flex-shrink: 0;
-        }
-
-        .testimonial-card__info {
-            min-width: 0;
-        }
-
-        .testimonial-card__name {
-            font-weight: 800;
-            font-size: 0.9rem;
-            color: #111827;
-            display: block;
-        }
-
-        .testimonial-card__meta {
-            font-size: 0.75rem;
-            color: #6b7280;
-            display: block;
-            margin-top: 0.1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .planner-preflight-dialog {
@@ -2332,12 +2222,246 @@
             text-align: left;
             color: var(--gov-text);
         }
+        /* Temple staff QR scan — /user/<token> (from temple-scan.html) */
+        body.main-temple-scan-view {
+            overflow: auto !important;
+            height: auto !important;
+            max-height: none !important;
+            background: linear-gradient(165deg, #fffbeb 0%, #f0fdfa 55%, #eff6ff 100%) !important;
+        }
+
+        body.main-temple-scan-view .site-header,
+        body.main-temple-scan-view #mainContent,
+        body.main-temple-scan-view #emergencyFab,
+        body.main-temple-scan-view #emergencyBackdrop,
+        body.main-temple-scan-view #emergencyPanel,
+        body.main-temple-scan-view #mobileNavBackdrop,
+        body.main-temple-scan-view #mobileNavPanel,
+        body.main-temple-scan-view .skip-link {
+            display: none !important;
+        }
+
+        .temple-staff-scan {
+            display: none;
+            min-height: 100vh;
+            padding: 1.25rem;
+            font-family: "Public Sans", system-ui, sans-serif;
+            color: #0f172a;
+        }
+
+        body.main-temple-scan-view .temple-staff-scan {
+            display: block !important;
+        }
+
+        .temple-staff-scan__wrap {
+            max-width: 28rem;
+            margin: 0 auto;
+        }
+
+        .temple-staff-scan__brand {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .temple-staff-scan__brand h1 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 800;
+        }
+
+        .temple-staff-scan__brand p {
+            margin: 0.35rem 0 0;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .temple-staff-scan__card {
+            background: #fff;
+            border-radius: 1.25rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+            padding: 1.5rem;
+        }
+
+        .temple-staff-scan__loading,
+        .temple-staff-scan__error {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #64748b;
+        }
+
+        .temple-staff-scan__error {
+            color: #b91c1c;
+            background: #fef2f2;
+            border-radius: 1rem;
+            border: 1px solid #fecaca;
+        }
+
+        .temple-staff-scan__user-banner {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #fef3c7, #ecfdf5);
+            margin-bottom: 1.25rem;
+        }
+
+        .temple-staff-scan__user-banner strong {
+            display: block;
+            font-size: 1.15rem;
+        }
+
+        .temple-staff-scan__user-banner span {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .temple-staff-scan__section-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #0d9488;
+            margin: 0 0 0.75rem;
+        }
+
+        .temple-staff-scan__search {
+            width: 100%;
+            padding: 0.65rem 0.85rem 0.65rem 2.35rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2364748b' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") no-repeat 0.65rem center / 1.1rem;
+        }
+
+        .temple-staff-scan__search:focus {
+            outline: none;
+            border-color: #5eead4;
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+        }
+
+        .temple-staff-scan__search-meta {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0 0 0.65rem;
+        }
+
+        .temple-staff-scan__list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .temple-staff-scan__btn {
+            width: 100%;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.85rem;
+            padding: 0.85rem 1rem;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .temple-staff-scan__btn:hover:not(:disabled) {
+            border-color: #99f6e4;
+            box-shadow: 0 6px 18px rgba(13, 148, 136, 0.12);
+        }
+
+        .temple-staff-scan__btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .temple-staff-scan__btn-short {
+            font-weight: 800;
+            font-size: 1rem;
+            display: block;
+        }
+
+        .temple-staff-scan__btn-full {
+            font-size: 0.82rem;
+            color: #64748b;
+            margin-top: 0.2rem;
+            display: block;
+        }
+
+        .temple-staff-toast-host {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 92vw;
+            pointer-events: none;
+        }
+
+        .temple-staff-toast {
+            padding: 0.85rem 1.1rem;
+            border-radius: 0.85rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+            animation: templeStaffToastIn 0.3s ease;
+        }
+
+        .temple-staff-toast--ok {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #6ee7b7;
+        }
+
+        .temple-staff-toast--err {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        @keyframes templeStaffToastIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
 <body
     class="font-body-md flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-slate-100 text-on-surface antialiased">
     <a class="skip-link" href="#mainContent">Skip to main content</a>
+
+    <div id="templeStaffScanRoot" class="temple-staff-scan hidden" aria-hidden="true">
+        <div class="temple-staff-scan__wrap">
+            <div class="temple-staff-scan__brand">
+                <h1>Temple check-in</h1>
+                <p>GeoTrip Planner · scan visitor QR</p>
+            </div>
+            <div id="templeStaffLoading" class="temple-staff-scan__card temple-staff-scan__loading">Validating QR…</div>
+            <div id="templeStaffError" class="temple-staff-scan__card temple-staff-scan__error hidden" role="alert"></div>
+            <div id="templeStaffPanel" class="temple-staff-scan__card hidden">
+                <div class="temple-staff-scan__user-banner">
+                    <span class="material-symbols-outlined" style="color:#d97706;font-size:2rem;">person</span>
+                    <strong id="templeStaffVisitorName">Visitor</strong>
+                    <span id="templeStaffVisitorMeta">Checking in</span>
+                </div>
+                <p class="temple-staff-scan__section-title">Select temple</p>
+                <input type="search" id="templeStaffSearch" class="temple-staff-scan__search"
+                    placeholder="Search temples…" autocomplete="off" aria-label="Search temples" />
+                <p id="templeStaffSearchMeta" class="temple-staff-scan__search-meta"></p>
+                <div id="templeStaffList" class="temple-staff-scan__list" role="list"></div>
+            </div>
+        </div>
+    </div>
+    <div id="templeStaffToastHost" class="temple-staff-toast-host hidden" aria-live="polite"></div>
 
     <header class="site-header sticky top-0 z-50 shrink-0 border-b border-amber-200/60 bg-white/95 backdrop-blur-md">
         <div
@@ -2997,109 +3121,6 @@
                     <div id="pkgTripMap" class="w-full rounded-xl border border-slate-200 bg-slate-100 shadow-inner"
                         style="min-height:min(75vh,650px);z-index:1" aria-label="Interactive map"></div>
                 </section>
-
-                <section id="testimonials" class="rounded-[2.5rem] bg-gradient-to-tr from-blue-50 via-white to-amber-100 p-6 shadow-sm sm:p-10 lg:p-12 space-y-6 sm:space-y-8" aria-labelledby="testimonialsHeading">
-                    <div class="text-center sm:text-left">
-                        <h2 id="testimonialsHeading"
-                            class="font-headline-lg text-2xl font-bold text-on-surface sm:text-3xl">What travellers say
-                        </h2>
-                        <p class="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant sm:text-base mx-auto sm:mx-0">Hear from our community of pilgrims and explorers who crafted their perfect journey with GeoTrip.</p>
-                    </div>
-                    
-                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        <figure class="testimonial-card">
-                            <span class="material-symbols-outlined testimonial-card__quote-icon">format_quote</span>
-                            <div class="testimonial-card__stars" aria-hidden="true">★★★★★</div>
-                            <blockquote class="testimonial-card__quote">
-                                <p>“The map-first flow helped us cluster food and temple stops without
-                                    doubling back. Distance hints matched what we saw on the ground.”</p>
-                            </blockquote>
-                            <figcaption class="testimonial-card__footer">
-                                <div class="testimonial-card__avatar">PR</div>
-                                <div class="testimonial-card__info">
-                                    <cite class="testimonial-card__name">Priya R.</cite>
-                                    <span class="testimonial-card__meta">Family trip · Chennai</span>
-                                </div>
-                            </figcaption>
-                        </figure>
-                        <figure class="testimonial-card">
-                            <span class="material-symbols-outlined testimonial-card__quote-icon">format_quote</span>
-                            <div class="testimonial-card__stars" aria-hidden="true">★★★★★</div>
-                            <blockquote class="testimonial-card__quote">
-                                <p>“Budget splitter plus the planner gave our group a simple per-person
-                                    picture before we booked stays. Clear and quick.”</p>
-                            </blockquote>
-                            <figcaption class="testimonial-card__footer">
-                                <div class="testimonial-card__avatar">AM</div>
-                                <div class="testimonial-card__info">
-                                    <cite class="testimonial-card__name">Arjun M.</cite>
-                                    <span class="testimonial-card__meta">Friends · Hyderabad</span>
-                                </div>
-                            </figcaption>
-                        </figure>
-                        <figure class="testimonial-card">
-                            <span class="material-symbols-outlined testimonial-card__quote-icon">format_quote</span>
-                            <div class="testimonial-card__stars" aria-hidden="true">★★★★☆</div>
-                            <blockquote class="testimonial-card__quote">
-                                <p>“Loved filtering by sightseeing and wildlife. The CSV-backed counts made
-                                    it easy to argue for one extra half-day in the hills.”</p>
-                            </blockquote>
-                            <figcaption class="testimonial-card__footer">
-                                <div class="testimonial-card__avatar">LK</div>
-                                <div class="testimonial-card__info">
-                                    <cite class="testimonial-card__name">Lakshmi K.</cite>
-                                    <span class="testimonial-card__meta">Solo traveller · Bengaluru</span>
-                                </div>
-                            </figcaption>
-                        </figure>
-                        <figure class="testimonial-card">
-                            <span class="material-symbols-outlined testimonial-card__quote-icon">format_quote</span>
-                            <div class="testimonial-card__stars" aria-hidden="true">★★★★★</div>
-                            <blockquote class="testimonial-card__quote">
-                                <p>“The booking options page gave us quick fare expectations from Tirupati
-                                    to Tirumala before finalizing the day plan.”</p>
-                            </blockquote>
-                            <figcaption class="testimonial-card__footer">
-                                <div class="testimonial-card__avatar">NT</div>
-                                <div class="testimonial-card__info">
-                                    <cite class="testimonial-card__name">Naveen T.</cite>
-                                    <span class="testimonial-card__meta">Weekend trip · Vijayawada</span>
-                                </div>
-                            </figcaption>
-                        </figure>
-                        <figure class="testimonial-card">
-                            <span class="material-symbols-outlined testimonial-card__quote-icon">format_quote</span>
-                            <div class="testimonial-card__stars" aria-hidden="true">★★★★☆</div>
-                            <blockquote class="testimonial-card__quote">
-                                <p>“Category chips and quick search were super useful. We locked temple +
-                                    food stops in under ten minutes.”</p>
-                            </blockquote>
-                            <figcaption class="testimonial-card__footer">
-                                <div class="testimonial-card__avatar">SP</div>
-                                <div class="testimonial-card__info">
-                                    <cite class="testimonial-card__name">Sowmya P.</cite>
-                                    <span class="testimonial-card__meta">Parents + kids · Nellore</span>
-                                </div>
-                            </figcaption>
-                        </figure>
-                        <figure class="testimonial-card">
-                            <span class="material-symbols-outlined testimonial-card__quote-icon">format_quote</span>
-                            <div class="testimonial-card__stars" aria-hidden="true">★★★★★</div>
-                            <blockquote class="testimonial-card__quote">
-                                <p>“Per-person split helped our 5-member group settle costs calmly. The UI
-                                    is simple enough for everyone to follow.”</p>
-                            </blockquote>
-                            <figcaption class="testimonial-card__footer">
-                                <div class="testimonial-card__avatar">RS</div>
-                                <div class="testimonial-card__info">
-                                    <cite class="testimonial-card__name">Rahul S.</cite>
-                                    <span class="testimonial-card__meta">Friends group · Tirupati</span>
-                                </div>
-                            </figcaption>
-                        </figure>
-                    </div>
-                </section>
-
 
             </div>
 
@@ -6014,7 +6035,211 @@
     })();
     </script>
     <script>
+        (function () {
+            var pathParts = window.location.pathname.split('/').filter(Boolean);
+            var staffScanToken =
+                pathParts.length >= 2 && pathParts[0] === 'user' ? decodeURIComponent(pathParts[1]) : '';
+
+            if (staffScanToken) {
+                window.__GTP_TEMPLE_SCAN__ = staffScanToken;
+                document.body.classList.add('main-temple-scan-view');
+                document.title = 'Temple check-in — GeoTrip Planner';
+
+                var scanRoot = document.getElementById('templeStaffScanRoot');
+                var toastHost = document.getElementById('templeStaffToastHost');
+                if (scanRoot) {
+                    scanRoot.classList.remove('hidden');
+                    scanRoot.setAttribute('aria-hidden', 'false');
+                }
+                if (toastHost) toastHost.classList.remove('hidden');
+
+                var loadingState = document.getElementById('templeStaffLoading');
+                var errorState = document.getElementById('templeStaffError');
+                var mainPanel = document.getElementById('templeStaffPanel');
+                var visitorName = document.getElementById('templeStaffVisitorName');
+                var visitorMeta = document.getElementById('templeStaffVisitorMeta');
+                var templeList = document.getElementById('templeStaffList');
+                var templeSearch = document.getElementById('templeStaffSearch');
+                var templeSearchMeta = document.getElementById('templeStaffSearchMeta');
+                var allTemples = [];
+                var searchDebounce = null;
+
+                function staffToast(msg, ok) {
+                    if (!toastHost) return;
+                    var el = document.createElement('div');
+                    el.className = 'temple-staff-toast ' + (ok ? 'temple-staff-toast--ok' : 'temple-staff-toast--err');
+                    el.textContent = msg;
+                    toastHost.appendChild(el);
+                    setTimeout(function () {
+                        el.remove();
+                    }, 5000);
+                }
+
+                function staffShowError(msg) {
+                    if (loadingState) loadingState.classList.add('hidden');
+                    if (mainPanel) mainPanel.classList.add('hidden');
+                    if (errorState) {
+                        errorState.classList.remove('hidden');
+                        errorState.textContent = msg;
+                    }
+                }
+
+                function staffEscapeHtml(s) {
+                    var d = document.createElement('div');
+                    d.textContent = s == null ? '' : String(s);
+                    return d.innerHTML;
+                }
+
+                function staffUpdateSearchMeta(count, q) {
+                    if (!templeSearchMeta) return;
+                    templeSearchMeta.textContent =
+                        count + ' temple(s)' + (q ? ' matching "' + q + '"' : ' from Tirupati dataset');
+                }
+
+                function staffRenderTempleButtons(temples) {
+                    if (!templeList) return;
+                    templeList.innerHTML = '';
+                    if (!temples.length) {
+                        templeList.innerHTML =
+                            '<p class="temple-staff-scan__search-meta">No temples match your search.</p>';
+                        return;
+                    }
+                    temples.forEach(function (t, idx) {
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'temple-staff-scan__btn';
+                        btn.innerHTML =
+                            '<span class="temple-staff-scan__btn-short">' +
+                            (idx + 1) +
+                            '. ' +
+                            staffEscapeHtml(t.templeName) +
+                            '</span>' +
+                            '<span class="temple-staff-scan__btn-full">' +
+                            staffEscapeHtml(t.fullName) +
+                            '</span>';
+                        btn.addEventListener('click', function () {
+                            staffRecordVisit(t, btn);
+                        });
+                        templeList.appendChild(btn);
+                    });
+                    staffUpdateSearchMeta(temples.length, templeSearch ? templeSearch.value.trim() : '');
+                }
+
+                function staffRecordVisit(temple, btn) {
+                    if (!templeList) return;
+                    templeList.querySelectorAll('.temple-staff-scan__btn').forEach(function (b) {
+                        b.disabled = true;
+                    });
+                    fetch('/api/temple-visits', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userToken: staffScanToken, templeId: temple.id })
+                    })
+                        .then(function (r) {
+                            return r.json();
+                        })
+                        .then(function (data) {
+                            if (data.status === 'ok') {
+                                staffToast(
+                                    data.message +
+                                        ' — ' +
+                                        ((data.temple && data.temple.templeName) || temple.templeName),
+                                    true
+                                );
+                            } else {
+                                staffToast(data.message || 'Check-in failed.', false);
+                            }
+                        })
+                        .catch(function () {
+                            staffToast('Network error.', false);
+                        })
+                        .finally(function () {
+                            templeList.querySelectorAll('.temple-staff-scan__btn').forEach(function (b) {
+                                b.disabled = false;
+                            });
+                        });
+                }
+
+                fetch('/api/qr/validate/' + encodeURIComponent(staffScanToken))
+                    .then(function (r) {
+                        return r.json().then(function (d) {
+                            return { ok: r.ok, d: d };
+                        });
+                    })
+                    .then(function (res) {
+                        if (!res.d.valid && res.d.status !== 'ok') {
+                            staffShowError(res.d.message || 'Invalid or expired QR token.');
+                            return null;
+                        }
+                        return Promise.all([
+                            Promise.resolve(res.d),
+                            fetch('/api/scan-user/' + encodeURIComponent(staffScanToken)).then(function (r) {
+                                return r.json();
+                            }),
+                            fetch('/api/temples').then(function (r) {
+                                return r.json();
+                            })
+                        ]);
+                    })
+                    .then(function (results) {
+                        if (!results) return;
+                        var userRes = results[1];
+                        var templeRes = results[2];
+                        if (userRes.status !== 'ok') {
+                            staffShowError(userRes.message || 'User not found.');
+                            return;
+                        }
+                        if (templeRes.status !== 'ok' || !templeRes.temples || !templeRes.temples.length) {
+                            staffShowError('No temples loaded. Restart server to sync tirupati_main_data.csv.');
+                            return;
+                        }
+                        if (loadingState) loadingState.classList.add('hidden');
+                        if (mainPanel) mainPanel.classList.remove('hidden');
+                        if (visitorName) visitorName.textContent = userRes.user.name || 'Visitor';
+                        if (visitorMeta) {
+                            visitorMeta.textContent = userRes.user.phone
+                                ? 'Phone: ' + userRes.user.phone
+                                : 'Verified QR';
+                        }
+                        allTemples = templeRes.temples;
+                        staffRenderTempleButtons(allTemples);
+                        if (templeSearch) {
+                            templeSearch.addEventListener('input', function () {
+                                clearTimeout(searchDebounce);
+                                var q = templeSearch.value;
+                                searchDebounce = setTimeout(function () {
+                                    if (!q.trim()) {
+                                        staffRenderTempleButtons(allTemples);
+                                        staffUpdateSearchMeta(allTemples.length, '');
+                                        return;
+                                    }
+                                    fetch('/api/temples?q=' + encodeURIComponent(q.trim()))
+                                        .then(function (r) {
+                                            return r.json();
+                                        })
+                                        .then(function (d) {
+                                            if (d.status === 'ok') {
+                                                staffRenderTempleButtons(d.temples);
+                                                staffUpdateSearchMeta(d.count, q.trim());
+                                            }
+                                        });
+                                }, 280);
+                            });
+                        }
+                    })
+                    .catch(function () {
+                        staffShowError('Could not validate QR. Check connection.');
+                    });
+
+                return;
+            }
+        })();
+    </script>
+    <script>
         (function() {
+            if (window.__GTP_TEMPLE_SCAN__) {
+                return;
+            }
             const userStr = localStorage.getItem('currentUser');
             if (!userStr) {
                 window.location.href = '/';
