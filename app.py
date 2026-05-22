@@ -1,13 +1,18 @@
 import os
 import io
 import json
+import re
+import csv
 import socket
+import secrets
 import requests
 import random
 import uuid
 from threading import Lock
 from urllib.parse import quote, urlparse
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
+from sqlalchemy import inspect, text
+from sqlalchemy.exc import ProgrammingError
 from flask import Flask, request, jsonify, send_from_directory, send_file, redirect, session
 from flask_cors import CORS
 from flask_mail import Mail, Message
@@ -45,19 +50,339 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    phone = db.Column(db.String(20), nullable=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    qr_token = db.Column(db.String(32), unique=True, nullable=True, index=True)
     is_verified = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
-    def __init__(self, username, email, password_hash, is_verified=False):
+    def __init__(self, username, email, password_hash, phone=None, is_verified=False, qr_token=None):
         self.username = username
         self.email = email
         self.password_hash = password_hash
+        self.phone = phone
         self.is_verified = is_verified
+        self.qr_token = qr_token
 
-# Create tables
-with app.app_context():
+
+class Temple(db.Model):
+    __tablename__ = 'temples'
+    id = db.Column(db.Integer, primary_key=True)
+    csv_name = db.Column(db.String(200), unique=True, nullable=True, index=True)
+    temple_name = db.Column(db.String(120), nullable=False)
+    full_name = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200), nullable=True)
+    lat = db.Column(db.Float, nullable=True)
+    lng = db.Column(db.Float, nullable=True)
+
+
+class TempleVisit(db.Model):
+    __tablename__ = 'temple_visits'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    temple_id = db.Column(db.Integer, db.ForeignKey('temples.id'), nullable=False, index=True)
+    visit_date = db.Column(db.Date, nullable=False, index=True)
+    visit_count = db.Column(db.Integer, default=1, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
+    updated_at = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(),
+        onupdate=lambda: datetime.now(),
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'temple_id', 'visit_date', name='uq_user_temple_day'),
+    )
+
+    user = db.relationship('User', backref=db.backref('temple_visits', lazy=True))
+    temple = db.relationship('Temple', backref=db.backref('visits', lazy=True))
+
+
+TIRUPATI_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tirupati_main_data.csv')
+TEMPLE_VISIT_COOLDOWN_MINUTES = max(1, int(os.getenv('TEMPLE_VISIT_COOLDOWN_MINUTES', '10')))
+
+
+QR_TOKEN_PATTERN = re.compile(r'^(GTP-USER-[A-Z0-9]{8}|GTX-[A-Z0-9]{5})$', re.IGNORECASE)
+
+
+def generate_qr_token():
+    """Secure personal QR token, e.g. GTP-USER-8F3K9X2P"""
+    while True:
+        token = f"GTP-USER-{secrets.token_hex(4).upper()}"
+        if not User.query.filter_by(qr_token=token).first():
+            return token
+
+
+def is_valid_qr_token(token):
+    if not token:
+        return False
+    return bool(QR_TOKEN_PATTERN.match(str(token).strip().upper()))
+
+
+def ensure_qr_token(user):
+    """Assign token once per user; never regenerate if already set."""
+    if not user:
+        return None
+    existing = (user.qr_token or '').strip().upper()
+    if existing and is_valid_qr_token(existing):
+        if user.qr_token != existing:
+            user.qr_token = existing
+            db.session.commit()
+        return existing
+    token = generate_qr_token()
+    user.qr_token = token
+    db.session.commit()
+    return token
+
+
+def resolve_user(identifier):
+    """Resolve visitor by secure QR token only (not numeric user id)."""
+    if not identifier:
+        return None
+    ident = str(identifier).strip().upper()
+    if ident.isdigit():
+        return None
+    if not is_valid_qr_token(ident):
+        return None
+    return User.query.filter_by(qr_token=ident).first()
+
+
+def _record_visit_for_user(user, temple_id):
+    temple = db.session.get(Temple, int(temple_id))
+    if not temple:
+        return None, {'message': 'Temple not found.'}, 404
+
+    today = date.today()
+    now = _visit_now()
+    cooldown_sec = _cooldown_seconds()
+    cooldown_min = cooldown_sec // 60
+
+    visit = TempleVisit.query.filter_by(
+        user_id=user.id,
+        temple_id=temple.id,
+        visit_date=today,
+    ).first()
+
+    if visit:
+        # Same temple today already checked in — enforce 10 min gap (only updated_at)
+        if (visit.visit_count or 0) >= 1 and visit.updated_at:
+            last_touch = _visit_dt_from_db(visit.updated_at)
+            if last_touch:
+                elapsed_sec = (now - last_touch).total_seconds()
+                # Negative = clock skew / TZ mismatch → do not block with huge wait
+                if 0 <= elapsed_sec < cooldown_sec:
+                    wait_sec = int(cooldown_sec - elapsed_sec)
+                    wait_sec = max(1, min(wait_sec, cooldown_sec))
+                    return None, {
+                        'message': _cooldown_message(wait_sec),
+                        'cooldown': True,
+                        'retryAfterSeconds': wait_sec,
+                        'cooldownMinutes': cooldown_min,
+                    }, 429
+        visit.visit_count = (visit.visit_count or 0) + 1
+        visit.updated_at = now
+        count = visit.visit_count
+        is_first = False
+    else:
+        visit = TempleVisit(
+            user_id=user.id,
+            temple_id=temple.id,
+            visit_date=today,
+            visit_count=1,
+            created_at=now,
+            updated_at=now,
+        )
+        db.session.add(visit)
+        count = 1
+        is_first = True
+
+    db.session.commit()
+    return {
+        'status': 'ok',
+        'isFirstVisitToday': is_first,
+        'visitCount': count,
+        'message': visit_message(count),
+        'cooldownMinutes': cooldown_min,
+        'temple': {
+            'id': temple.id,
+            'templeName': temple.temple_name,
+            'fullName': temple.full_name,
+            'location': temple.location or '',
+        },
+        'user': {'id': user.id, 'name': user.username},
+        'visitDate': today.isoformat(),
+    }, None, 200
+
+
+def user_public_dict(user, client_origin=None):
+    token = ensure_qr_token(user)
+    base = get_share_base_url(client_origin)
+    return {
+        'id': user.id,
+        'name': user.username,
+        'email': user.email,
+        'phone': user.phone or '',
+        'qrToken': token,
+        'qrUrl': f'{base}/user/{token}',
+    }
+
+
+def visit_message(count):
+    if count <= 1:
+        return 'Welcome! This is your first visit today.'
+    suffix = 'th'
+    if count % 10 == 1 and count % 100 != 11:
+        suffix = 'st'
+    elif count % 10 == 2 and count % 100 != 12:
+        suffix = 'nd'
+    elif count % 10 == 3 and count % 100 != 13:
+        suffix = 'rd'
+    return f'This is your {count}{suffix} visit today.'
+
+
+def _visit_now():
+    """Local naive time — matches PostgreSQL timestamp without time zone."""
+    return datetime.now()
+
+
+def _visit_dt_from_db(dt):
+    if not dt:
+        return None
+    if dt.tzinfo is not None:
+        return dt.astimezone().replace(tzinfo=None)
+    return dt
+
+
+def _cooldown_seconds():
+    return max(60, int(os.getenv('TEMPLE_VISIT_COOLDOWN_MINUTES', '10')) * 60)
+
+
+def _cooldown_message(wait_seconds):
+    wait_seconds = max(1, int(wait_seconds))
+    minutes, seconds = divmod(wait_seconds, 60)
+    if minutes and seconds:
+        return (
+            f'Please wait {minutes} min {seconds} sec before checking in again at this temple.'
+        )
+    if minutes:
+        return f'Please wait {minutes} minute(s) before checking in again at this temple.'
+    return f'Please wait {seconds} second(s) before checking in again at this temple.'
+
+
+def _ensure_user_columns():
+    try:
+        cols = {c['name'] for c in inspect(db.engine).get_columns('users')}
+    except Exception:
+        return
+    stmts = []
+    if 'phone' not in cols:
+        stmts.append('ALTER TABLE users ADD COLUMN phone VARCHAR(20)')
+    if 'qr_token' not in cols:
+        stmts.append('ALTER TABLE users ADD COLUMN qr_token VARCHAR(32)')
+    for sql in stmts:
+        try:
+            db.session.execute(text(sql))
+            db.session.commit()
+        except ProgrammingError:
+            db.session.rollback()
+
+
+def _ensure_temple_columns():
+    try:
+        cols = {c['name'] for c in inspect(db.engine).get_columns('temples')}
+    except Exception:
+        return
+    stmts = []
+    if 'csv_name' not in cols:
+        stmts.append('ALTER TABLE temples ADD COLUMN csv_name VARCHAR(200)')
+    if 'lat' not in cols:
+        stmts.append('ALTER TABLE temples ADD COLUMN lat DOUBLE PRECISION')
+    if 'lng' not in cols:
+        stmts.append('ALTER TABLE temples ADD COLUMN lng DOUBLE PRECISION')
+    for sql in stmts:
+        try:
+            db.session.execute(text(sql))
+            db.session.commit()
+        except ProgrammingError:
+            db.session.rollback()
+    try:
+        db.session.execute(text(
+            'CREATE UNIQUE INDEX IF NOT EXISTS ix_temples_csv_name ON temples (csv_name) '
+            'WHERE csv_name IS NOT NULL'
+        ))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
+def _sync_temples_from_csv():
+    """Load all Temple-category rows from tirupati_main_data.csv into PostgreSQL."""
+    if not os.path.isfile(TIRUPATI_CSV_PATH):
+        print('[WARN] tirupati_main_data.csv not found; temple list not synced.')
+        return
+
+    seen_names = set()
+    with open(TIRUPATI_CSV_PATH, encoding='utf-8', newline='') as fh:
+        for row in csv.DictReader(fh):
+            if (row.get('category') or '').strip().lower() != 'temple':
+                continue
+            name = (row.get('name') or '').strip()
+            if not name:
+                continue
+            seen_names.add(name)
+            lat = lng = None
+            try:
+                if row.get('lat'):
+                    lat = float(row['lat'])
+                if row.get('lng'):
+                    lng = float(row['lng'])
+            except (TypeError, ValueError):
+                pass
+            location = 'Tirupati region'
+            if lat is not None and lng is not None:
+                location = f'Tirupati ({lat:.4f}, {lng:.4f})'
+
+            existing = Temple.query.filter_by(csv_name=name).first()
+            if existing:
+                existing.temple_name = name[:120]
+                existing.full_name = name[:200]
+                existing.location = location
+                existing.lat = lat
+                existing.lng = lng
+            else:
+                db.session.add(Temple(
+                    csv_name=name,
+                    temple_name=name[:120],
+                    full_name=name[:200],
+                    location=location,
+                    lat=lat,
+                    lng=lng,
+                ))
+
+    db.session.commit()
+    print(f'[INFO] Synced {len(seen_names)} temples from tirupati_main_data.csv')
+
+
+def _backfill_qr_tokens():
+    for user in User.query.filter((User.qr_token == None) | (User.qr_token == '')).all():  # noqa: E711
+        ensure_qr_token(user)
+    for user in User.query.all():
+        if user.qr_token and not is_valid_qr_token(user.qr_token):
+            user.qr_token = None
+            db.session.commit()
+            ensure_qr_token(user)
+
+
+def init_db():
     db.create_all()
+    _ensure_user_columns()
+    _ensure_temple_columns()
+    _sync_temples_from_csv()
+    _backfill_qr_tokens()
+
+
+with app.app_context():
+    init_db()
 
 # Disable caching for development
 @app.after_request
@@ -255,6 +580,7 @@ def register():
         username = data.get('name')
         email = data.get('email', '').strip().lower()
         password = data.get('password')
+        phone = (data.get('phone') or '').strip() or None
 
         if User.query.filter_by(email=email).first():
             return jsonify({"status": "error", "message": "Email already registered"}), 400
@@ -268,6 +594,7 @@ def register():
             'username': username,
             'email': email,
             'password': password,
+            'phone': phone,
             'otp': otp,
             'otp_expiry': (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
         }
@@ -304,14 +631,21 @@ def verify_otp():
                 username=reg_data['username'],
                 email=reg_data['email'].lower(),
                 password_hash=generate_password_hash(reg_data['password']),
-                is_verified=True
+                phone=reg_data.get('phone'),
+                is_verified=True,
+                qr_token=generate_qr_token(),
             )
             db.session.add(new_user)
             db.session.commit()
-            
+            ensure_qr_token(new_user)
+
             session.pop('registration_data', None)
             print(f"[DEBUG] User {reg_data['email']} successfully verified and created.")
-            return jsonify({"status": "success", "message": "Email verified and account created!"})
+            return jsonify({
+                "status": "success",
+                "message": "Email verified and account created!",
+                "user": user_public_dict(new_user),
+            })
         else:
             return jsonify({"status": "error", "message": "Invalid OTP code"}), 400
 
@@ -355,9 +689,10 @@ def login():
             session['user_id'] = user.id
             session.permanent = True  # Ensure session persists
             print(f"[DEBUG] Login successful for: {email}")
+            client_origin = data.get('clientOrigin')
             return jsonify({
-                "status": "success", 
-                "user": {"name": user.username, "email": user.email}
+                "status": "success",
+                "user": user_public_dict(user, client_origin=client_origin),
             })
         else:
             print(f"[DEBUG] Login failed: Invalid password for '{email}'.")
@@ -370,6 +705,286 @@ def login():
 def logout():
     session.clear()
     return jsonify({"status": "success", "message": "Logged out successfully"})
+
+
+@app.route('/api/auth/me', methods=['GET'])
+def auth_me():
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({"status": "error", "message": "Not logged in"}), 401
+    user = db.session.get(User, uid)
+    if not user:
+        session.clear()
+        return jsonify({"status": "error", "message": "User not found"}), 404
+    client_origin = request.args.get('clientOrigin')
+    return jsonify({"status": "success", "user": user_public_dict(user, client_origin=client_origin)})
+
+
+# --- Temple QR visit flow ---
+@app.route('/user/<identifier>')
+def user_scan_page(identifier):
+    if not is_valid_qr_token(identifier):
+        return (
+            '<!DOCTYPE html><html><body style="font-family:sans-serif;padding:2rem;text-align:center">'
+            '<h1>Invalid QR link</h1><p>This personal temple QR link is not valid.</p></body></html>',
+            400,
+            {'Content-Type': 'text/html; charset=utf-8'},
+        )
+    return send_from_directory('.', 'temple-scan.html')
+
+
+@app.route('/api/qr/validate/<token>', methods=['GET'])
+def validate_qr_token(token):
+    if not is_valid_qr_token(token):
+        return jsonify({'status': 'error', 'valid': False, 'message': 'Invalid QR token format.'}), 400
+    user = resolve_user(token)
+    if not user:
+        return jsonify({'status': 'error', 'valid': False, 'message': 'QR token not recognized.'}), 404
+    return jsonify({
+        'status': 'ok',
+        'valid': True,
+        'user': {'name': user.username, 'phone': user.phone or ''},
+    })
+
+
+@app.route('/api/qr/generate', methods=['POST'])
+def generate_user_qr():
+    """Ensure logged-in user has a unique QR token (created once)."""
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
+    user = db.session.get(User, uid)
+    if not user:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    client_origin = (request.get_json(silent=True) or {}).get('clientOrigin')
+    token = ensure_qr_token(user)
+    payload = user_public_dict(user, client_origin=client_origin)
+    return jsonify({
+        'status': 'ok',
+        'created': True,
+        'qrToken': token,
+        'qrUrl': payload['qrUrl'],
+        'user': payload,
+    })
+
+
+@app.route('/api/scan-user/<identifier>', methods=['GET'])
+def scan_user_info(identifier):
+    if not is_valid_qr_token(identifier):
+        return jsonify({'status': 'error', 'message': 'Invalid QR token.'}), 400
+    user = resolve_user(identifier)
+    if not user:
+        return jsonify({'status': 'error', 'message': 'User not found.'}), 404
+    return jsonify({
+        'status': 'ok',
+        'user': {
+            'name': user.username,
+            'phone': user.phone or '',
+        },
+    })
+
+
+@app.route('/api/temples', methods=['GET'])
+def list_temples():
+    q = (request.args.get('q') or '').strip()
+    query = Temple.query
+    if q:
+        like = f'%{q}%'
+        query = query.filter(
+            db.or_(
+                Temple.temple_name.ilike(like),
+                Temple.full_name.ilike(like),
+                Temple.csv_name.ilike(like),
+                Temple.location.ilike(like),
+            )
+        )
+    temples = query.order_by(Temple.temple_name.asc()).all()
+    return jsonify({
+        'status': 'ok',
+        'count': len(temples),
+        'temples': [
+            {
+                'id': t.id,
+                'templeName': t.temple_name,
+                'fullName': t.full_name,
+                'location': t.location or '',
+                'lat': t.lat,
+                'lng': t.lng,
+            }
+            for t in temples
+        ],
+    })
+
+
+@app.route('/api/temple-visits', methods=['POST'])
+def record_temple_visit():
+    data = request.get_json(silent=True) or {}
+    temple_id = data.get('templeId')
+    if not temple_id:
+        return jsonify({'status': 'error', 'message': 'Temple is required.'}), 400
+
+    user = None
+    user_token = (data.get('userToken') or '').strip()
+    if user_token:
+        if not is_valid_qr_token(user_token):
+            return jsonify({'status': 'error', 'message': 'Invalid QR token.'}), 400
+        user = resolve_user(user_token)
+    elif session.get('user_id'):
+        user = db.session.get(User, session['user_id'])
+
+    if not user:
+        return jsonify({'status': 'error', 'message': 'Valid user token or login required.'}), 401
+
+    result, err_payload, code = _record_visit_for_user(user, temple_id)
+    if err_payload:
+        body = {'status': 'error'}
+        if isinstance(err_payload, dict):
+            body.update(err_payload)
+        else:
+            body['message'] = err_payload
+        return jsonify(body), code
+    return jsonify(result)
+
+
+@app.route('/api/temple-visits/history', methods=['GET'])
+def temple_visit_history():
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
+    limit = min(int(request.args.get('limit', 30)), 100)
+    rows = (
+        TempleVisit.query.filter_by(user_id=uid)
+        .order_by(TempleVisit.visit_date.desc(), TempleVisit.updated_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return jsonify({
+        'status': 'ok',
+        'history': [
+            {
+                'id': v.id,
+                'templeId': v.temple_id,
+                'templeName': v.temple.temple_name if v.temple else '',
+                'fullName': v.temple.full_name if v.temple else '',
+                'visitDate': v.visit_date.isoformat(),
+                'visitCount': v.visit_count,
+                'createdAt': v.created_at.isoformat() if v.created_at else None,
+            }
+            for v in rows
+        ],
+    })
+
+
+@app.route('/api/temple-visits/visited-temples', methods=['GET'])
+def visited_temples_list():
+    """Distinct temples this user has checked into (aggregated)."""
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
+
+    rows = (
+        TempleVisit.query.filter_by(user_id=uid)
+        .order_by(TempleVisit.visit_date.desc())
+        .all()
+    )
+    by_temple = {}
+    for v in rows:
+        tid = v.temple_id
+        if tid not in by_temple:
+            by_temple[tid] = {
+                'templeId': tid,
+                'templeName': v.temple.temple_name if v.temple else '',
+                'fullName': v.temple.full_name if v.temple else '',
+                'location': (v.temple.location or '') if v.temple else '',
+                'totalVisits': 0,
+                'visitDays': 0,
+                'lastVisitDate': v.visit_date.isoformat(),
+            }
+        entry = by_temple[tid]
+        entry['totalVisits'] += v.visit_count or 0
+        entry['visitDays'] += 1
+        if v.visit_date.isoformat() > entry['lastVisitDate']:
+            entry['lastVisitDate'] = v.visit_date.isoformat()
+
+    temples = sorted(by_temple.values(), key=lambda x: x['lastVisitDate'], reverse=True)
+    return jsonify({
+        'status': 'ok',
+        'count': len(temples),
+        'visitedTemples': temples,
+    })
+
+
+@app.route('/api/temple-visits/analytics', methods=['GET'])
+def temple_visit_analytics():
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
+    today = date.today()
+    today_rows = TempleVisit.query.filter_by(user_id=uid, visit_date=today).all()
+    all_rows = TempleVisit.query.filter_by(user_id=uid).all()
+
+    visits_today_total = sum((r.visit_count or 0) for r in today_rows)
+    temples_today = len(today_rows)
+    lifetime_visits = sum((r.visit_count or 0) for r in all_rows)
+
+    by_temple_today = [
+        {
+            'templeId': r.temple_id,
+            'templeName': r.temple.temple_name if r.temple else '',
+            'visitCount': r.visit_count,
+        }
+        for r in today_rows
+    ]
+
+    return jsonify({
+        'status': 'ok',
+        'date': today.isoformat(),
+        'visitsTodayTotal': visits_today_total,
+        'templesVisitedToday': temples_today,
+        'lifetimeVisitCount': lifetime_visits,
+        'todayByTemple': by_temple_today,
+    })
+
+
+@app.route('/api/user/me/qr.png')
+def my_user_qr_png():
+    uid = session.get('user_id')
+    if not uid:
+        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
+    user = db.session.get(User, uid)
+    if not user:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    return _user_qr_png_response(user)
+
+
+@app.route('/api/user/<identifier>/qr.png')
+def user_qr_png(identifier):
+    ident = str(identifier).strip().upper()
+    user = None
+    if is_valid_qr_token(ident):
+        user = resolve_user(ident)
+    elif session.get('user_id') and str(session['user_id']) == str(identifier):
+        user = db.session.get(User, session['user_id'])
+    if not user:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    return _user_qr_png_response(user)
+
+
+def _user_qr_png_response(user):
+    client_origin = request.args.get('clientOrigin')
+    scan_url = user_public_dict(user, client_origin=client_origin)['qrUrl']
+    try:
+        import qrcode
+        buf = io.BytesIO()
+        qrcode.make(scan_url).save(buf, format='PNG')
+        buf.seek(0)
+        return send_file(buf, mimetype='image/png', max_age=120)
+    except Exception:
+        return redirect(
+            'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data='
+            + quote(scan_url, safe=''),
+            code=302,
+        )
 
 @app.route('/api/auth/forgot_password', methods=['POST'])
 def forgot_password():

@@ -366,6 +366,15 @@
                                 class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 outline-none focus:border-purple-600 transition-all">
                         </div>
                     </div>
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Phone (optional)</label>
+                        <div class="input-group">
+                            <i class="fa-solid fa-phone leading-icon"></i>
+                            <input type="tel" id="regPhone" placeholder="10-digit mobile"
+                                class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 outline-none focus:border-purple-600 transition-all"
+                                pattern="[0-9+\s-]{8,15}">
+                        </div>
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1">
                             <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Password</label>
@@ -664,6 +673,7 @@
             e.preventDefault();
             const name = document.getElementById('regName').value;
             const email = document.getElementById('regEmail').value;
+            const phone = (document.getElementById('regPhone').value || '').trim();
             const password = document.getElementById('regPassword').value;
             const confirm = document.getElementById('confirmPassword').value;
 
@@ -681,7 +691,7 @@
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
+                    body: JSON.stringify({ name, email, phone, password })
                 });
                 const result = await response.json();
 
@@ -794,7 +804,12 @@
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        clientOrigin: window.location.origin
+                    })
                 });
                 const result = await response.json();
 
