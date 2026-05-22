@@ -1924,7 +1924,7 @@
             max-width: 360px !important;
         }
 
-        /* --- Main preview map: match budget_calculator.html map UI --- */
+        /* --- Main preview map: match /dashboard map UI --- */
         #mapSection {
             --gov-text: #0f172a;
             --gov-text-muted: #64748b;
@@ -2481,7 +2481,6 @@
             <nav class="site-header__nav site-header__nav--primary hidden min-w-0 items-center justify-center gap-1 sm:gap-2 lg:flex"
                 aria-label="Primary">
                 <a class="site-header__link" href="packages.html">Packages</a>
-                <a class="site-header__link" href="budget_calculator.html">Smart Budget Planner</a>
                 <a class="site-header__link" href="booking.html">Booking</a>
                 <a class="site-header__link" href="about.html">About us</a>
             </nav>
@@ -3115,7 +3114,7 @@
 
                 <section id="mapSection" class="mt-6 hidden w-full space-y-4" aria-label="Trip preview map">
                     <input type="hidden" id="userStartLocation" value="Tirupati" />
-                    <a href="budget_calculator.html" id="mainOpenPlannerLink"
+                    <a href="/dashboard" id="mainOpenPlannerLink"
                         class="main-open-planner-link sr-only">Open full map planner</a>
                     <p id="pkgMapStatus" class="text-sm text-on-surface-variant" role="status"></p>
                     <div id="pkgTripMap" class="w-full rounded-xl border border-slate-200 bg-slate-100 shadow-inner"
@@ -3364,18 +3363,16 @@
         <nav class="drawer-nav flex-1 overflow-y-auto p-3" aria-label="Mobile">
             <a href="packages.html"><span class="material-symbols-outlined text-xl"
                     aria-hidden="true">inventory_2</span> Trip packages</a>
-            <a href="budget_calculator.html"><span class="material-symbols-outlined text-xl"
-                    aria-hidden="true">map</span> Budget calculator &amp; splitter</a>
             <a href="booking.html"><span class="material-symbols-outlined text-xl"
                     aria-hidden="true">confirmation_number</span> Booking</a>
-            <a href="budget_calculator.html"><span class="material-symbols-outlined text-xl"
+            <a href="/dashboard"><span class="material-symbols-outlined text-xl"
                     aria-hidden="true">payments</span> Open planner</a>
             <a href="about.html"><span class="material-symbols-outlined text-xl"
                     aria-hidden="true">info</span> About us</a>
             <a href="#" onclick="handleLogout(); return false;" class="!text-amber-900 !bg-amber-50 !border-amber-300 mt-4 flex items-center gap-3 font-bold"><span class="material-symbols-outlined text-xl" aria-hidden="true">logout</span> Logout</a>
         </nav>
         <div class="border-t border-amber-100 p-3">
-            <a href="budget_calculator.html"
+            <a href="/dashboard"
                 class="flex min-h-12 items-center justify-center rounded-xl bg-secondary text-center text-base font-bold text-on-secondary no-underline">Start
                 planning</a>
         </div>
@@ -3610,7 +3607,6 @@
                         });
                     }
 
-                    const PLANNER = 'budget_calculator.html';
                     let selectedCat = 'all';
 
                     function syncCatChipUi() {
@@ -4401,7 +4397,7 @@
                 if (dateV) p.set('date', dateV);
                 if (locV) p.set('loc', locV);
                 if (cat && cat !== 'all') p.set('category', cat);
-                var href = 'budget_calculator.html?' + p.toString();
+                var href = '/dashboard?' + p.toString();
                 links.forEach(function (a) {
                     a.setAttribute('href', href);
                 });

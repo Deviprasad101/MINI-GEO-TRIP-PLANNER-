@@ -255,26 +255,26 @@
             category: "Basic / General",
             items: [
                 { q: "Hello / Hi", a: "Hello! Welcome to GeoTrip Planner. I am here to help you plan your Tirupati trip efficiently." },
-                { q: "What can you do?", a: "I can help you explore tour packages, plan itineraries on the map, split your budget, and guide you to official booking portals." },
-                { q: "How does this app work?", a: "GeoTrip Planner combines a Map Planner for finding spots, a Budget Splitter to manage expenses, and curated Packages to give you a complete trip experience." }
+                { q: "What can you do?", a: "I can help you explore tour packages, plan trips on the GeoTrip map dashboard, and guide you to official booking portals." },
+                { q: "How does this app work?", a: "GeoTrip Planner combines an interactive map on the dashboard, curated trip packages, and official booking links for a complete Tirupati experience." }
             ]
         },
         {
             category: "Trip Planning",
             items: [
-                { q: "How do I plan a trip?", a: "Go to the <a href='budget_calculator.html'>Map & Budget Planner</a>, add places like temples or food joints to your route, and see live estimates." },
+                { q: "How do I plan a trip?", a: "Open the <a href='/dashboard'>GeoTrip dashboard</a>, pick a theme, set your outing details, and use <strong>Show map</strong> to explore temples, food, and sights." },
                 { q: "Suggest places to visit", a: "Tirupati offers the main Sri Venkateswara Temple, ISKCON, Talakona Waterfalls, and SV Zoological Park. Check the <a href='packages.html'>Packages</a> page for curated lists!" },
-                { q: "Show nearby attractions", a: "You can find nearby attractions directly on the <a href='budget_calculator.html'>Map Planner</a> by clicking on the map pins." },
-                { q: "How to create itinerary?", a: "An itinerary is automatically created as you select places on the map in the <a href='budget_calculator.html'>Planner</a> page. It optimizes the route for you." }
+                { q: "Show nearby attractions", a: "You can find nearby attractions on the <a href='/dashboard'>dashboard map</a> by choosing a category and tapping map pins." },
+                { q: "How to create itinerary?", a: "Use <a href='packages.html'>Trip packages</a> to build a routed itinerary with QR sharing, or explore stops on the <a href='/dashboard'>dashboard map</a>." }
             ]
         },
         {
-            category: "Budget Splitter",
+            category: "Trip budget",
             items: [
-                { q: "How to split expenses?", a: "Open the <a href='budget_calculator.html'>Budget &amp; map planner</a>, scroll to <strong>Budget Summary</strong>, and tap <strong>Budget Splitter</strong> — or use <strong>Calculate split</strong> there after entering totals." },
-                { q: "Add members to trip", a: "In the Budget Splitter, adjust the 'People' input field. The system automatically recalculates the per-person share." },
-                { q: "Calculate total budget", a: "The total budget is entered by you or pulled automatically from your Map Planner session into the Budget Splitter." },
-                { q: "Who owes how much?", a: "The Budget Splitter currently assumes equal sharing. It shows the exact equal split amount under the 'Per traveller' section." }
+                { q: "How to split expenses?", a: "Choose a <a href='packages.html'>trip package</a> tier that matches your group size and budget range, then plan stops on the map from the dashboard." },
+                { q: "Add members to trip", a: "On <a href='packages.html'>Packages</a>, set the number of travellers when building your trip before applying the route to the map." },
+                { q: "Calculate total budget", a: "Each package tier shows a budget range (Basic through Elite). Pick the tier that fits your group on the <a href='packages.html'>Packages</a> page." },
+                { q: "Who owes how much?", a: "Package pricing is shown per tier for your group size. Divide the quoted range by the number of travellers for a rough per-person estimate." }
             ]
         },
         {
@@ -297,8 +297,8 @@
         {
             category: "Navigation / App Help",
             items: [
-                { q: "Go to planner page", a: "Click here: <a href='budget_calculator.html'>Map & Budget Planner</a>" },
-                { q: "Open budget splitter", a: "Go to <a href='budget_calculator.html'>Budget &amp; map planner</a>, then open <strong>Budget Splitter</strong> from the Budget Summary card." },
+                { q: "Go to planner page", a: "Click here: <a href='/dashboard'>GeoTrip dashboard</a>" },
+                { q: "Open budget splitter", a: "Trip budgets are set via <a href='packages.html'>package tiers</a>. Open the dashboard map to plan your route." },
                 { q: "Open booking page", a: "Click here: <a href='booking.html'>Official Booking</a>" },
                 { q: "How to use this feature?", a: "Select any query from this menu, and I will guide you with details or direct links!" }
             ]
@@ -316,7 +316,7 @@
     let htmlOptions = `
         <div class="gt-chatbot-quick-actions">
             <button class="gt-chatbot-quick-btn" onclick="window.location.href='packages.html'">📦 Packages</button>
-            <button class="gt-chatbot-quick-btn" onclick="window.location.href='budget_calculator.html'">💰 Budget calculator &amp; splitter</button>
+            <button class="gt-chatbot-quick-btn" onclick="window.location.href='/dashboard'">🗺️ GeoTrip map</button>
             <button class="gt-chatbot-quick-btn" onclick="window.location.href='booking.html'">🚆 Booking</button>
             <button class="gt-chatbot-quick-btn" onclick="alert('Checklist coming soon! Remember IDs &amp; traditional wear.')">✅ Checklist Feature</button>
         </div>
