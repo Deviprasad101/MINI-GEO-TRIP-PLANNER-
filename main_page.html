@@ -3126,7 +3126,75 @@
 
             </div>
 
-            <!-- Temple visit hub removed — now in admin panel -->
+            <!-- Personal QR Code Section -->
+            <section id="myQrSection" class="landing-max mx-auto mt-12 mb-10 px-4 sm:px-6">
+                <style>
+                    .qr-card {
+                        max-width: 26rem; margin: 0 auto;
+                        border-radius: 1.5rem; border: 1px solid #fde68a;
+                        background: linear-gradient(155deg, #fffbeb 0%, #fff 45%, #f0fdfa 100%);
+                        box-shadow: 0 20px 50px rgba(15,23,42,0.08);
+                        padding: 2rem 1.5rem; text-align: center;
+                    }
+                    .qr-card__title {
+                        font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+                        letter-spacing: 0.08em; color: #0f766e; margin-bottom: 0.25rem;
+                    }
+                    .qr-card__subtitle {
+                        font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;
+                    }
+                    .qr-card__desc {
+                        font-size: 0.88rem; color: #64748b; max-width: 22rem;
+                        margin: 0 auto 1.25rem; line-height: 1.5;
+                    }
+                    .qr-card__img {
+                        width: 200px; height: 200px; margin: 0 auto;
+                        display: block; border-radius: 0.75rem;
+                        border: 3px solid #e2e8f0;
+                    }
+                    .qr-card__token {
+                        font-size: 0.78rem; font-family: ui-monospace, monospace;
+                        color: #64748b; margin-top: 0.65rem;
+                    }
+                    .qr-card__actions {
+                        display: flex; flex-wrap: wrap; gap: 0.5rem;
+                        justify-content: center; margin-top: 1rem;
+                    }
+                    .qr-card__btn {
+                        display: inline-flex; align-items: center; gap: 0.35rem;
+                        padding: 0.6rem 1.15rem; border-radius: 999px;
+                        font-size: 0.85rem; font-weight: 700; border: none;
+                        cursor: pointer; transition: transform 0.12s, box-shadow 0.15s;
+                        font-family: inherit;
+                    }
+                    .qr-card__btn--primary {
+                        background: linear-gradient(135deg, #0d9488, #0f766e);
+                        color: #fff; box-shadow: 0 4px 14px rgba(13,148,136,0.35);
+                    }
+                    .qr-card__btn--ghost {
+                        background: #fff; color: #0f766e;
+                        border: 1px solid #99f6e4;
+                    }
+                    .qr-card__btn:hover { transform: scale(1.03); }
+                </style>
+                <div class="qr-card">
+                    <p class="qr-card__title">Your Personal QR</p>
+                    <p class="qr-card__subtitle">Welcome, <span id="qrUserName">Guest</span></p>
+                    <p class="qr-card__desc">
+                        Scan this QR code to check in at temples. Temple staff or you can scan it to log your visit.
+                    </p>
+                    <img id="qrImage" class="qr-card__img" src="" alt="Your personal temple QR code" width="200" height="200" loading="lazy" />
+                    <p id="qrTokenDisplay" class="qr-card__token"></p>
+                    <div class="qr-card__actions">
+                        <button type="button" id="qrDownloadBtn" class="qr-card__btn qr-card__btn--primary">
+                            <span class="material-symbols-outlined" style="font-size:1.1rem">download</span> Download QR
+                        </button>
+                        <button type="button" id="qrCopyBtn" class="qr-card__btn qr-card__btn--ghost">
+                            <span class="material-symbols-outlined" style="font-size:1.1rem">content_copy</span> Copy link
+                        </button>
+                    </div>
+                </div>
+            </section>
 
             <!-- Footer -->
             <footer class="mt-auto border-t border-amber-900/20 bg-slate-900 text-slate-200" role="contentinfo">
@@ -6116,15 +6184,12 @@
                     userNameDisplay.textContent = name;
                     userInitial.textContent = name.charAt(0).toUpperCase();
                 }
-                if (templeQrUserName) templeQrUserName.textContent = name;
-                if (templeHubAvatar) templeHubAvatar.textContent = name.charAt(0).toUpperCase();
-                if (templeHubProfileName) templeHubProfileName.textContent = name;
-                if (templeHubProfileMeta) {
-                    templeHubProfileMeta.textContent = (u.phone ? 'Phone: ' + u.phone + ' · ' : '') + 'ID #' + (u.id || '—');
-                }
-                if (u.qrToken && templeQrImage) templeQrImage.src = qrImageUrl(u.qrToken);
-                if (templeQrToken && u.qrToken) templeQrToken.textContent = 'Token: ' + u.qrToken;
-                if (templeQrUrl && u.qrUrl) templeQrUrl.textContent = u.qrUrl;
+                var qrNameEl = document.getElementById('qrUserName');
+                var qrImgEl = document.getElementById('qrImage');
+                var qrTokenEl = document.getElementById('qrTokenDisplay');
+                if (qrNameEl) qrNameEl.textContent = name;
+                if (u.qrToken && qrImgEl) qrImgEl.src = qrImageUrl(u.qrToken);
+                if (qrTokenEl && u.qrToken) qrTokenEl.textContent = 'Token: ' + u.qrToken;
             }
 
             function renderVisitedItems(container, items, emptyMsg) {
@@ -6299,25 +6364,24 @@
                 return d.innerHTML;
             }
 
-            var downloadBtn = document.getElementById('templeQrDownloadBtn');
+            var downloadBtn = document.getElementById('qrDownloadBtn');
             if (downloadBtn) {
                 downloadBtn.addEventListener('click', function() {
-                    if (!user || !user.qrToken) return showToast('QR not ready', false);
+                    if (!user || !user.qrToken) return;
                     var a = document.createElement('a');
                     a.href = qrImageUrl(user.qrToken);
                     a.download = 'GeoTrip-Temple-QR-' + user.qrToken + '.png';
                     a.click();
-                    showToast('Downloading QR image…', true);
                 });
             }
-            var copyBtn = document.getElementById('templeQrCopyBtn');
+            var copyBtn = document.getElementById('qrCopyBtn');
             if (copyBtn) {
                 copyBtn.addEventListener('click', function() {
                     if (!user || !user.qrUrl) return;
                     navigator.clipboard.writeText(user.qrUrl).then(function() {
-                        showToast('QR link copied', true);
+                        alert('QR link copied!');
                     }).catch(function() {
-                        showToast(user.qrUrl, true);
+                        prompt('Copy this link:', user.qrUrl);
                     });
                 });
             }
@@ -6340,17 +6404,8 @@
                 .then(function(r) { return r && r.json ? r.json() : null; })
                 .then(function(gen) {
                     if (gen && gen.status === 'ok' && gen.user) applyUser(gen.user);
-                    loadTemples();
-                    loadAnalytics();
-                    loadVisitedTemples();
-                    loadHistory();
                 })
-                .catch(function() {
-                    loadTemples();
-                    loadAnalytics();
-                    loadVisitedTemples();
-                    loadHistory();
-                });
+                .catch(function() {});
         })();
 
         async function handleLogout() {
