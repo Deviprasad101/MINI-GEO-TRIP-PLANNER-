@@ -367,12 +367,12 @@
                         </div>
                     </div>
                     <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Phone (optional)</label>
+                        <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Phone Number</label>
                         <div class="input-group">
                             <i class="fa-solid fa-phone leading-icon"></i>
-                            <input type="tel" id="regPhone" placeholder="10-digit mobile"
+                            <input type="tel" id="regPhone" placeholder="10-digit mobile" required
                                 class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 outline-none focus:border-purple-600 transition-all"
-                                pattern="[0-9+\s-]{8,15}">
+                                pattern="[6-9][0-9]{9}">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
@@ -405,18 +405,19 @@
                     </button>
                 </div>
 
-                <!-- OTP Step -->
+                <!-- Email OTP Step -->
                 <div id="otpStep" class="hidden space-y-6">
+                    <h3 class="text-center text-lg font-bold text-slate-700">Verify your Email</h3>
                     <p class="text-center text-sm text-slate-500 font-medium">
                         We've sent a 6-digit code to <br><span id="displayEmail" class="text-purple-600 font-bold"></span>
                     </p>
                     <div class="flex justify-center gap-2">
-                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveFocus(this, 1)">
-                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveFocus(this, 2)">
-                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveFocus(this, 3)">
-                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveFocus(this, 4)">
-                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveFocus(this, 5)">
-                        <input type="text" maxlength="1" class="otp-input" onkeyup="moveFocus(this, 6)">
+                        <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 1)">
+                        <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 2)">
+                        <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 3)">
+                        <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 4)">
+                        <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 5)">
+                        <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 6)">
                     </div>
                     <div class="text-center">
                         <p class="text-xs text-slate-400">Didn't receive code? 
@@ -425,11 +426,37 @@
                     </div>
                     <button type="button" id="verifyBtn"
                         class="btn-gradient w-full py-4 rounded-2xl font-bold text-white shadow-lg flex items-center justify-center gap-3 active:scale-95">
-                        <span id="verifyBtnText">Verify & Create Account</span>
+                        <span id="verifyBtnText">Verify Email</span>
                         <div class="loader" id="verifyLoader"></div>
                     </button>
                     <button type="button" onclick="showStep(1)" class="w-full text-xs text-slate-400 font-medium hover:text-purple-600 transition-colors">
                         Change Email Address
+                    </button>
+                </div>
+
+                <!-- Phone OTP Step -->
+                <div id="phoneOtpStep" class="hidden space-y-6">
+                    <h3 class="text-center text-lg font-bold text-slate-700">Verify your Mobile</h3>
+                    <p class="text-center text-sm text-slate-500 font-medium">
+                        We've sent a 6-digit code to <br><span id="displayPhone" class="text-purple-600 font-bold"></span>
+                    </p>
+                    <div class="flex justify-center gap-2">
+                        <input type="text" maxlength="1" class="otp-input phone-otp-input" onkeyup="movePhoneFocus(this, 1)">
+                        <input type="text" maxlength="1" class="otp-input phone-otp-input" onkeyup="movePhoneFocus(this, 2)">
+                        <input type="text" maxlength="1" class="otp-input phone-otp-input" onkeyup="movePhoneFocus(this, 3)">
+                        <input type="text" maxlength="1" class="otp-input phone-otp-input" onkeyup="movePhoneFocus(this, 4)">
+                        <input type="text" maxlength="1" class="otp-input phone-otp-input" onkeyup="movePhoneFocus(this, 5)">
+                        <input type="text" maxlength="1" class="otp-input phone-otp-input" onkeyup="movePhoneFocus(this, 6)">
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-slate-400">Didn't receive code? 
+                            <button type="button" id="resendPhoneBtn" class="text-purple-600 font-bold disabled:opacity-50" disabled>Resend in <span id="phoneTimer">30</span>s</button>
+                        </p>
+                    </div>
+                    <button type="button" id="verifyPhoneBtn"
+                        class="btn-gradient w-full py-4 rounded-2xl font-bold text-white shadow-lg flex items-center justify-center gap-3 active:scale-95">
+                        <span id="verifyPhoneBtnText">Verify & Create Account</span>
+                        <div class="loader" id="verifyPhoneLoader"></div>
                     </button>
                 </div>
             </form>
@@ -711,35 +738,39 @@
             }
         });
 
-        // OTP Helper functions
-        function moveFocus(input, index) {
+        // OTP focus helpers (scoped by class so email / phone / forgot don't collide)
+        function moveEmailFocus(input, index) {
             if (input.value.length >= 1 && index < 6) {
-                document.querySelectorAll('.otp-input')[index].focus();
+                document.querySelectorAll('.email-otp-input')[index].focus();
+            }
+        }
+        function movePhoneFocus(input, index) {
+            if (input.value.length >= 1 && index < 6) {
+                document.querySelectorAll('.phone-otp-input')[index].focus();
             }
         }
 
         function showStep(step) {
-            if (step === 1) {
-                document.getElementById('regStep1').classList.remove('hidden');
-                document.getElementById('otpStep').classList.add('hidden');
-            } else {
-                document.getElementById('regStep1').classList.add('hidden');
-                document.getElementById('otpStep').classList.remove('hidden');
-            }
+            document.getElementById('regStep1').classList.add('hidden');
+            document.getElementById('otpStep').classList.add('hidden');
+            document.getElementById('phoneOtpStep').classList.add('hidden');
+            if (step === 1) document.getElementById('regStep1').classList.remove('hidden');
+            else if (step === 2) document.getElementById('otpStep').classList.remove('hidden');
+            else if (step === 3) document.getElementById('phoneOtpStep').classList.remove('hidden');
         }
 
-        let timeLeft = 30;
-        let timerId;
+        // --- Email OTP timer ---
+        let timeLeft = 30, timerId;
         function startTimer() {
             timeLeft = 30;
             const btn = document.getElementById('resendBtn');
             const timerSpan = document.getElementById('timer');
             btn.disabled = true;
-            
+            btn.innerHTML = 'Resend in <span id="timer">30</span>s';
             clearInterval(timerId);
             timerId = setInterval(() => {
                 timeLeft--;
-                timerSpan.innerText = timeLeft;
+                document.getElementById('timer').innerText = timeLeft;
                 if (timeLeft <= 0) {
                     clearInterval(timerId);
                     btn.disabled = false;
@@ -748,26 +779,90 @@
             }, 1000);
         }
 
+        // --- Phone OTP timer ---
+        let phoneTimeLeft = 30, phoneTimerId;
+        function startPhoneTimer() {
+            phoneTimeLeft = 30;
+            const btn = document.getElementById('resendPhoneBtn');
+            const timerSpan = document.getElementById('phoneTimer');
+            btn.disabled = true;
+            btn.innerHTML = 'Resend in <span id="phoneTimer">30</span>s';
+            clearInterval(phoneTimerId);
+            phoneTimerId = setInterval(() => {
+                phoneTimeLeft--;
+                document.getElementById('phoneTimer').innerText = phoneTimeLeft;
+                if (phoneTimeLeft <= 0) {
+                    clearInterval(phoneTimerId);
+                    btn.disabled = false;
+                    btn.innerText = "Resend Now";
+                }
+            }, 1000);
+        }
+
+        // Resend email OTP
         document.getElementById('resendBtn').addEventListener('click', async () => {
             try {
                 const res = await fetch('/api/auth/resend_otp', { method: 'POST' });
                 const result = await res.json();
                 if (result.status === 'success') {
                     startTimer();
-                    document.getElementById('resendBtn').innerText = "Resend in 30s";
                 }
             } catch (err) { alert("Resend failed"); }
         });
 
+        // Resend phone OTP
+        document.getElementById('resendPhoneBtn').addEventListener('click', async () => {
+            try {
+                const res = await fetch('/api/auth/resend_otp', { method: 'POST' });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    startPhoneTimer();
+                }
+            } catch (err) { alert("Resend failed"); }
+        });
+
+        // Step 1: Verify email OTP → moves to phone OTP step
         document.getElementById('verifyBtn').addEventListener('click', async () => {
-            const otp = Array.from(document.querySelectorAll('.otp-input')).map(i => i.value).join('');
-            if (otp.length < 6) return alert("Enter full code");
+            const otp = Array.from(document.querySelectorAll('.email-otp-input')).map(i => i.value).join('');
+            if (otp.length < 6) return alert("Enter full 6-digit code");
 
             document.getElementById('verifyBtnText').style.display = 'none';
             document.getElementById('verifyLoader').style.display = 'block';
 
             try {
                 const response = await fetch('/api/auth/verify_otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp })
+                });
+                const result = await response.json();
+
+                if (result.status === 'success' && result.step === 'phone') {
+                    document.getElementById('displayPhone').innerText = result.maskedPhone || '';
+                    document.querySelectorAll('.phone-otp-input').forEach(i => i.value = '');
+                    showStep(3);
+                    startPhoneTimer();
+                } else {
+                    alert(result.message);
+                }
+            } catch (err) {
+                alert("Verification failed");
+            } finally {
+                document.getElementById('verifyBtnText').style.display = 'block';
+                document.getElementById('verifyLoader').style.display = 'none';
+            }
+        });
+
+        // Step 2: Verify phone OTP → account created
+        document.getElementById('verifyPhoneBtn').addEventListener('click', async () => {
+            const otp = Array.from(document.querySelectorAll('.phone-otp-input')).map(i => i.value).join('');
+            if (otp.length < 6) return alert("Enter full 6-digit code");
+
+            document.getElementById('verifyPhoneBtnText').style.display = 'none';
+            document.getElementById('verifyPhoneLoader').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/auth/verify_phone_otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ otp })
@@ -781,10 +876,10 @@
                     alert(result.message);
                 }
             } catch (err) {
-                alert("Verification failed");
+                alert("Phone verification failed");
             } finally {
-                document.getElementById('verifyBtnText').style.display = 'block';
-                document.getElementById('verifyLoader').style.display = 'none';
+                document.getElementById('verifyPhoneBtnText').style.display = 'block';
+                document.getElementById('verifyPhoneLoader').style.display = 'none';
             }
         });
 

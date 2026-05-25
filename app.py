@@ -20,6 +20,10 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from google import genai
 from dotenv import load_dotenv
+try:
+    from twilio.rest import Client as TwilioClient
+except ImportError:
+    TwilioClient = None
 
 load_dotenv()
 
@@ -145,6 +149,48 @@ def resolve_user(identifier):
     if not is_valid_qr_token(ident):
         return None
     return User.query.filter_by(qr_token=ident).first()
+
+
+def normalize_phone(raw):
+    """Normalize Indian mobile number to E.164 format (+91XXXXXXXXXX)."""
+    if not raw:
+        return None
+    digits = re.sub(r'\D', '', raw)
+    if digits.startswith('91') and len(digits) == 12:
+        digits = digits[2:]
+    if len(digits) != 10 or digits[0] not in '6789':
+        return None
+    return '+91' + digits
+
+
+def _send_twilio_verify(phone_e164):
+    """Send OTP via Twilio Verify; returns (ok, error_message)."""
+    if not twilio_client or not TWILIO_VERIFY_SID:
+        print(f'[WARN] Twilio not configured. Skipping phone OTP for {phone_e164}.')
+        return False, 'SMS service not configured. Contact admin.'
+    try:
+        twilio_client.verify.v2.services(TWILIO_VERIFY_SID) \
+            .verifications.create(to=phone_e164, channel='sms')
+        print(f'[DEBUG] Phone OTP sent via Twilio to {phone_e164}')
+        return True, None
+    except Exception as e:
+        print(f'[ERROR] Twilio send failed: {e}')
+        return False, str(e)
+
+
+def _check_twilio_verify(phone_e164, code):
+    """Check OTP via Twilio Verify; returns (approved, error_message)."""
+    if not twilio_client or not TWILIO_VERIFY_SID:
+        return False, 'SMS service not configured.'
+    try:
+        check = twilio_client.verify.v2.services(TWILIO_VERIFY_SID) \
+            .verification_checks.create(to=phone_e164, code=code)
+        if check.status == 'approved':
+            return True, None
+        return False, 'Invalid OTP code'
+    except Exception as e:
+        print(f'[ERROR] Twilio verify failed: {e}')
+        return False, 'Verification failed. Try again.'
 
 
 def _record_visit_for_user(user, temple_id):
@@ -403,6 +449,17 @@ OLLAMA_BASE = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "120"))
 
+# Twilio Verify (phone OTP during registration)
+TWILIO_SID = os.getenv('TWILIO_ACCOUNT_SID')
+TWILIO_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+TWILIO_VERIFY_SID = os.getenv('TWILIO_VERIFY_SERVICE_SID')
+twilio_client = (
+    TwilioClient(TWILIO_SID, TWILIO_TOKEN)
+    if (TwilioClient and TWILIO_SID and TWILIO_TOKEN) else None
+)
+if not twilio_client:
+    print('[WARN] Twilio not configured – phone OTP verification will be unavailable.')
+
 
 def ask_ollama(prompt: str) -> str:
     url = f"{OLLAMA_BASE}/api/generate"
@@ -586,37 +643,48 @@ def register():
         username = data.get('name')
         email = data.get('email', '').strip().lower()
         password = data.get('password')
-        phone = (data.get('phone') or '').strip() or None
+        raw_phone = (data.get('phone') or '').strip()
+
+        if not raw_phone:
+            return jsonify({"status": "error", "message": "Phone number is required"}), 400
+
+        phone = normalize_phone(raw_phone)
+        if not phone:
+            return jsonify({"status": "error", "message": "Enter a valid 10-digit Indian mobile number"}), 400
 
         if User.query.filter_by(email=email).first():
             return jsonify({"status": "error", "message": "Email already registered"}), 400
 
-        # Generate OTP
+        existing_phone = User.query.filter_by(phone=phone).first()
+        if existing_phone:
+            return jsonify({"status": "error", "message": "Phone number already registered"}), 400
+
         otp = str(random.randint(100000, 999999))
-        print(f"[DEBUG] Generated OTP for {email}: {otp}")
-        
-        # Store in session
+        print(f"[DEBUG] Generated email OTP for {email}: {otp}")
+
         session['registration_data'] = {
             'username': username,
             'email': email,
             'password': password,
             'phone': phone,
-            'otp': otp,
-            'otp_expiry': (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
+            'step': 'email',
+            'email_otp': otp,
+            'email_otp_expiry': (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat(),
+            'email_verified': False,
         }
 
-        # Send Email
         msg = Message('GeoTrip Planner - Verify Your Email', recipients=[email])
         msg.body = f"Hello {username},\n\nYour OTP for GeoTrip Planner registration is: {otp}\n\nThis code expires in 5 minutes."
         mail.send(msg)
 
-        return jsonify({"status": "success", "message": "OTP sent to email"})
+        return jsonify({"status": "success", "step": "email", "message": "OTP sent to email"})
     except Exception as e:
         print(f"Registration Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/auth/verify_otp', methods=['POST'])
 def verify_otp():
+    """Step 1: verify email OTP, then trigger phone OTP via Twilio."""
     try:
         data = request.json
         user_otp = data.get('otp')
@@ -625,57 +693,115 @@ def verify_otp():
         if not reg_data:
             return jsonify({"status": "error", "message": "Session expired. Please register again."}), 400
 
-        # Check expiry
-        expiry = datetime.fromisoformat(reg_data['otp_expiry'])
+        if reg_data.get('step') != 'email':
+            return jsonify({"status": "error", "message": "Email already verified."}), 400
+
+        expiry = datetime.fromisoformat(reg_data['email_otp_expiry'])
         if datetime.now(timezone.utc) > expiry:
             session.pop('registration_data', None)
-            return jsonify({"status": "error", "message": "OTP expired"}), 400
+            return jsonify({"status": "error", "message": "OTP expired. Please register again."}), 400
 
-        if user_otp == reg_data['otp']:
-            # Create user
-            new_user = User(
-                username=reg_data['username'],
-                email=reg_data['email'].lower(),
-                password_hash=generate_password_hash(reg_data['password']),
-                phone=reg_data.get('phone'),
-                is_verified=True,
-                qr_token=generate_qr_token(),
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            ensure_qr_token(new_user)
-
-            session.pop('registration_data', None)
-            print(f"[DEBUG] User {reg_data['email']} successfully verified and created.")
-            return jsonify({
-                "status": "success",
-                "message": "Email verified and account created!",
-                "user": user_public_dict(new_user),
-            })
-        else:
+        if user_otp != reg_data['email_otp']:
             return jsonify({"status": "error", "message": "Invalid OTP code"}), 400
+
+        reg_data['email_verified'] = True
+        reg_data['step'] = 'phone'
+        session['registration_data'] = reg_data
+
+        phone = reg_data['phone']
+        ok, err = _send_twilio_verify(phone)
+        if not ok:
+            reg_data['step'] = 'email'
+            reg_data['email_verified'] = False
+            session['registration_data'] = reg_data
+            return jsonify({"status": "error", "message": f"Email verified but could not send SMS: {err}"}), 500
+
+        masked = phone[:4] + '••••••' + phone[-2:]
+        return jsonify({
+            "status": "success",
+            "step": "phone",
+            "message": f"Email verified! OTP sent to {masked}",
+            "maskedPhone": masked,
+        })
 
     except Exception as e:
         print(f"Verification Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
+@app.route('/api/auth/verify_phone_otp', methods=['POST'])
+def verify_phone_otp():
+    """Step 2: verify phone OTP via Twilio Verify, then create the user."""
+    try:
+        data = request.json
+        user_otp = data.get('otp')
+        reg_data = session.get('registration_data')
+
+        if not reg_data or not reg_data.get('email_verified'):
+            return jsonify({"status": "error", "message": "Session expired. Please register again."}), 400
+
+        if reg_data.get('step') != 'phone':
+            return jsonify({"status": "error", "message": "Complete email verification first."}), 400
+
+        phone = reg_data['phone']
+        approved, err = _check_twilio_verify(phone, user_otp)
+        if not approved:
+            return jsonify({"status": "error", "message": err or "Invalid OTP code"}), 400
+
+        new_user = User(
+            username=reg_data['username'],
+            email=reg_data['email'].lower(),
+            password_hash=generate_password_hash(reg_data['password']),
+            phone=phone,
+            is_verified=True,
+            qr_token=generate_qr_token(),
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        ensure_qr_token(new_user)
+
+        session.pop('registration_data', None)
+        print(f"[DEBUG] User {reg_data['email']} verified (email + phone) and created.")
+        return jsonify({
+            "status": "success",
+            "message": "Phone verified and account created!",
+            "user": user_public_dict(new_user),
+        })
+
+    except Exception as e:
+        print(f"Phone Verification Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/api/auth/resend_otp', methods=['POST'])
 def resend_otp():
+    """Resend OTP for whichever step the user is on (email or phone)."""
     try:
         reg_data = session.get('registration_data')
         if not reg_data:
             return jsonify({"status": "error", "message": "Please register first"}), 400
 
-        otp = str(random.randint(100000, 999999))
-        reg_data['otp'] = otp
-        reg_data['otp_expiry'] = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
-        session['registration_data'] = reg_data
+        step = reg_data.get('step', 'email')
 
-        msg = Message('GeoTrip Planner - Resend OTP', recipients=[reg_data['email']])
-        msg.body = f"Your new OTP is: {otp}"
-        mail.send(msg)
+        if step == 'email':
+            otp = str(random.randint(100000, 999999))
+            reg_data['email_otp'] = otp
+            reg_data['email_otp_expiry'] = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
+            session['registration_data'] = reg_data
 
-        return jsonify({"status": "success", "message": "New OTP sent"})
+            msg = Message('GeoTrip Planner - Resend OTP', recipients=[reg_data['email']])
+            msg.body = f"Your new OTP is: {otp}"
+            mail.send(msg)
+            return jsonify({"status": "success", "step": "email", "message": "New email OTP sent"})
+
+        if step == 'phone':
+            phone = reg_data['phone']
+            ok, err = _send_twilio_verify(phone)
+            if not ok:
+                return jsonify({"status": "error", "message": f"Could not resend SMS: {err}"}), 500
+            masked = phone[:4] + '••••••' + phone[-2:]
+            return jsonify({"status": "success", "step": "phone", "message": f"New OTP sent to {masked}"})
+
+        return jsonify({"status": "error", "message": "Invalid registration step"}), 400
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
