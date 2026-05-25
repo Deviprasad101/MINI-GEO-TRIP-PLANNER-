@@ -3074,43 +3074,127 @@
                             </div>
                         </button>
                     </div>
-                    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
-                        <label
-                            class="flex max-w-2xl cursor-pointer items-start gap-3 rounded-xl border border-amber-200/90 bg-amber-50/60 px-4 py-3 shadow-sm transition hover:bg-amber-50">
-                            <input type="checkbox" id="mainGpsCheckbox"
-                                class="main-gps-checkbox mt-1 h-5 w-5 shrink-0 cursor-pointer rounded border-amber-400 accent-amber-800 focus:ring-2 focus:ring-amber-400/40"
-                                aria-describedby="mainGpsStatus" />
-                            <span class="min-w-0 flex flex-col gap-1">
-                                <span class="flex items-center gap-2 text-sm font-bold text-on-surface">
-                                    <span class="material-symbols-outlined text-xl text-amber-800"
-                                        aria-hidden="true">my_location</span>
-                                    Use GPS for start location
+                    <style>
+                        .actions-qr-row {
+                            display: grid;
+                            grid-template-columns: 1fr;
+                            gap: 1rem;
+                            margin-top: 1.25rem;
+                            align-items: stretch;
+                        }
+                        @media (min-width: 768px) {
+                            .actions-qr-row { grid-template-columns: 1fr auto; }
+                        }
+                        .actions-left {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.85rem;
+                        }
+                        .actions-btns {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 0.65rem;
+                            align-items: center;
+                        }
+                        .qr-panel {
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
+                            padding: 1rem 1.25rem;
+                            border-radius: 1.25rem;
+                            border: 1px solid #ccfbf1;
+                            background: linear-gradient(135deg, #f0fdfa 0%, #fffbeb 100%);
+                            box-shadow: 0 4px 16px rgba(13,148,136,0.08);
+                        }
+                        .qr-panel__img {
+                            width: 100px; height: 100px;
+                            border-radius: 0.75rem;
+                            border: 3px solid #99f6e4;
+                            flex-shrink: 0;
+                        }
+                        .qr-panel__info { min-width: 0; }
+                        .qr-panel__label {
+                            font-size: 0.7rem; font-weight: 800;
+                            text-transform: uppercase; letter-spacing: 0.06em;
+                            color: #0f766e; margin-bottom: 0.15rem;
+                        }
+                        .qr-panel__name {
+                            font-size: 1rem; font-weight: 800; color: #0f172a;
+                            white-space: nowrap; overflow: hidden;
+                            text-overflow: ellipsis; max-width: 12rem;
+                        }
+                        .qr-panel__token {
+                            font-size: 0.68rem; font-family: ui-monospace, monospace;
+                            color: #64748b; margin-top: 0.15rem;
+                        }
+                        .qr-panel__btns {
+                            display: flex; gap: 0.4rem; margin-top: 0.5rem;
+                        }
+                        .qr-panel__btn {
+                            display: inline-flex; align-items: center; gap: 0.25rem;
+                            padding: 0.35rem 0.75rem; border-radius: 999px;
+                            font-size: 0.75rem; font-weight: 700; border: none;
+                            cursor: pointer; font-family: inherit;
+                            transition: transform 0.12s;
+                        }
+                        .qr-panel__btn:hover { transform: scale(1.05); }
+                        .qr-panel__btn--dl { background: linear-gradient(135deg, #0d9488, #0f766e); color: #fff; box-shadow: 0 2px 8px rgba(13,148,136,0.3); }
+                        .qr-panel__btn--cp { background: #fff; color: #0f766e; border: 1px solid #99f6e4; }
+                    </style>
+
+                    <div class="actions-qr-row">
+                        <!-- Left: GPS + Buttons -->
+                        <div class="actions-left">
+                            <label
+                                class="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200/90 bg-amber-50/60 px-4 py-3 shadow-sm transition hover:bg-amber-50">
+                                <input type="checkbox" id="mainGpsCheckbox"
+                                    class="main-gps-checkbox mt-1 h-5 w-5 shrink-0 cursor-pointer rounded border-amber-400 accent-amber-800 focus:ring-2 focus:ring-amber-400/40"
+                                    aria-describedby="mainGpsStatus" />
+                                <span class="min-w-0 flex flex-col gap-1">
+                                    <span class="flex items-center gap-2 text-sm font-bold text-on-surface">
+                                        <span class="material-symbols-outlined text-xl text-amber-800" aria-hidden="true">my_location</span>
+                                        Use GPS for start location
+                                    </span>
+                                    <span class="text-xs font-normal leading-snug text-on-surface-variant">Tick this to use your live GPS as the map start. The address field is disabled while GPS is on.</span>
                                 </span>
-                                <span class="text-xs font-normal leading-snug text-on-surface-variant">Tick this to use
-                                    your live GPS as the map start. The address field is disabled while GPS is
-                                    on.</span>
-                            </span>
-                        </label>
-                        <div class="min-w-0 flex-1 space-y-1 sm:pt-1">
-                            <p id="mainGpsStatus" class="text-sm leading-snug text-on-surface-variant" role="status">
-                            </p>
-                            <button type="button" id="mainUseAddressBtn"
-                                class="hidden text-left text-sm font-semibold text-secondary underline-offset-2 hover:underline"
-                                aria-controls="mainStartLocation">Use typed address instead</button>
+                            </label>
+                            <div class="min-w-0 space-y-1">
+                                <p id="mainGpsStatus" class="text-sm leading-snug text-on-surface-variant" role="status"></p>
+                                <button type="button" id="mainUseAddressBtn"
+                                    class="hidden text-left text-sm font-semibold text-secondary underline-offset-2 hover:underline"
+                                    aria-controls="mainStartLocation">Use typed address instead</button>
+                            </div>
+                            <div class="actions-btns" role="group" aria-label="Show preview map">
+                                <button type="button" id="mainShowMapBtn"
+                                    class="js-main-show-map inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary-container px-6 py-3 text-base font-bold text-on-primary-container shadow-md transition hover:brightness-[1.05]">
+                                    <span class="material-symbols-outlined" aria-hidden="true">map</span>
+                                    Show map
+                                </button>
+                                <button type="button" id="mainDownloadPdfBtn"
+                                    class="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-800 px-6 py-3 text-base font-bold text-white shadow-md transition hover:bg-slate-900 active:scale-[0.98]">
+                                    <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                                    Download PDF
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="mt-5 flex flex-row flex-wrap items-center gap-3 sm:gap-4" role="group"
-                        aria-label="Show preview map">
-                        <button type="button" id="mainShowMapBtn"
-                            class="js-main-show-map inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary-container px-6 py-3 text-base font-bold text-on-primary-container shadow-md transition hover:brightness-[1.05]">
-                            <span class="material-symbols-outlined" aria-hidden="true">map</span>
-                            Show map
-                        </button>
-                        <button type="button" id="mainDownloadPdfBtn"
-                            class="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-800 px-6 py-3 text-base font-bold text-white shadow-md transition hover:bg-slate-900 active:scale-[0.98]">
-                            <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
-                            Download PDF
-                        </button>
+
+                        <!-- Right: QR Code -->
+                        <div id="myQrSection" class="qr-panel">
+                            <img id="qrImage" class="qr-panel__img" src="" alt="Your temple QR" width="100" height="100" loading="lazy" />
+                            <div class="qr-panel__info">
+                                <p class="qr-panel__label">Your Temple QR</p>
+                                <p class="qr-panel__name" id="qrUserName">Guest</p>
+                                <p id="qrTokenDisplay" class="qr-panel__token"></p>
+                                <div class="qr-panel__btns">
+                                    <button type="button" id="qrDownloadBtn" class="qr-panel__btn qr-panel__btn--dl">
+                                        <span class="material-symbols-outlined" style="font-size:1rem">download</span> Download
+                                    </button>
+                                    <button type="button" id="qrCopyBtn" class="qr-panel__btn qr-panel__btn--cp">
+                                        <span class="material-symbols-outlined" style="font-size:1rem">content_copy</span> Copy link
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <p id="mainTripFormHint" class="mt-3 hidden text-sm font-medium text-red-700" role="alert"></p>
                 </div>
@@ -3125,76 +3209,6 @@
                 </section>
 
             </div>
-
-            <!-- Personal QR Code Section (hidden until Show Map is clicked) -->
-            <section id="myQrSection" class="landing-max mx-auto mt-12 mb-10 px-4 sm:px-6 hidden">
-                <style>
-                    .qr-card {
-                        max-width: 26rem; margin: 0 auto;
-                        border-radius: 1.5rem; border: 1px solid #fde68a;
-                        background: linear-gradient(155deg, #fffbeb 0%, #fff 45%, #f0fdfa 100%);
-                        box-shadow: 0 20px 50px rgba(15,23,42,0.08);
-                        padding: 2rem 1.5rem; text-align: center;
-                    }
-                    .qr-card__title {
-                        font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
-                        letter-spacing: 0.08em; color: #0f766e; margin-bottom: 0.25rem;
-                    }
-                    .qr-card__subtitle {
-                        font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;
-                    }
-                    .qr-card__desc {
-                        font-size: 0.88rem; color: #64748b; max-width: 22rem;
-                        margin: 0 auto 1.25rem; line-height: 1.5;
-                    }
-                    .qr-card__img {
-                        width: 200px; height: 200px; margin: 0 auto;
-                        display: block; border-radius: 0.75rem;
-                        border: 3px solid #e2e8f0;
-                    }
-                    .qr-card__token {
-                        font-size: 0.78rem; font-family: ui-monospace, monospace;
-                        color: #64748b; margin-top: 0.65rem;
-                    }
-                    .qr-card__actions {
-                        display: flex; flex-wrap: wrap; gap: 0.5rem;
-                        justify-content: center; margin-top: 1rem;
-                    }
-                    .qr-card__btn {
-                        display: inline-flex; align-items: center; gap: 0.35rem;
-                        padding: 0.6rem 1.15rem; border-radius: 999px;
-                        font-size: 0.85rem; font-weight: 700; border: none;
-                        cursor: pointer; transition: transform 0.12s, box-shadow 0.15s;
-                        font-family: inherit;
-                    }
-                    .qr-card__btn--primary {
-                        background: linear-gradient(135deg, #0d9488, #0f766e);
-                        color: #fff; box-shadow: 0 4px 14px rgba(13,148,136,0.35);
-                    }
-                    .qr-card__btn--ghost {
-                        background: #fff; color: #0f766e;
-                        border: 1px solid #99f6e4;
-                    }
-                    .qr-card__btn:hover { transform: scale(1.03); }
-                </style>
-                <div class="qr-card">
-                    <p class="qr-card__title">Your Personal QR</p>
-                    <p class="qr-card__subtitle">Welcome, <span id="qrUserName">Guest</span></p>
-                    <p class="qr-card__desc">
-                        Scan this QR code to check in at temples. Temple staff or you can scan it to log your visit.
-                    </p>
-                    <img id="qrImage" class="qr-card__img" src="" alt="Your personal temple QR code" width="200" height="200" loading="lazy" />
-                    <p id="qrTokenDisplay" class="qr-card__token"></p>
-                    <div class="qr-card__actions">
-                        <button type="button" id="qrDownloadBtn" class="qr-card__btn qr-card__btn--primary">
-                            <span class="material-symbols-outlined" style="font-size:1.1rem">download</span> Download QR
-                        </button>
-                        <button type="button" id="qrCopyBtn" class="qr-card__btn qr-card__btn--ghost">
-                            <span class="material-symbols-outlined" style="font-size:1.1rem">content_copy</span> Copy link
-                        </button>
-                    </div>
-                </div>
-            </section>
 
             <!-- Footer -->
             <footer class="mt-auto border-t border-amber-900/20 bg-slate-900 text-slate-200" role="contentinfo">
@@ -4444,8 +4458,6 @@
 
                     var mapSec = document.getElementById('mapSection');
                     if (mapSec) mapSec.classList.remove('hidden');
-                    var qrSec = document.getElementById('myQrSection');
-                    if (qrSec) qrSec.classList.remove('hidden');
                     var mapsToUpdate = [];
                     if (ensurePkgMap()) {
                         mapsToUpdate.push({
@@ -5037,8 +5049,6 @@
                             var top3 = geoHospitals.slice(0, 3);
                             var mapSec = document.getElementById('mapSection');
                             if (mapSec) mapSec.classList.remove('hidden');
-                            var qrSec2 = document.getElementById('myQrSection');
-                            if (qrSec2) qrSec2.classList.remove('hidden');
                             if (!ensurePkgMap()) {
                                 fail('Map failed to load.');
                                 return;
