@@ -102,6 +102,14 @@ class TempleVisit(db.Model):
     temple = db.relationship('Temple', backref=db.backref('visits', lazy=True))
 
 
+class Admin(db.Model):
+    __tablename__ = 'admins'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+
 TIRUPATI_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tirupati_main_data.csv')
 TEMPLE_VISIT_COOLDOWN_MINUTES = max(1, int(os.getenv('TEMPLE_VISIT_COOLDOWN_MINUTES', '10')))
 
@@ -419,12 +427,28 @@ def _backfill_qr_tokens():
             ensure_qr_token(user)
 
 
+def _seed_default_admin():
+    """Create the default admin from .env if no admins exist yet."""
+    if Admin.query.first():
+        return
+    uname = os.getenv('ADMIN_USERNAME', 'admin')
+    pwd = os.getenv('ADMIN_PASSWORD', 'admin')
+    admin = Admin(
+        username=uname,
+        password_hash=generate_password_hash(pwd),
+    )
+    db.session.add(admin)
+    db.session.commit()
+    print(f'[INFO] Default admin "{uname}" created from .env')
+
+
 def init_db():
     db.create_all()
     _ensure_user_columns()
     _ensure_temple_columns()
     _sync_temples_from_csv()
     _backfill_qr_tokens()
+    _seed_default_admin()
 
 
 with app.app_context():
@@ -1304,6 +1328,136 @@ def api_chat():
     except Exception as e:
         print(f"Chat Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# --- Admin Panel ---
+def _require_admin():
+    if not session.get('is_admin'):
+        return jsonify({'status': 'error', 'message': 'Admin login required'}), 401
+    return None
+
+
+@app.route('/admin')
+def admin_page():
+    return send_from_directory('.', 'admin.html')
+
+
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login():
+    data = request.json or {}
+    username = (data.get('username') or '').strip()
+    password = data.get('password') or ''
+    admin = Admin.query.filter_by(username=username).first()
+    if not admin or not check_password_hash(admin.password_hash, password):
+        return jsonify({'status': 'error', 'message': 'Invalid admin credentials'}), 401
+    session['is_admin'] = True
+    session['admin_username'] = admin.username
+    return jsonify({'status': 'success', 'message': 'Admin login successful'})
+
+
+@app.route('/api/admin/logout', methods=['POST'])
+def admin_logout():
+    session.pop('is_admin', None)
+    session.pop('admin_username', None)
+    return jsonify({'status': 'success', 'message': 'Logged out'})
+
+
+@app.route('/api/admin/me', methods=['GET'])
+def admin_me():
+    if not session.get('is_admin'):
+        return jsonify({'status': 'error', 'loggedIn': False}), 401
+    return jsonify({'status': 'success', 'loggedIn': True, 'username': session.get('admin_username', 'admin')})
+
+
+@app.route('/api/admin/stats', methods=['GET'])
+def admin_stats():
+    err = _require_admin()
+    if err:
+        return err
+    total_users = User.query.count()
+    verified_users = User.query.filter_by(is_verified=True).count()
+    total_temples = Temple.query.count()
+    total_visits = db.session.query(db.func.coalesce(db.func.sum(TempleVisit.visit_count), 0)).scalar()
+    unique_visitors = db.session.query(db.func.count(db.func.distinct(TempleVisit.user_id))).scalar()
+    today = date.today()
+    visits_today = db.session.query(
+        db.func.coalesce(db.func.sum(TempleVisit.visit_count), 0)
+    ).filter(TempleVisit.visit_date == today).scalar()
+    return jsonify({
+        'status': 'ok',
+        'totalUsers': total_users,
+        'verifiedUsers': verified_users,
+        'totalTemples': total_temples,
+        'totalVisits': int(total_visits),
+        'uniqueVisitors': int(unique_visitors),
+        'visitsToday': int(visits_today),
+    })
+
+
+@app.route('/api/admin/users', methods=['GET'])
+def admin_users():
+    err = _require_admin()
+    if err:
+        return err
+    users = User.query.order_by(User.created_at.desc()).all()
+    return jsonify({
+        'status': 'ok',
+        'users': [
+            {
+                'id': u.id,
+                'username': u.username,
+                'email': u.email,
+                'phone': u.phone or '',
+                'qrToken': u.qr_token or '',
+                'isVerified': u.is_verified,
+                'createdAt': u.created_at.isoformat() if u.created_at else '',
+            }
+            for u in users
+        ],
+    })
+
+
+@app.route('/api/admin/visits', methods=['GET'])
+def admin_visits():
+    err = _require_admin()
+    if err:
+        return err
+    limit = min(int(request.args.get('limit', 100)), 500)
+    rows = (
+        TempleVisit.query
+        .order_by(TempleVisit.visit_date.desc(), TempleVisit.updated_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return jsonify({
+        'status': 'ok',
+        'visits': [
+            {
+                'id': v.id,
+                'userName': v.user.username if v.user else '',
+                'userEmail': v.user.email if v.user else '',
+                'templeName': v.temple.temple_name if v.temple else '',
+                'visitDate': v.visit_date.isoformat(),
+                'visitCount': v.visit_count,
+                'createdAt': v.created_at.isoformat() if v.created_at else '',
+            }
+            for v in rows
+        ],
+    })
+
+
+@app.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
+def admin_delete_user(user_id):
+    err = _require_admin()
+    if err:
+        return err
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    TempleVisit.query.filter_by(user_id=user.id).delete()
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'status': 'ok', 'message': f'User {user.email} deleted'})
 
 
 if __name__ == '__main__':
