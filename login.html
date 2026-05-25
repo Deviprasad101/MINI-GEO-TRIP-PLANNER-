@@ -301,12 +301,12 @@
                 <p class="text-slate-300 text-sm font-medium drop-shadow-sm">Enter your credentials to access your dashboard</p>
             </div>
 
-            <form id="loginForm" class="space-y-4">
+            <form id="loginForm" class="space-y-4" autocomplete="off">
                 <div class="space-y-1">
                     <label class="text-[11px] font-bold text-purple-600 uppercase ml-1 text-white">Email Address</label>
                     <div class="input-group">
                         <i class="fa-solid fa-envelope leading-icon"></i>
-                        <input type="email" id="email" required placeholder="hema@gmail.com">
+                        <input type="email" id="email" required placeholder="" autocomplete="off">
                     </div>
                 </div>
 
@@ -314,7 +314,7 @@
                     <label class="text-[11px] font-bold text-purple-600 uppercase ml-1 text-white">Password</label>
                     <div class="input-group flex items-center relative">
                         <i class="fa-solid fa-lock leading-icon"></i>
-                        <input type="password" id="password" required placeholder="••••••••" class="pr-12">
+                        <input type="password" id="password" required placeholder="" autocomplete="off" class="pr-12">
                         <i class="fa-solid fa-eye absolute right-4 cursor-pointer text-slate-400 hover:text-slate-600 transition-colors"
                             id="togglePassword"></i>
                     </div>
@@ -356,13 +356,13 @@
                 <p class="text-slate-500 text-sm font-medium">Join GeoTrip Planner today</p>
             </div>
 
-            <form id="registerForm" class="space-y-4">
+            <form id="registerForm" class="space-y-4" autocomplete="off">
                 <div id="regStep1" class="space-y-4">
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Full Name</label>
                         <div class="input-group">
                             <i class="fa-solid fa-user leading-icon"></i>
-                            <input type="text" id="regName" required placeholder="John Doe"
+                            <input type="text" id="regName" required placeholder="" autocomplete="off"
                                 class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 outline-none focus:border-purple-600 transition-all">
                         </div>
                     </div>
@@ -370,7 +370,7 @@
                         <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Email Address</label>
                         <div class="input-group">
                             <i class="fa-solid fa-envelope leading-icon"></i>
-                            <input type="email" id="regEmail" required placeholder="example@mail.com"
+                            <input type="email" id="regEmail" required placeholder="" autocomplete="off"
                                 class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 outline-none focus:border-purple-600 transition-all">
                         </div>
                     </div>
@@ -378,7 +378,7 @@
                         <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Phone Number</label>
                         <div class="input-group">
                             <i class="fa-solid fa-phone leading-icon"></i>
-                            <input type="tel" id="regPhone" placeholder="10-digit mobile" required
+                            <input type="tel" id="regPhone" placeholder="" required autocomplete="off"
                                 class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 outline-none focus:border-purple-600 transition-all"
                                 pattern="[6-9][0-9]{9}">
                         </div>
@@ -388,7 +388,7 @@
                             <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Password</label>
                             <div class="input-group flex items-center relative">
                                 <i class="fa-solid fa-lock leading-icon"></i>
-                                <input type="password" id="regPassword" required placeholder="••••••••"
+                                <input type="password" id="regPassword" required placeholder="" autocomplete="new-password"
                                     class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 pr-10 outline-none focus:border-purple-600 transition-all text-sm">
                                 <i class="fa-solid fa-eye absolute right-3 cursor-pointer text-slate-400 hover:text-slate-600 transition-colors text-sm"
                                     id="toggleRegPassword"></i>
@@ -398,7 +398,7 @@
                             <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Confirm</label>
                             <div class="input-group flex items-center relative">
                                 <i class="fa-solid fa-check-double leading-icon"></i>
-                                <input type="password" id="confirmPassword" required placeholder="••••••••"
+                                <input type="password" id="confirmPassword" required placeholder="" autocomplete="new-password"
                                     class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 pr-10 outline-none focus:border-purple-600 transition-all text-sm">
                                 <i class="fa-solid fa-eye absolute right-3 cursor-pointer text-slate-400 hover:text-slate-600 transition-colors text-sm"
                                     id="toggleConfirmPassword"></i>
@@ -484,13 +484,13 @@
                 <p class="text-slate-500 text-sm font-medium">Enter your registered email to receive an OTP</p>
             </div>
 
-            <form id="forgotForm" class="space-y-4">
+            <form id="forgotForm" class="space-y-4" autocomplete="off">
                 <div id="forgotStep1" class="space-y-4">
                     <div class="space-y-1 text-left">
                         <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Email Address</label>
                         <div class="input-group">
                             <i class="fa-solid fa-envelope leading-icon"></i>
-                            <input type="email" id="forgotEmail" required placeholder="example@mail.com"
+                            <input type="email" id="forgotEmail" required placeholder="" autocomplete="off"
                                 class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 outline-none focus:border-purple-600 transition-all">
                         </div>
                     </div>
@@ -520,7 +520,7 @@
                         <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">New Password</label>
                         <div class="input-group flex items-center relative">
                             <i class="fa-solid fa-lock leading-icon"></i>
-                            <input type="password" id="forgotNewPassword" required placeholder="••••••••"
+                            <input type="password" id="forgotNewPassword" required placeholder="" autocomplete="new-password"
                                 class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 pr-10 outline-none focus:border-purple-600 transition-all text-sm">
                             <i class="fa-solid fa-eye absolute right-3 cursor-pointer text-slate-400 hover:text-slate-600 transition-colors text-sm"
                                 id="toggleForgotNewPassword"></i>
@@ -949,6 +949,15 @@
             btnText.style.display = 'block';
             btnIcon.style.display = 'block';
             loader.style.display = 'none';
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        });
+
+        // Force-clear all fields after browser autofill kicks in
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelectorAll('#loginForm input, #registerForm input, #forgotForm input').forEach(i => { i.value = ''; });
+            }, 50);
         });
     </script>
 </body>
