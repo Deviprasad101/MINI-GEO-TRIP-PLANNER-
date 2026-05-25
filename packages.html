@@ -5841,6 +5841,37 @@
             &copy; 2026 AI Itinerary Strategist. Powered by Gemini & OpenAI.
         </div>
     </footer>
+    <!-- Floating QR Code -->
+    <style>
+        .floating-qr{position:fixed;bottom:1.25rem;left:1.25rem;z-index:9998;display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:1.25rem;border:1px solid #ccfbf1;background:linear-gradient(135deg,#f0fdfa,#fffbeb);box-shadow:0 8px 30px rgba(13,148,136,.15);transition:transform .2s}
+        .floating-qr:hover{transform:translateY(-2px)}
+        .floating-qr__img{width:64px;height:64px;border-radius:.5rem;border:2px solid #99f6e4;flex-shrink:0}
+        .floating-qr__info{min-width:0}
+        .floating-qr__label{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#0f766e}
+        .floating-qr__name{font-size:.85rem;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:10rem}
+        .floating-qr__token{font-size:.6rem;font-family:ui-monospace,monospace;color:#64748b;margin-top:1px}
+        .floating-qr__btns{display:flex;gap:.3rem;margin-top:.35rem}
+        .floating-qr__btn{display:inline-flex;align-items:center;gap:.2rem;padding:.25rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:transform .1s}
+        .floating-qr__btn:hover{transform:scale(1.05)}
+        .floating-qr__btn--dl{background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff}
+        .floating-qr__btn--cp{background:#fff;color:#0f766e;border:1px solid #99f6e4}
+    </style>
+    <div id="floatingQr" class="floating-qr" style="display:none">
+        <img id="fqrImage" class="floating-qr__img" src="" alt="Your QR" width="64" height="64" loading="lazy"/>
+        <div class="floating-qr__info">
+            <p class="floating-qr__label">Your Temple QR</p>
+            <p class="floating-qr__name" id="fqrName">Guest</p>
+            <p id="fqrToken" class="floating-qr__token"></p>
+            <div class="floating-qr__btns">
+                <button type="button" id="fqrDownload" class="floating-qr__btn floating-qr__btn--dl">
+                    <span class="material-symbols-outlined" style="font-size:.85rem">download</span> Download
+                </button>
+                <button type="button" id="fqrCopy" class="floating-qr__btn floating-qr__btn--cp">
+                    <span class="material-symbols-outlined" style="font-size:.85rem">content_copy</span> Copy
+                </button>
+            </div>
+        </div>
+    </div>
     <script>
         async function handleLogout() {
             try {
@@ -5852,6 +5883,27 @@
                 window.location.href = '/';
             }
         }
+        (function(){
+            var userStr = localStorage.getItem('currentUser');
+            if (!userStr) return;
+            var u = JSON.parse(userStr);
+            if (!u || !u.qrToken) return;
+            var origin = encodeURIComponent(window.location.origin);
+            var qrUrl = '/api/user/' + encodeURIComponent(u.qrToken) + '/qr.png?clientOrigin=' + origin + '&t=' + Date.now();
+            var wrap = document.getElementById('floatingQr');
+            document.getElementById('fqrImage').src = qrUrl;
+            document.getElementById('fqrName').textContent = u.name || 'Guest';
+            document.getElementById('fqrToken').textContent = 'Token: ' + u.qrToken;
+            wrap.style.display = 'flex';
+            document.getElementById('fqrDownload').addEventListener('click', function(){
+                var a = document.createElement('a');
+                a.href = qrUrl; a.download = 'GeoTrip-QR-' + u.qrToken + '.png'; a.click();
+            });
+            document.getElementById('fqrCopy').addEventListener('click', function(){
+                var link = u.qrUrl || (window.location.origin + '/user/' + u.qrToken);
+                navigator.clipboard.writeText(link).then(function(){ alert('QR link copied!'); }).catch(function(){ prompt('Copy this link:', link); });
+            });
+        })();
     </script>
 </body>
 

@@ -1365,7 +1365,7 @@ def admin_logout():
 @app.route('/api/admin/me', methods=['GET'])
 def admin_me():
     if not session.get('is_admin'):
-        return jsonify({'status': 'error', 'loggedIn': False}), 401
+        return jsonify({'status': 'ok', 'loggedIn': False})
     return jsonify({'status': 'success', 'loggedIn': True, 'username': session.get('admin_username', 'admin')})
 
 
