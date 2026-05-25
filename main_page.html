@@ -3126,8 +3126,8 @@
 
             </div>
 
-            <!-- Personal QR Code Section -->
-            <section id="myQrSection" class="landing-max mx-auto mt-12 mb-10 px-4 sm:px-6">
+            <!-- Personal QR Code Section (hidden until Show Map is clicked) -->
+            <section id="myQrSection" class="landing-max mx-auto mt-12 mb-10 px-4 sm:px-6 hidden">
                 <style>
                     .qr-card {
                         max-width: 26rem; margin: 0 auto;
@@ -3383,8 +3383,26 @@
                     return 'other';
                 }
 
+                function splitCsvRowHero(line) {
+                    var fields = []; var cur = ''; var inQ = false;
+                    for (var i = 0; i < line.length; i++) {
+                        var ch = line[i];
+                        if (inQ) {
+                            if (ch === '"' && i + 1 < line.length && line[i + 1] === '"') { cur += '"'; i++; }
+                            else if (ch === '"') { inQ = false; }
+                            else { cur += ch; }
+                        } else {
+                            if (ch === '"') { inQ = true; }
+                            else if (ch === ',') { fields.push(cur); cur = ''; }
+                            else { cur += ch; }
+                        }
+                    }
+                    fields.push(cur);
+                    return fields;
+                }
+
                 function parseLine(line) {
-                    const parts = line.split(',');
+                    const parts = splitCsvRowHero(line);
                     if (parts.length < 6) return null;
                     if (!(parts[0] || '').trim() && (parts[6] || '').trim()) return null;
                     return { categoryKey: categoryKeyFromCsv(parts[1].trim()) };
@@ -3883,8 +3901,32 @@
                 return 'other';
             }
 
+            function splitCsvRow(line) {
+                var fields = [];
+                var cur = '';
+                var inQuote = false;
+                for (var i = 0; i < line.length; i++) {
+                    var ch = line[i];
+                    if (inQuote) {
+                        if (ch === '"' && i + 1 < line.length && line[i + 1] === '"') {
+                            cur += '"'; i++;
+                        } else if (ch === '"') {
+                            inQuote = false;
+                        } else {
+                            cur += ch;
+                        }
+                    } else {
+                        if (ch === '"') { inQuote = true; }
+                        else if (ch === ',') { fields.push(cur); cur = ''; }
+                        else { cur += ch; }
+                    }
+                }
+                fields.push(cur);
+                return fields;
+            }
+
             function parseCSVLine(line) {
-                var parts = line.split(',');
+                var parts = splitCsvRow(line);
                 if (parts.length < 6) return null;
                 var hName = (parts[6] || '').trim();
                 var hCat = (parts[7] || '').trim();
@@ -3908,15 +3950,6 @@
                 if (!name || isNaN(lat) || isNaN(lng)) return null;
                 var description = (parts[4] || '').trim();
                 var timings = (parts[5] || '').trim();
-                if (parts.length > 6) {
-                    var tail = parts.slice(6);
-                    var tailEmpty = tail.every(function (t) {
-                        return !(t || '').trim();
-                    });
-                    if (!tailEmpty && parts.length > 8) {
-                        timings = parts.slice(5, parts.length - 3).join(',').trim();
-                    }
-                }
                 return {
                     name: name,
                     category: category,
@@ -4411,6 +4444,8 @@
 
                     var mapSec = document.getElementById('mapSection');
                     if (mapSec) mapSec.classList.remove('hidden');
+                    var qrSec = document.getElementById('myQrSection');
+                    if (qrSec) qrSec.classList.remove('hidden');
                     var mapsToUpdate = [];
                     if (ensurePkgMap()) {
                         mapsToUpdate.push({
@@ -5002,6 +5037,8 @@
                             var top3 = geoHospitals.slice(0, 3);
                             var mapSec = document.getElementById('mapSection');
                             if (mapSec) mapSec.classList.remove('hidden');
+                            var qrSec2 = document.getElementById('myQrSection');
+                            if (qrSec2) qrSec2.classList.remove('hidden');
                             if (!ensurePkgMap()) {
                                 fail('Map failed to load.');
                                 return;
@@ -5370,6 +5407,18 @@
     </button>
 
     <script>
+    window.categoryKeyFromCsv = function(cat) {
+        var c = (cat || '').toLowerCase();
+        if (c.indexOf('hospital') !== -1) return 'hospital';
+        if (c.indexOf('food') !== -1) return 'food';
+        if (c.indexOf('adventure') !== -1) return 'adventure';
+        if (c.indexOf('wildlife') !== -1) return 'wildlife';
+        if (c.indexOf('temple') !== -1) return 'temple';
+        if (c.indexOf('sight') !== -1) return 'sightseeing';
+        return 'other';
+    };
+    </script>
+    <script>
     (function() {
         'use strict';
 
@@ -5381,7 +5430,7 @@
                     // Sync with main page's places array and add categoryKey
                     window.places = window.recommender.places.map(function(p) {
                         if (!p.categoryKey) {
-                            p.categoryKey = typeof categoryKeyFromCsv === 'function' ? categoryKeyFromCsv(p.category) : 'other';
+                            p.categoryKey = window.categoryKeyFromCsv ? window.categoryKeyFromCsv(p.category) : 'other';
                         }
                         return p;
                     });
