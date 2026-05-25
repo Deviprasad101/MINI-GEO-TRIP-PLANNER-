@@ -134,6 +134,7 @@
             <button class="tab-btn active px-5 py-2.5 rounded-xl text-sm font-bold" data-tab="users"><i class="fa-solid fa-users mr-1.5"></i>Users</button>
             <button class="tab-btn bg-white border border-gray-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold" data-tab="visits"><i class="fa-solid fa-location-dot mr-1.5"></i>Temple Visits</button>
             <button class="tab-btn bg-white border border-gray-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold" data-tab="temples"><i class="fa-solid fa-gopuram mr-1.5"></i>Temples</button>
+            <button class="tab-btn bg-white border border-gray-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold" data-tab="userdetails"><i class="fa-solid fa-id-card mr-1.5"></i>User Details</button>
         </div>
 
         <!-- Users Table -->
@@ -155,7 +156,9 @@
                                 <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Name</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Email</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Phone</th>
-                                <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">QR Token</th>
+                                <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Visits Today</th>
+                                <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Total Visits</th>
+                                <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Last Visit</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Verified</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Joined</th>
                                 <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Action</th>
@@ -213,6 +216,68 @@
                     </table>
                 </div>
                 <p id="templesEmpty" class="hidden text-center text-slate-400 py-10 text-sm">No temples found</p>
+            </div>
+        </div>
+
+        <!-- User Details Tab -->
+        <div id="tab-userdetails" class="tab-content hidden fade-in">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+                    <h2 class="font-bold text-slate-800"><i class="fa-solid fa-id-card mr-2 text-purple-500"></i>User Visit Details</h2>
+                    <div class="relative">
+                        <select id="userDetailSelect" class="pl-4 pr-8 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-purple-400">
+                            <option value="">Select a user...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Selected user info -->
+                <div id="userDetailContent" class="p-5 hidden">
+                    <!-- Profile -->
+                    <div class="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 text-white font-extrabold text-xl flex items-center justify-center shrink-0" id="udAvatar">?</div>
+                        <div>
+                            <p class="font-bold text-lg text-slate-800" id="udName">—</p>
+                            <p class="text-sm text-slate-500" id="udMeta">—</p>
+                        </div>
+                    </div>
+
+                    <!-- Analytics cards -->
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100">
+                            <p class="text-2xl font-extrabold text-teal-700" id="udVisitsToday">0</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Visits Today</p>
+                        </div>
+                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100">
+                            <p class="text-2xl font-extrabold text-teal-700" id="udTemplesToday">0</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Temples Today</p>
+                        </div>
+                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100">
+                            <p class="text-2xl font-extrabold text-teal-700" id="udLifetime">0</p>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Lifetime</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <!-- Visited Temples -->
+                        <div>
+                            <h3 class="text-xs font-bold uppercase text-teal-700 mb-3"><i class="fa-solid fa-gopuram mr-1.5"></i>Visited Temples</h3>
+                            <div id="udVisitedTemples" class="space-y-2 max-h-[300px] overflow-y-auto">
+                                <p class="text-sm text-slate-400">Select a user to view</p>
+                            </div>
+                        </div>
+
+                        <!-- Visit History -->
+                        <div>
+                            <h3 class="text-xs font-bold uppercase text-teal-700 mb-3"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>Visit History</h3>
+                            <div id="udVisitHistory" class="space-y-2 max-h-[300px] overflow-y-auto">
+                                <p class="text-sm text-slate-400">Select a user to view</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p id="userDetailEmpty" class="text-center text-slate-400 py-10 text-sm">Select a user from the dropdown above to view their visit details</p>
             </div>
         </div>
     </main>
@@ -280,6 +345,7 @@ function showDashboard() {
     loadUsers();
     loadVisits();
     loadTemples();
+    populateUserDropdown();
 }
 
 async function loadStats() {
@@ -310,7 +376,9 @@ async function loadUsers() {
                 <td class="px-5 py-3 font-semibold text-slate-800">${esc(u.username)}</td>
                 <td class="px-5 py-3 text-slate-600">${esc(u.email)}</td>
                 <td class="px-5 py-3 text-slate-500">${esc(u.phone) || '<span class="text-slate-300">—</span>'}</td>
-                <td class="px-5 py-3 font-mono text-xs text-purple-600">${esc(u.qrToken) || '—'}</td>
+                <td class="px-5 py-3 text-center font-semibold text-teal-700">${u.visitsToday ?? 0}</td>
+                <td class="px-5 py-3 text-center font-semibold text-slate-700">${u.totalVisits ?? 0}</td>
+                <td class="px-5 py-3 text-slate-400 text-xs">${u.lastVisitDate || '—'}</td>
                 <td class="px-5 py-3">${u.isVerified
                     ? '<span class="inline-flex items-center gap-1 text-green-600 text-xs font-bold"><i class="fa-solid fa-circle-check"></i> Yes</span>'
                     : '<span class="text-slate-400 text-xs">No</span>'}</td>
@@ -394,6 +462,77 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
         document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
     });
+});
+
+// --- User Details tab ---
+async function populateUserDropdown() {
+    try {
+        const res = await fetch('/api/admin/users');
+        const d = await res.json();
+        const sel = document.getElementById('userDetailSelect');
+        sel.innerHTML = '<option value="">Select a user...</option>';
+        if (d.users) {
+            d.users.forEach(u => {
+                sel.innerHTML += `<option value="${u.id}">${esc(u.username)} (${esc(u.email)})</option>`;
+            });
+        }
+    } catch {}
+}
+
+document.getElementById('userDetailSelect').addEventListener('change', async (e) => {
+    const uid = e.target.value;
+    const content = document.getElementById('userDetailContent');
+    const empty = document.getElementById('userDetailEmpty');
+    if (!uid) { content.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+
+    try {
+        const res = await fetch(`/api/admin/users/${uid}/details`);
+        const d = await res.json();
+        if (d.status !== 'ok') { showToast(d.message, 'error'); return; }
+
+        empty.classList.add('hidden');
+        content.classList.remove('hidden');
+
+        const u = d.user;
+        document.getElementById('udAvatar').textContent = (u.username || '?')[0].toUpperCase();
+        document.getElementById('udName').textContent = u.username;
+        document.getElementById('udMeta').textContent =
+            (u.phone ? 'Phone: ' + u.phone + ' · ' : '') + 'Email: ' + u.email + ' · ID #' + u.id;
+
+        document.getElementById('udVisitsToday').textContent = d.visitsToday;
+        document.getElementById('udTemplesToday').textContent = d.templesToday;
+        document.getElementById('udLifetime').textContent = d.lifetimeVisits;
+
+        const vtEl = document.getElementById('udVisitedTemples');
+        if (d.visitedTemples.length === 0) {
+            vtEl.innerHTML = '<p class="text-sm text-slate-400">No temples visited yet</p>';
+        } else {
+            vtEl.innerHTML = d.visitedTemples.map(t => `
+                <div class="flex items-start gap-3 p-3 bg-teal-50 rounded-xl border border-teal-100">
+                    <i class="fa-solid fa-gopuram text-teal-600 mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold text-slate-800 text-sm">${esc(t.templeName)}</p>
+                        <p class="text-xs text-slate-500">${esc(t.location)} · ${t.totalVisits} visit(s) · Last: ${t.lastDate}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const vhEl = document.getElementById('udVisitHistory');
+        if (d.history.length === 0) {
+            vhEl.innerHTML = '<p class="text-sm text-slate-400">No visit history</p>';
+        } else {
+            vhEl.innerHTML = d.history.map(h => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm">
+                    <div>
+                        <p class="font-semibold text-slate-800">${esc(h.templeName)}</p>
+                        <p class="text-xs text-slate-500">${h.visitDate}</p>
+                    </div>
+                    <span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-bold">${h.visitCount}x</span>
+                </div>
+            `).join('');
+        }
+    } catch { showToast('Failed to load user details', 'error'); }
 });
 
 // --- Search ---

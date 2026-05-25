@@ -1399,22 +1399,27 @@ def admin_users():
     err = _require_admin()
     if err:
         return err
+    today = date.today()
     users = User.query.order_by(User.created_at.desc()).all()
-    return jsonify({
-        'status': 'ok',
-        'users': [
-            {
-                'id': u.id,
-                'username': u.username,
-                'email': u.email,
-                'phone': u.phone or '',
-                'qrToken': u.qr_token or '',
-                'isVerified': u.is_verified,
-                'createdAt': u.created_at.isoformat() if u.created_at else '',
-            }
-            for u in users
-        ],
-    })
+    result = []
+    for u in users:
+        all_visits = TempleVisit.query.filter_by(user_id=u.id).all()
+        today_visits = [v for v in all_visits if v.visit_date == today]
+        total = sum((v.visit_count or 0) for v in all_visits)
+        today_total = sum((v.visit_count or 0) for v in today_visits)
+        last_visit = max((v.visit_date for v in all_visits), default=None)
+        result.append({
+            'id': u.id,
+            'username': u.username,
+            'email': u.email,
+            'phone': u.phone or '',
+            'visitsToday': today_total,
+            'totalVisits': total,
+            'lastVisitDate': last_visit.isoformat() if last_visit else '',
+            'isVerified': u.is_verified,
+            'createdAt': u.created_at.isoformat() if u.created_at else '',
+        })
+    return jsonify({'status': 'ok', 'users': result})
 
 
 @app.route('/api/admin/visits', methods=['GET'])
@@ -1442,6 +1447,60 @@ def admin_visits():
                 'createdAt': v.created_at.isoformat() if v.created_at else '',
             }
             for v in rows
+        ],
+    })
+
+
+@app.route('/api/admin/users/<int:user_id>/details', methods=['GET'])
+def admin_user_details(user_id):
+    """Per-user visit analytics for the admin panel."""
+    err = _require_admin()
+    if err:
+        return err
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+
+    today = date.today()
+    all_visits = TempleVisit.query.filter_by(user_id=user.id).order_by(
+        TempleVisit.visit_date.desc(), TempleVisit.updated_at.desc()
+    ).all()
+    today_visits = [v for v in all_visits if v.visit_date == today]
+
+    by_temple = {}
+    for v in all_visits:
+        tid = v.temple_id
+        if tid not in by_temple:
+            by_temple[tid] = {
+                'templeName': v.temple.temple_name if v.temple else '',
+                'location': (v.temple.location or '') if v.temple else '',
+                'totalVisits': 0,
+                'lastDate': v.visit_date.isoformat(),
+            }
+        by_temple[tid]['totalVisits'] += v.visit_count or 0
+        if v.visit_date.isoformat() > by_temple[tid]['lastDate']:
+            by_temple[tid]['lastDate'] = v.visit_date.isoformat()
+    visited_temples = sorted(by_temple.values(), key=lambda x: x['lastDate'], reverse=True)
+
+    return jsonify({
+        'status': 'ok',
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'phone': user.phone or '',
+        },
+        'visitsToday': sum((v.visit_count or 0) for v in today_visits),
+        'templesToday': len(today_visits),
+        'lifetimeVisits': sum((v.visit_count or 0) for v in all_visits),
+        'visitedTemples': visited_temples,
+        'history': [
+            {
+                'templeName': v.temple.temple_name if v.temple else '',
+                'visitDate': v.visit_date.isoformat(),
+                'visitCount': v.visit_count,
+            }
+            for v in all_visits[:50]
         ],
     })
 
