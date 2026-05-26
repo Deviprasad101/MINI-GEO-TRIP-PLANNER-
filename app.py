@@ -1344,7 +1344,7 @@ def about_page():
 
 @app.route('/admin')
 def admin_page():
-    return send_from_directory('.', 'admin.html')
+    return send_from_directory('.', 'login.html')
 
 
 @app.route('/api/admin/login', methods=['POST'])

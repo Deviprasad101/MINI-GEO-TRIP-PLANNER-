@@ -217,11 +217,11 @@
         </div>
 
         <!-- Center Admin Button -->
-        <a href="/admin"
-           class="absolute left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white bg-white/15 border border-white/25 backdrop-blur-sm hover:bg-purple-600 hover:border-purple-500 transition-all">
+        <button type="button" onclick="toggleAdminPanel(true)"
+           class="absolute left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white bg-white/15 border border-white/25 backdrop-blur-sm hover:bg-purple-600 hover:border-purple-500 transition-all cursor-pointer">
             <i class="fa-solid fa-shield-halved"></i>
             <span class="hidden sm:inline">Admin</span>
-        </a>
+        </button>
 
         <!-- Right Logos -->
         <div class="flex flex-col items-end shrink min-w-0 z-10">
@@ -959,6 +959,341 @@
             }, 50);
         });
     </script>
+
+<!-- ═══════════ ADMIN PANEL (merged from admin.html) ═══════════ -->
+<div id="adminFullPanel" style="display:none">
+<style>
+    #adminFullPanel { font-family: 'Inter', 'Poppins', sans-serif; position: fixed; inset: 0; z-index: 9999; background: #f9fafb; overflow-y: auto; }
+    #adminFullPanel .adm-stat-card { transition: transform 0.2s; }
+    #adminFullPanel .adm-stat-card:hover { transform: translateY(-4px); }
+    #adminFullPanel .adm-tab-btn.active { background: #7c3aed; color: #fff; }
+    #adminFullPanel .adm-tab-btn { transition: all 0.2s; }
+    #adminFullPanel .adm-fade-in { animation: admFadeIn 0.4s ease; }
+    @keyframes admFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    #adminFullPanel table th { position: sticky; top: 0; z-index: 2; }
+    #adminFullPanel .adm-toast { animation: admSlideIn 0.3s ease, admFadeOut 0.3s 2.7s ease forwards; }
+    @keyframes admSlideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes admFadeOut { to { opacity: 0; transform: translateX(100%); } }
+</style>
+
+<!-- Admin Login Screen -->
+<div id="admLoginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md adm-fade-in">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-2xl shadow-lg mb-4">
+                <i class="fa-solid fa-shield-halved text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Admin Panel</h1>
+            <p class="text-slate-500 text-sm mt-1">GeoTrip Planner Administration</p>
+        </div>
+        <form id="admLoginForm" class="space-y-5">
+            <div>
+                <label class="text-xs font-bold text-purple-600 uppercase ml-1">Username</label>
+                <div class="relative mt-1">
+                    <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="admUser" required placeholder="admin"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition" autocomplete="off">
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-purple-600 uppercase ml-1">Password</label>
+                <div class="relative mt-1">
+                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="password" id="admPass" required placeholder="••••••••"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition" autocomplete="new-password">
+                </div>
+            </div>
+            <p id="admLoginError" class="text-red-500 text-sm font-medium hidden"></p>
+            <button type="submit"
+                class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:brightness-110 transition active:scale-95">
+                <span id="admLoginBtnText">Login</span>
+                <i class="fa-solid fa-spinner fa-spin hidden" id="admLoginSpinner"></i>
+            </button>
+        </form>
+        <button type="button" onclick="toggleAdminPanel(false)" class="block text-center text-xs text-slate-400 mt-6 hover:text-purple-600 transition w-full cursor-pointer bg-transparent border-none">← Back to GeoTrip Planner</button>
+    </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="admDashboardScreen" class="hidden">
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-xl flex items-center justify-center shadow">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-extrabold text-slate-800 leading-tight">GeoTrip Admin</h1>
+                <p class="text-[11px] text-slate-400 font-medium">Administration Dashboard</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-slate-500 font-medium hidden sm:inline"><i class="fa-solid fa-user-shield mr-1 text-purple-500"></i> <span id="admName">admin</span></span>
+            <button onclick="admLogout()" class="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-100 transition">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+            </button>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div id="admStatsRow" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-users"></i></div></div>
+                <p class="text-2xl font-extrabold text-slate-800" id="admStatUsers">-</p>
+                <p class="text-[11px] text-slate-400 font-medium mt-1">Total Users</p>
+            </div>
+            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-green-100 text-green-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-user-check"></i></div></div>
+                <p class="text-2xl font-extrabold text-slate-800" id="admStatVerified">-</p>
+                <p class="text-[11px] text-slate-400 font-medium mt-1">Verified Users</p>
+            </div>
+            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-gopuram"></i></div></div>
+                <p class="text-2xl font-extrabold text-slate-800" id="admStatTemples">-</p>
+                <p class="text-[11px] text-slate-400 font-medium mt-1">Temples</p>
+            </div>
+            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-location-dot"></i></div></div>
+                <p class="text-2xl font-extrabold text-slate-800" id="admStatVisits">-</p>
+                <p class="text-[11px] text-slate-400 font-medium mt-1">Total Check-ins</p>
+            </div>
+            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-cyan-100 text-cyan-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-person-walking"></i></div></div>
+                <p class="text-2xl font-extrabold text-slate-800" id="admStatUniqueVisitors">-</p>
+                <p class="text-[11px] text-slate-400 font-medium mt-1">Unique Visitors</p>
+            </div>
+            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-calendar-day"></i></div></div>
+                <p class="text-2xl font-extrabold text-slate-800" id="admStatToday">-</p>
+                <p class="text-[11px] text-slate-400 font-medium mt-1">Visits Today</p>
+            </div>
+        </div>
+        <div class="flex gap-2 mb-6">
+            <button class="adm-tab-btn active px-5 py-2.5 rounded-xl text-sm font-bold" data-admtab="users"><i class="fa-solid fa-users mr-1.5"></i>Users</button>
+            <button class="adm-tab-btn bg-white border border-gray-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold" data-admtab="visits"><i class="fa-solid fa-location-dot mr-1.5"></i>Temple Visits</button>
+            <button class="adm-tab-btn bg-white border border-gray-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold" data-admtab="userdetails"><i class="fa-solid fa-id-card mr-1.5"></i>User Details</button>
+        </div>
+        <div id="admtab-users" class="adm-tab-content adm-fade-in">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="font-bold text-slate-800"><i class="fa-solid fa-users mr-2 text-purple-500"></i>Registered Users</h2>
+                    <div class="relative"><i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="admUserSearch" placeholder="Search users..." class="pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-purple-400 w-48">
+                    </div>
+                </div>
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                    <table class="w-full text-sm"><thead class="bg-gray-50"><tr>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">ID</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Name</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Email</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Phone</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Verified</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Joined</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Action</th>
+                    </tr></thead><tbody id="admUsersTableBody" class="divide-y divide-gray-100"></tbody></table>
+                </div>
+                <p id="admUsersEmpty" class="hidden text-center text-slate-400 py-10 text-sm">No users found</p>
+            </div>
+        </div>
+        <div id="admtab-visits" class="adm-tab-content hidden adm-fade-in">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100"><h2 class="font-bold text-slate-800"><i class="fa-solid fa-location-dot mr-2 text-purple-500"></i>Temple Visit Log</h2></div>
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                    <table class="w-full text-sm"><thead class="bg-gray-50"><tr>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">User</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Email</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Temple</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Date</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Check-ins</th>
+                    </tr></thead><tbody id="admVisitsTableBody" class="divide-y divide-gray-100"></tbody></table>
+                </div>
+                <p id="admVisitsEmpty" class="hidden text-center text-slate-400 py-10 text-sm">No visits recorded yet</p>
+            </div>
+        </div>
+        <div id="admtab-userdetails" class="adm-tab-content hidden adm-fade-in">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+                    <h2 class="font-bold text-slate-800"><i class="fa-solid fa-id-card mr-2 text-purple-500"></i>User Visit Details</h2>
+                    <select id="admUserDetailSelect" class="pl-4 pr-8 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-purple-400"><option value="">Select a user...</option></select>
+                </div>
+                <div id="admUserDetailContent" class="p-5 hidden">
+                    <div class="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 text-white font-extrabold text-xl flex items-center justify-center shrink-0" id="admUdAvatar">?</div>
+                        <div><p class="font-bold text-lg text-slate-800" id="admUdName">—</p><p class="text-sm text-slate-500" id="admUdMeta">—</p></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100"><p class="text-2xl font-extrabold text-teal-700" id="admUdVisitsToday">0</p><p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Visits Today</p></div>
+                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100"><p class="text-2xl font-extrabold text-teal-700" id="admUdTemplesToday">0</p><p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Temples Today</p></div>
+                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100"><p class="text-2xl font-extrabold text-teal-700" id="admUdLifetime">0</p><p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Lifetime</p></div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><h3 class="text-xs font-bold uppercase text-teal-700 mb-3"><i class="fa-solid fa-gopuram mr-1.5"></i>Visited Temples</h3><div id="admUdVisitedTemples" class="space-y-2 max-h-[300px] overflow-y-auto"><p class="text-sm text-slate-400">Select a user to view</p></div></div>
+                        <div><h3 class="text-xs font-bold uppercase text-teal-700 mb-3"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>Visit History</h3><div id="admUdVisitHistory" class="space-y-2 max-h-[300px] overflow-y-auto"><p class="text-sm text-slate-400">Select a user to view</p></div></div>
+                    </div>
+                </div>
+                <p id="admUserDetailEmpty" class="text-center text-slate-400 py-10 text-sm">Select a user from the dropdown above to view their visit details</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="admToastContainer" class="fixed top-6 right-6 z-[10000] space-y-2"></div>
+</div><!-- /adminFullPanel -->
+
+<script>
+(function(){
+    function admEsc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function admFormatDate(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+    function admShowToast(msg, type) {
+        var c = document.getElementById('admToastContainer');
+        var t = document.createElement('div');
+        t.className = 'adm-toast ' + (type === 'error' ? 'bg-red-500' : 'bg-green-500') + ' text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium';
+        t.textContent = msg; c.appendChild(t); setTimeout(function(){ t.remove(); }, 3000);
+    }
+
+    window.toggleAdminPanel = function(show) {
+        var panel = document.getElementById('adminFullPanel');
+        if (show) {
+            panel.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            (async function(){ try { await fetch('/api/admin/logout', { method: 'POST' }); } catch {} })();
+        } else {
+            panel.style.display = 'none';
+            document.body.style.overflow = '';
+            document.getElementById('admLoginScreen').classList.remove('hidden');
+            document.getElementById('admDashboardScreen').classList.add('hidden');
+            document.getElementById('admPass').value = '';
+            document.getElementById('admUser').value = '';
+            document.getElementById('admLoginError').classList.add('hidden');
+        }
+    };
+
+    document.getElementById('admLoginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var errEl = document.getElementById('admLoginError');
+        errEl.classList.add('hidden');
+        document.getElementById('admLoginBtnText').textContent = 'Logging in...';
+        document.getElementById('admLoginSpinner').classList.remove('hidden');
+        try {
+            var res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: document.getElementById('admUser').value.trim(), password: document.getElementById('admPass').value }) });
+            var data = await res.json();
+            if (data.status === 'success') { admShowDashboard(); } else { errEl.textContent = data.message; errEl.classList.remove('hidden'); }
+        } catch(ex) { errEl.textContent = 'Connection error'; errEl.classList.remove('hidden'); }
+        finally { document.getElementById('admLoginBtnText').textContent = 'Login'; document.getElementById('admLoginSpinner').classList.add('hidden'); }
+    });
+
+    window.admLogout = async function() {
+        await fetch('/api/admin/logout', { method: 'POST' });
+        document.getElementById('admDashboardScreen').classList.add('hidden');
+        document.getElementById('admLoginScreen').classList.remove('hidden');
+        document.getElementById('admPass').value = '';
+    };
+
+    function admShowDashboard() {
+        document.getElementById('admLoginScreen').classList.add('hidden');
+        document.getElementById('admDashboardScreen').classList.remove('hidden');
+        admLoadStats(); admLoadUsers(); admLoadVisits(); admPopulateUserDropdown();
+    }
+
+    async function admLoadStats() {
+        try { var res = await fetch('/api/admin/stats'); var d = await res.json(); if (d.status !== 'ok') return;
+            document.getElementById('admStatUsers').textContent = d.totalUsers;
+            document.getElementById('admStatVerified').textContent = d.verifiedUsers;
+            document.getElementById('admStatTemples').textContent = d.totalTemples;
+            document.getElementById('admStatVisits').textContent = d.totalVisits;
+            document.getElementById('admStatUniqueVisitors').textContent = d.uniqueVisitors;
+            document.getElementById('admStatToday').textContent = d.visitsToday;
+        } catch(ex) {}
+    }
+
+    async function admLoadUsers() {
+        try { var res = await fetch('/api/admin/users'); var d = await res.json();
+            var tbody = document.getElementById('admUsersTableBody'); var empty = document.getElementById('admUsersEmpty');
+            if (!d.users || d.users.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
+            tbody.innerHTML = d.users.map(function(u) { return '<tr class="hover:bg-gray-50 transition">' +
+                '<td class="px-5 py-3 text-slate-500 font-mono text-xs">' + u.id + '</td>' +
+                '<td class="px-5 py-3 font-semibold text-slate-800">' + admEsc(u.username) + '</td>' +
+                '<td class="px-5 py-3 text-slate-600">' + admEsc(u.email) + '</td>' +
+                '<td class="px-5 py-3 text-slate-500">' + (admEsc(u.phone) || '<span class="text-slate-300">—</span>') + '</td>' +
+                '<td class="px-5 py-3">' + (u.isVerified ? '<span class="inline-flex items-center gap-1 text-green-600 text-xs font-bold"><i class="fa-solid fa-circle-check"></i> Yes</span>' : '<span class="text-slate-400 text-xs">No</span>') + '</td>' +
+                '<td class="px-5 py-3 text-slate-400 text-xs">' + admFormatDate(u.createdAt) + '</td>' +
+                '<td class="px-5 py-3"><button onclick="admDeleteUser(' + u.id + ',\'' + admEsc(u.email) + '\')" class="text-red-400 hover:text-red-600 text-xs font-bold transition" title="Delete user"><i class="fa-solid fa-trash"></i></button></td></tr>';
+            }).join('');
+        } catch(ex) {}
+    }
+
+    async function admLoadVisits() {
+        try { var res = await fetch('/api/admin/visits?limit=200'); var d = await res.json();
+            var tbody = document.getElementById('admVisitsTableBody'); var empty = document.getElementById('admVisitsEmpty');
+            if (!d.visits || d.visits.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
+            tbody.innerHTML = d.visits.map(function(v) { return '<tr class="hover:bg-gray-50 transition">' +
+                '<td class="px-5 py-3 font-semibold text-slate-800">' + admEsc(v.userName) + '</td>' +
+                '<td class="px-5 py-3 text-slate-500">' + admEsc(v.userEmail) + '</td>' +
+                '<td class="px-5 py-3 text-slate-700">' + admEsc(v.templeName) + '</td>' +
+                '<td class="px-5 py-3 text-slate-500 text-xs">' + v.visitDate + '</td>' +
+                '<td class="px-5 py-3"><span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-bold">' + v.visitCount + '</span></td></tr>';
+            }).join('');
+        } catch(ex) {}
+    }
+
+    window.admDeleteUser = async function(id, email) {
+        if (!confirm('Delete user "' + email + '"? This also deletes their temple visits.')) return;
+        try { var res = await fetch('/api/admin/users/' + id, { method: 'DELETE' }); var d = await res.json();
+            if (d.status === 'ok') { admShowToast(d.message); admLoadUsers(); admLoadStats(); admLoadVisits(); }
+            else { admShowToast(d.message, 'error'); }
+        } catch(ex) { admShowToast('Delete failed', 'error'); }
+    };
+
+    document.querySelectorAll('.adm-tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.adm-tab-btn').forEach(function(b) { b.classList.remove('active'); b.classList.add('bg-white', 'border', 'border-gray-200', 'text-slate-600'); });
+            btn.classList.add('active'); btn.classList.remove('bg-white', 'border', 'border-gray-200', 'text-slate-600');
+            document.querySelectorAll('.adm-tab-content').forEach(function(c) { c.classList.add('hidden'); });
+            document.getElementById('admtab-' + btn.dataset.admtab).classList.remove('hidden');
+        });
+    });
+
+    async function admPopulateUserDropdown() {
+        try { var res = await fetch('/api/admin/users'); var d = await res.json();
+            var sel = document.getElementById('admUserDetailSelect');
+            sel.innerHTML = '<option value="">Select a user...</option>';
+            if (d.users) { d.users.forEach(function(u) { sel.innerHTML += '<option value="' + u.id + '">' + admEsc(u.username) + ' (' + admEsc(u.email) + ')</option>'; }); }
+        } catch(ex) {}
+    }
+
+    document.getElementById('admUserDetailSelect').addEventListener('change', async function(e) {
+        var uid = e.target.value;
+        var content = document.getElementById('admUserDetailContent');
+        var empty = document.getElementById('admUserDetailEmpty');
+        if (!uid) { content.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+        try { var res = await fetch('/api/admin/users/' + uid + '/details'); var d = await res.json();
+            if (d.status !== 'ok') { admShowToast(d.message, 'error'); return; }
+            empty.classList.add('hidden'); content.classList.remove('hidden');
+            var u = d.user;
+            document.getElementById('admUdAvatar').textContent = (u.username || '?')[0].toUpperCase();
+            document.getElementById('admUdName').textContent = u.username;
+            document.getElementById('admUdMeta').textContent = (u.phone ? 'Phone: ' + u.phone + ' · ' : '') + 'Email: ' + u.email + ' · ID #' + u.id;
+            document.getElementById('admUdVisitsToday').textContent = d.visitsToday;
+            document.getElementById('admUdTemplesToday').textContent = d.templesToday;
+            document.getElementById('admUdLifetime').textContent = d.lifetimeVisits;
+            var vtEl = document.getElementById('admUdVisitedTemples');
+            if (d.visitedTemples.length === 0) { vtEl.innerHTML = '<p class="text-sm text-slate-400">No temples visited yet</p>'; }
+            else { vtEl.innerHTML = d.visitedTemples.map(function(t) { return '<div class="flex items-start gap-3 p-3 bg-teal-50 rounded-xl border border-teal-100"><i class="fa-solid fa-gopuram text-teal-600 mt-0.5"></i><div><p class="font-semibold text-slate-800 text-sm">' + admEsc(t.templeName) + '</p><p class="text-xs text-slate-500">' + admEsc(t.location) + ' · ' + t.totalVisits + ' visit(s) · Last: ' + t.lastDate + '</p></div></div>'; }).join(''); }
+            var vhEl = document.getElementById('admUdVisitHistory');
+            if (d.history.length === 0) { vhEl.innerHTML = '<p class="text-sm text-slate-400">No visit history</p>'; }
+            else { vhEl.innerHTML = d.history.map(function(h) { return '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm"><div><p class="font-semibold text-slate-800">' + admEsc(h.templeName) + '</p><p class="text-xs text-slate-500">' + h.visitDate + '</p></div><span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-bold">' + h.visitCount + 'x</span></div>'; }).join(''); }
+        } catch(ex) { admShowToast('Failed to load user details', 'error'); }
+    });
+
+    document.getElementById('admUserSearch').addEventListener('input', function(e) {
+        var q = e.target.value.toLowerCase();
+        document.querySelectorAll('#admUsersTableBody tr').forEach(function(row) { row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+    });
+
+    if (window.location.pathname === '/admin') { toggleAdminPanel(true); }
+})();
+</script>
 </body>
 
 </html>
