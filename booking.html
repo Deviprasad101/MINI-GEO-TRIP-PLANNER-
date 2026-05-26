@@ -550,14 +550,20 @@
         }
 
         .shell {
-            max-width: 1060px;
+            max-width: 1340px;
             margin: 0 auto;
-            padding: 1.15rem 1rem 2.2rem;
+            padding: 1.5rem 1.5rem 2.5rem;
+        }
+        @media (min-width: 640px) {
+            .shell { padding: 2rem 2rem 3rem; }
+        }
+        @media (min-width: 1024px) {
+            .shell { padding: 2rem 2.5rem 3rem; }
         }
 
         .hero {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2.25rem;
             border: 1px solid rgba(219, 234, 254, 0.9);
             border-radius: 1.75rem;
             background: linear-gradient(135deg, #ffffff 0%, #eff6ff 50%, #fef3c7 100%);
@@ -633,14 +639,113 @@
             font-weight: 500;
         }
 
+        .booking-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (min-width: 1024px) {
+            .booking-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 2.25rem;
+            }
+        }
+
         .booking-card {
             border: 1px solid #cfd8e8;
-            border-radius: 1rem;
+            border-radius: 1.25rem;
             background: linear-gradient(180deg, #ffffff, #fbfdff);
             box-shadow: var(--gov-shadow);
             overflow: hidden;
             position: relative;
             backdrop-filter: blur(8px);
+        }
+
+        .temple-list {
+            padding: 0.85rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+        .temple-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            border-radius: 0.85rem;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .temple-item:hover { border-color: #d97706; box-shadow: 0 4px 12px rgba(217,119,6,0.1); transform: translateY(-1px); }
+        .temple-item__icon {
+            width: 2.5rem; height: 2.5rem;
+            border-radius: 0.6rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+        .temple-item__info { flex: 1; min-width: 0; }
+        .temple-item__name { font-weight: 700; font-size: 0.85rem; color: var(--gov-navy); margin: 0; }
+        .temple-item__time { font-size: 0.72rem; color: var(--gov-muted); margin-top: 2px; }
+        .temple-item__link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.45rem 0.95rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.15s;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .temple-item__link--book {
+            background: linear-gradient(135deg, #b45309, #d97706);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(180,83,9,0.2);
+        }
+        .temple-item__link--book:hover { filter: brightness(1.1); transform: scale(1.04); }
+
+        .shortlisted-card {
+            border: 1px solid #dbeafe;
+            border-radius: 1.25rem;
+            background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #eff6ff 100%);
+            box-shadow: 0 10px 30px rgba(23,37,84,0.08);
+            overflow: hidden;
+            position: relative;
+        }
+        .shortlisted-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+        }
+        .shortlisted-head {
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(59,130,246,0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .shortlisted-head h3 {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--gov-navy);
+            margin: 0;
+        }
+        .shortlisted-empty {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--gov-muted);
+            line-height: 1.7;
         }
 
         .booking-card::before {
@@ -656,8 +761,8 @@
         .tabs {
             display: flex;
             align-items: center;
-            gap: 0.45rem;
-            padding: 0.55rem 0.75rem 0;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem 0;
             border-bottom: 1px solid var(--gov-border);
             overflow-x: auto;
             background: linear-gradient(180deg, #f8fbff, #f5f8ff);
@@ -697,7 +802,7 @@
 
         .tab-panel {
             display: none;
-            padding: 1rem;
+            padding: 1.25rem 1.25rem 1.5rem;
         }
 
         .tab-panel.is-active {
@@ -728,7 +833,7 @@
 
         @media (min-width: 780px) {
             .tab-panel {
-                padding: 1.1rem 1.15rem 1.2rem;
+                padding: 1.5rem 1.5rem 1.75rem;
             }
 
             .grid-2 {
@@ -1536,10 +1641,12 @@
             <span class="hero__eyebrow"><span class="material-symbols-outlined" style="font-size:15px"
                     aria-hidden="true">account_balance</span> Official booking interface</span>
             <h1>Book Your Journey</h1>
-            <p>Select bus, cab, or train mode and continue to partner booking portals with a government-grade, clean
-                workflow.</p>
+            <p>Book transport, temple darshan, and view your shortlisted places — all in one place.</p>
         </section>
 
+        <div class="booking-grid">
+
+        <!-- LEFT: Transport Booking -->
         <section class="booking-card" aria-label="Booking modes">
             <nav class="tabs" role="tablist" aria-label="Booking mode">
                 <button class="tab-btn is-active" id="tabBus" role="tab" aria-selected="true" aria-controls="panelBus"
@@ -1758,6 +1865,24 @@
             </section>
         </section>
 
+        <!-- RIGHT COLUMN -->
+        <!-- RIGHT: Shortlisted Places Only -->
+        <div class="shortlisted-card">
+            <div class="shortlisted-head">
+                <span class="material-symbols-outlined" style="font-size:1.3rem;color:#3b82f6">route</span>
+                <h3>Your Shortlisted Places</h3>
+            </div>
+            <div id="shortlistedPlacesList" class="temple-list">
+                <div class="shortlisted-empty" id="shortlistedEmpty">
+                    <span class="material-symbols-outlined" style="font-size:2.5rem;color:#cbd5e1;display:block;margin-bottom:0.75rem">explore</span>
+                    No places shortlisted yet.<br>
+                    Go to the <a href="/dashboard" style="color:#b45309;font-weight:700;text-decoration:underline">Main Page</a>, fill in Trip Details and click <strong>Show Map</strong> to shortlist places.
+                </div>
+            </div>
+        </div>
+
+        </div><!-- /booking-grid -->
+
         <!-- Common Data for Autocomplete -->
         <datalist id="commonCities">
             <option value="Tirupati"></option>
@@ -1888,6 +2013,57 @@
                     }
                 });
             });
+        })();
+    </script>
+    <script>
+        (function() {
+            var catIcons = {
+                temple: { bg: '#fef3c7', fg: '#b45309', icon: 'temple_hindu' },
+                food: { bg: '#fff7ed', fg: '#c2410c', icon: 'restaurant' },
+                adventure: { bg: '#d1fae5', fg: '#065f46', icon: 'landscape' },
+                sightseeing: { bg: '#dbeafe', fg: '#1e40af', icon: 'photo_camera' },
+                wildlife: { bg: '#ecfccb', fg: '#365314', icon: 'pets' },
+                hospital: { bg: '#fce7f3', fg: '#9d174d', icon: 'local_hospital' },
+                other: { bg: '#f1f5f9', fg: '#475569', icon: 'place' }
+            };
+
+            try {
+                var data = localStorage.getItem('geotrip_shortlisted');
+                if (!data) return;
+                var places = JSON.parse(data);
+                if (!Array.isArray(places) || places.length === 0) return;
+
+                var listEl = document.getElementById('shortlistedPlacesList');
+                var emptyEl = document.getElementById('shortlistedEmpty');
+                if (!listEl) return;
+                if (emptyEl) emptyEl.style.display = 'none';
+
+                places.forEach(function(p, idx) {
+                    var cat = catIcons[p.categoryKey] || catIcons.other;
+                    var div = document.createElement('div');
+                    div.className = 'temple-item';
+
+                    var linkHtml = '';
+                    if (p.booking_link) {
+                        linkHtml = '<a href="' + p.booking_link + '" target="_blank" rel="noopener" class="temple-item__link temple-item__link--book">' +
+                            '<span class="material-symbols-outlined" style="font-size:.8rem">open_in_new</span> Book Now</a>';
+                    } else {
+                        linkHtml = '<span style="display:inline-block;min-width:5.5rem"></span>';
+                    }
+
+                    div.innerHTML =
+                        '<div class="temple-item__icon" style="background:' + cat.bg + ';color:' + cat.fg + '">' +
+                            '<span class="material-symbols-outlined">' + cat.icon + '</span>' +
+                        '</div>' +
+                        '<div class="temple-item__info">' +
+                            '<p class="temple-item__name">' + (idx + 1) + '. ' + (p.name || '') + '</p>' +
+                            '<p class="temple-item__time">' + (p.category || '') + ' &middot; ' + (p.timings || '') + '</p>' +
+                        '</div>' +
+                        linkHtml;
+
+                    listEl.appendChild(div);
+                });
+            } catch(e) {}
         })();
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -2533,7 +2709,7 @@
     </script>
     <script src="chatbot.js" defer></script>
     <footer style="background-color: #0f172a; color: #94a3b8; padding: 3rem 1.5rem; font-family: 'Inter', sans-serif; border-top: 4px solid #b45309; margin-top: auto; z-index: 50; position: relative;">
-        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between;">
+        <div style="max-width: 1340px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between;">
             <div style="flex: 1; min-width: 250px;">
                 <h3 style="color: #f8fafc; font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
                     <span class="material-symbols-outlined" style="color: #fbbf24;">account_balance</span> Official Booking Portal
@@ -2558,7 +2734,7 @@
                 </p>
             </div>
         </div>
-        <div style="max-width: 1200px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid #1e293b; text-align: center; font-size: 0.75rem;">
+        <div style="max-width: 1340px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid #1e293b; text-align: center; font-size: 0.75rem;">
             &copy; 2026 Official Booking Portal. Secure & Verified Redirection.
         </div>
     </footer>

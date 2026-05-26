@@ -43,6 +43,7 @@ class GeoTripRecommender {
                     timings:     (cols[5] || '').trim(),
                     tags:        (cols[6] || '').trim().toLowerCase(),
                     rating:      parseFloat(cols[7]) || 4.0,
+                    booking_link:(cols[8] || '').trim(),
                 };
                 this.places.push(place);
             }

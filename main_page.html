@@ -3961,6 +3961,7 @@
                 if (!name || isNaN(lat) || isNaN(lng)) return null;
                 var description = (parts[4] || '').trim();
                 var timings = (parts[5] || '').trim();
+                var booking_link = (parts[8] || '').trim();
                 return {
                     name: name,
                     category: category,
@@ -3968,7 +3969,8 @@
                     lat: lat,
                     lng: lng,
                     description: description,
-                    timings: timings
+                    timings: timings,
+                    booking_link: booking_link
                 };
             }
 
@@ -4557,6 +4559,13 @@
                         });
                     }).filter(Boolean);
                     window.lastSelectedStops = orderedPlaces;
+
+                    try {
+                        var toStore = orderedPlaces.map(function(p) {
+                            return { name: p.name, category: p.category, categoryKey: p.categoryKey, lat: p.lat, lng: p.lng, timings: p.timings, booking_link: p.booking_link || '' };
+                        });
+                        localStorage.setItem('geotrip_shortlisted', JSON.stringify(toStore));
+                    } catch(e) {}
 
                     mapsToUpdate.forEach(function (m) {
                         if (m.markers) m.markers.clearLayers();
