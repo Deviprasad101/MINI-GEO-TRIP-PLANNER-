@@ -499,16 +499,9 @@ function formatDate(iso) {
     return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// Auto-login check on page load
+// Clear any stale admin session on page load so credentials are always required
 (async () => {
-    try {
-        const res = await fetch('/api/admin/me');
-        const d = await res.json();
-        if (d.loggedIn) {
-            document.getElementById('adminName').textContent = d.username;
-            showDashboard();
-        }
-    } catch {}
+    try { await fetch('/api/admin/logout', { method: 'POST' }); } catch {}
 })();
 </script>
 </body>

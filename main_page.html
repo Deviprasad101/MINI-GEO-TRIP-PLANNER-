@@ -3175,8 +3175,8 @@
                             </div>
                         </div>
 
-                        <!-- Right: QR Code -->
-                        <div id="myQrSection" class="qr-panel">
+                        <!-- Right: QR Code (hidden until Show Map is clicked) -->
+                        <div id="myQrSection" class="qr-panel" style="display:none">
                             <img id="qrImage" class="qr-panel__img" src="" alt="Your temple QR" width="100" height="100" loading="lazy" />
                             <div class="qr-panel__info">
                                 <p class="qr-panel__label">Your Temple QR</p>
@@ -5306,6 +5306,9 @@
                     showMainLandingMap();
                     // Auto-open recommendations
                     if (window._showRecPanel) window._showRecPanel();
+                    // Reveal QR code section
+                    var qrSec = document.getElementById('myQrSection');
+                    if (qrSec) qrSec.style.display = '';
                 });
             });
 
