@@ -899,7 +899,7 @@ def user_scan_page(identifier):
             400,
             {'Content-Type': 'text/html; charset=utf-8'},
         )
-    return send_from_directory('.', 'scan.html')
+    return send_from_directory('.', 'main_page.html')
 
 
 @app.route('/api/qr/validate/<token>', methods=['GET'])
