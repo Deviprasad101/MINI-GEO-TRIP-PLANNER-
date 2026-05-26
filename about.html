@@ -171,15 +171,31 @@
         .why-item h4 { font-family: "Noto Serif", Georgia, serif; font-size: 0.95rem; font-weight: 700; color: var(--gov-navy); margin: 0 0 0.3rem; }
         .why-item p { font-size: 0.82rem; color: var(--gov-muted); line-height: 1.55; margin: 0; }
 
-        /* ─── Snap cards (gallery replacement) ─── */
-        .gallery-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
-        @media (min-width: 640px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 1024px) { .gallery-grid { grid-template-columns: repeat(3, 1fr); } }
-        .snap-card { background: #fff; border: 1px solid #e8e4de; border-radius: 1.25rem; padding: 1.75rem 1.5rem; transition: all 0.3s ease; position: relative; }
-        .snap-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(23,37,84,0.1); border-color: var(--gov-amber); }
-        .snap-icon { width: 3.5rem; height: 3.5rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
-        .snap-card h3 { font-family: "Noto Serif", Georgia, serif; font-size: 1rem; font-weight: 700; color: var(--gov-navy); margin: 0 0 0.6rem; }
-        .snap-card p { font-size: 0.82rem; color: var(--gov-muted); line-height: 1.7; margin: 0; }
+        /* ─── Storytelling snapshots (scrapbook style) ─── */
+        .story-board { position: relative; background: linear-gradient(135deg, #faf5eb 0%, #f5efe3 50%, #faf5eb 100%); border-radius: 1.5rem; padding: 3rem 2rem 2rem; border: 1px solid #e0d5c3; box-shadow: inset 0 2px 20px rgba(180,160,120,0.08), 0 8px 32px rgba(23,37,84,0.06); overflow: hidden; }
+        .story-board::before { content: ""; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4c8a8' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; opacity: 0.6; z-index: 0; }
+        .story-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; position: relative; z-index: 1; }
+        @media (min-width: 640px) { .story-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .story-grid { grid-template-columns: repeat(3, 1fr); } }
+        .snap-card { background: #fff; border-radius: 0.5rem; padding: 0.6rem 0.6rem 1.4rem; box-shadow: 0 4px 16px rgba(60,40,20,0.12), 0 1px 3px rgba(60,40,20,0.08); transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1); position: relative; cursor: default; }
+        .snap-card:nth-child(1) { transform: rotate(-2deg); }
+        .snap-card:nth-child(2) { transform: rotate(1.5deg); }
+        .snap-card:nth-child(3) { transform: rotate(-1deg); }
+        .snap-card:nth-child(4) { transform: rotate(2deg); }
+        .snap-card:nth-child(5) { transform: rotate(-1.5deg); }
+        .snap-card:nth-child(6) { transform: rotate(1deg); }
+        .snap-card:hover { transform: rotate(0deg) translateY(-8px) scale(1.03); box-shadow: 0 20px 50px rgba(60,40,20,0.18); z-index: 2; }
+        .snap-card__img { width: 100%; height: 200px; object-fit: cover; border-radius: 0.25rem; display: block; border: 1px solid #e8e0d0; }
+        .snap-card__pin { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 3; }
+        .snap-card__pin::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.6); }
+        .snap-card__num { position: absolute; top: 0.6rem; right: 0.6rem; width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: "Noto Serif", Georgia, serif; font-size: 0.75rem; font-weight: 800; color: #fff; z-index: 2; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        .snap-card h3 { font-family: "Noto Serif", Georgia, serif; font-size: 0.95rem; font-weight: 700; color: var(--gov-navy); margin: 0.9rem 0 0.35rem; padding: 0 0.2rem; line-height: 1.3; }
+        .snap-card p { font-size: 0.78rem; color: var(--gov-muted); line-height: 1.65; margin: 0; padding: 0 0.2rem; }
+        .story-deco { position: absolute; pointer-events: none; z-index: 0; opacity: 0.15; }
+        .story-deco--compass { bottom: 1rem; right: 1.5rem; font-size: 4rem; color: #8B7355; transform: rotate(15deg); }
+        .story-deco--route { top: 1rem; left: 1.5rem; font-size: 3rem; color: #92400e; transform: rotate(-10deg); }
+        .story-deco--pin { top: 2rem; right: 3rem; font-size: 2.5rem; color: #dc2626; transform: rotate(20deg); }
+        @media (max-width: 639px) { .story-board { padding: 2.5rem 1rem 1.5rem; } .snap-card:nth-child(n) { transform: rotate(0); } }
 
         /* ─── Lab card ─── */
         .lab-card { border: 1px solid #e8e4de; border-radius: 1.5rem; background: #fff; padding: 2.5rem; position: relative; overflow: hidden; }
@@ -471,43 +487,62 @@
             </div>
         </section>
 
-        <!-- ── 5. PROJECT SNAPSHOTS ── -->
+        <!-- ── 5. PROJECT SNAPSHOTS (Storytelling / Scrapbook Style) ── -->
         <section class="about-section shell">
-            <div class="reveal">
-                <p class="sec-eyebrow"><span class="material-symbols-outlined" style="font-size:1rem">widgets</span> Modules</p>
-                <h2 class="sec-title">Project Snapshots</h2>
-                <p class="sec-desc">A walkthrough of GeoTrip Planner's key modules, interfaces, and capabilities.</p>
+            <div class="reveal" style="text-align:center;margin-bottom:2.5rem">
+                <p class="sec-eyebrow" style="justify-content:center"><span class="material-symbols-outlined" style="font-size:1rem">auto_stories</span> Our Story</p>
+                <h2 class="sec-title" style="font-size:clamp(1.8rem,4vw,2.5rem)">Project Snapshots</h2>
+                <p class="sec-desc" style="margin-left:auto;margin-right:auto;text-align:center">A visual walkthrough of GeoTrip Planner's key modules — from sign-up to exploration.</p>
             </div>
-            <div class="gallery-grid reveal" style="transition-delay:0.1s">
-                <div class="snap-card">
-                    <div class="snap-icon" style="background:#eff6ff;color:#2563eb"><span class="material-symbols-outlined" style="font-size:2rem">person_add</span></div>
-                    <h3>Sign Up &amp; OTP Verification</h3>
-                    <p>Secure dual-factor registration with email OTP (Flask-Mail) and mobile OTP (Twilio Verify). Users verify both channels before accessing the dashboard, ensuring authenticated and personalized travel planning.</p>
-                </div>
-                <div class="snap-card">
-                    <div class="snap-icon" style="background:#fef3c7;color:#b45309"><span class="material-symbols-outlined" style="font-size:2rem">tune</span></div>
-                    <h3>Trip Details &amp; Category Cards</h3>
-                    <p>Users select from 5 travel categories — Temples, Sightseeing, Food, Adventure, Wildlife — set outing timings, group size, and budget. Interactive category cards with time-aware filtering show only places open during the selected window.</p>
-                </div>
-                <div class="snap-card">
-                    <div class="snap-icon" style="background:#d1fae5;color:#065f46"><span class="material-symbols-outlined" style="font-size:2rem">auto_awesome</span></div>
-                    <h3>AI Itinerary &amp; Route Map</h3>
-                    <p>Google Gemini AI generates a complete day-by-day itinerary based on user preferences. The interactive Leaflet.js map displays all shortlisted places with OSRM-optimized driving routes, distance, and estimated travel time between stops.</p>
-                </div>
-                <div class="snap-card">
-                    <div class="snap-icon" style="background:#fce7f3;color:#9d174d"><span class="material-symbols-outlined" style="font-size:2rem">qr_code_scanner</span></div>
-                    <h3>QR Scan &amp; Temple Check-in</h3>
-                    <p>Each user receives a unique QR code after login. Scanning it opens a temple selection page where users pick a temple and confirm their visit. All check-in data — visits today, lifetime count, temples visited — is tracked in the admin panel.</p>
-                </div>
-                <div class="snap-card">
-                    <div class="snap-icon" style="background:#dbeafe;color:#1d4ed8"><span class="material-symbols-outlined" style="font-size:2rem">commute</span></div>
-                    <h3>Transport &amp; Booking</h3>
-                    <p>Integrated booking interface for APSRTC buses, local Uber/Ola taxis, and IRCTC trains. The booking page also dynamically displays shortlisted places from the main planner with direct "Book Now" links for temples with official TTD darshan booking.</p>
-                </div>
-                <div class="snap-card">
-                    <div class="snap-icon" style="background:#ffedd5;color:#c2410c"><span class="material-symbols-outlined" style="font-size:2rem">dashboard</span></div>
-                    <h3>All Categories Overview</h3>
-                    <p>A unified dashboard view showing all 116+ places across 5 categories with real-time availability, ratings, timings, and descriptions. The TF-IDF cosine similarity recommendation engine suggests personalized places based on user preferences and proximity.</p>
+            <div class="story-board reveal" style="transition-delay:0.1s">
+                <!-- Decorative elements -->
+                <span class="story-deco story-deco--compass material-symbols-outlined">explore</span>
+                <span class="story-deco story-deco--route material-symbols-outlined">route</span>
+                <span class="story-deco story-deco--pin material-symbols-outlined">location_on</span>
+
+                <div class="story-grid">
+                    <div class="snap-card">
+                        <div class="snap-card__pin" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"></div>
+                        <div class="snap-card__num" style="background:#2563eb">1</div>
+                        <img class="snap-card__img" src="images/Sign Up & OTP Verification.avif" alt="Sign Up & OTP Verification — dual-factor registration" loading="lazy" decoding="async" />
+                        <h3>Sign Up &amp; OTP Verification</h3>
+                        <p>Secure dual-factor registration with email OTP and mobile OTP via Twilio Verify. Both channels are verified before dashboard access.</p>
+                    </div>
+                    <div class="snap-card">
+                        <div class="snap-card__pin" style="background:linear-gradient(135deg,#f59e0b,#b45309)"></div>
+                        <div class="snap-card__num" style="background:#b45309">2</div>
+                        <img class="snap-card__img" src="images/Trip Details & Category Cards.png" alt="Trip Details & Category Cards — 5 travel categories" loading="lazy" decoding="async" />
+                        <h3>Trip Details &amp; Category Cards</h3>
+                        <p>Select from 5 travel categories, set outing timings, group size, and budget. Time-aware filtering shows only places open during your window.</p>
+                    </div>
+                    <div class="snap-card">
+                        <div class="snap-card__pin" style="background:linear-gradient(135deg,#10b981,#065f46)"></div>
+                        <div class="snap-card__num" style="background:#065f46">3</div>
+                        <img class="snap-card__img" src="images/AI Itinerary & Route Map.png" alt="AI Itinerary & Route Map — Gemini AI powered planning" loading="lazy" decoding="async" />
+                        <h3>AI Itinerary &amp; Route Map</h3>
+                        <p>Gemini AI generates a full day itinerary. Leaflet.js map displays shortlisted places with OSRM-optimized driving routes and travel time.</p>
+                    </div>
+                    <div class="snap-card">
+                        <div class="snap-card__pin" style="background:linear-gradient(135deg,#ec4899,#9d174d)"></div>
+                        <div class="snap-card__num" style="background:#9d174d">4</div>
+                        <img class="snap-card__img" src="images/QR Scan & Temple Check-in.png" alt="QR Scan & Temple Check-in — unique QR for each user" loading="lazy" decoding="async" />
+                        <h3>QR Scan &amp; Temple Check-in</h3>
+                        <p>Each user gets a unique QR code. Scanning opens temple selection for check-in. All visit data is tracked in the admin panel.</p>
+                    </div>
+                    <div class="snap-card">
+                        <div class="snap-card__pin" style="background:linear-gradient(135deg,#6366f1,#1d4ed8)"></div>
+                        <div class="snap-card__num" style="background:#1d4ed8">5</div>
+                        <img class="snap-card__img" src="images/Transport & Booking.png" alt="Transport & Booking — buses, taxis, and trains" loading="lazy" decoding="async" />
+                        <h3>Transport &amp; Booking</h3>
+                        <p>Integrated booking for APSRTC buses, Uber/Ola taxis, and IRCTC trains. Shortlisted places appear with direct TTD darshan booking links.</p>
+                    </div>
+                    <div class="snap-card">
+                        <div class="snap-card__pin" style="background:linear-gradient(135deg,#f97316,#c2410c)"></div>
+                        <div class="snap-card__num" style="background:#c2410c">6</div>
+                        <img class="snap-card__img" src="images/All Categories Overview .png" alt="All Categories Overview — 116+ places across 5 categories" loading="lazy" decoding="async" />
+                        <h3>All Categories Overview</h3>
+                        <p>Unified dashboard with 116+ places across 5 categories. TF-IDF cosine similarity engine suggests personalized recommendations.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -793,7 +828,7 @@
         (function(){
             var mapEl = document.getElementById('iitMap');
             if (!mapEl) return;
-            var lat = 13.7148, lng = 79.4930;
+            var lat = 13.717320, lng = 79.591157;
             var map = L.map(mapEl, { scrollWheelZoom: false }).setView([lat, lng], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap',
