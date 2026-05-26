@@ -1337,6 +1337,11 @@ def _require_admin():
     return None
 
 
+@app.route('/about')
+def about_page():
+    return send_from_directory('.', 'about.html')
+
+
 @app.route('/admin')
 def admin_page():
     return send_from_directory('.', 'admin.html')
