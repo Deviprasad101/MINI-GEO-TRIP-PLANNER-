@@ -2224,9 +2224,9 @@
         }
         /* Temple staff QR scan — /user/<token> (from temple-scan.html) */
         body.main-temple-scan-view {
-            overflow: auto !important;
-            height: auto !important;
-            max-height: none !important;
+            overflow: hidden !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
             background: linear-gradient(165deg, #fffbeb 0%, #f0fdfa 55%, #eff6ff 100%) !important;
         }
 
@@ -2237,16 +2237,46 @@
         body.main-temple-scan-view #emergencyPanel,
         body.main-temple-scan-view #mobileNavBackdrop,
         body.main-temple-scan-view #mobileNavPanel,
-        body.main-temple-scan-view .skip-link {
+        body.main-temple-scan-view .skip-link,
+        body.main-temple-scan-view .gt-chatbot-btn,
+        body.main-temple-scan-view .gt-chatbot-window,
+        body.main-temple-scan-view #recFab,
+        body.main-temple-scan-view #recPanel {
             display: none !important;
         }
 
         .temple-staff-scan {
             display: none;
-            min-height: 100vh;
+            height: 100dvh;
+            max-height: 100dvh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 1.25rem;
+            padding-bottom: 2rem;
             font-family: "Public Sans", system-ui, sans-serif;
             color: #0f172a;
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #f1f5f9;
+        }
+
+        .temple-staff-scan::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .temple-staff-scan::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+
+        .temple-staff-scan::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+            border: 2px solid #f1f5f9;
+        }
+
+        .temple-staff-scan::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
         }
 
         body.main-temple-scan-view .temple-staff-scan {
@@ -2256,6 +2286,7 @@
         .temple-staff-scan__wrap {
             max-width: 28rem;
             margin: 0 auto;
+            min-height: min-content;
         }
 
         .temple-staff-scan__brand {
@@ -2315,6 +2346,96 @@
             color: #64748b;
         }
 
+        .temple-staff-scan__add-user {
+            margin-bottom: 0.85rem;
+        }
+
+        .temple-staff-scan__token-input:focus {
+            outline: none;
+            border-color: #5eead4;
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+        }
+
+        .temple-staff-scan__add-btn,
+        .temple-staff-scan__done-btn {
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: filter 0.15s, transform 0.15s;
+        }
+
+        .temple-staff-scan__add-btn {
+            width: 100%;
+            padding: 0.68rem 0.95rem;
+            background: linear-gradient(135deg, #0d9488, #14b8a6);
+            color: #fff;
+        }
+
+        .temple-staff-scan__done-wrap .temple-staff-scan__done-btn {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: linear-gradient(135deg, #b45309, #f59e0b);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .temple-staff-scan__add-btn:hover,
+        .temple-staff-scan__done-btn:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+
+        .temple-staff-scan__add-btn:disabled,
+        .temple-staff-scan__done-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .temple-staff-scan__users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .temple-staff-scan__user-chip {
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #0f172a;
+            border-radius: 999px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .temple-staff-scan__user-chip.is-active {
+            border-color: #14b8a6;
+            background: #ccfbf1;
+            color: #115e59;
+        }
+
+        .temple-staff-scan__summary {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0.15rem 0 0.35rem;
+        }
+
+        .temple-staff-scan__save-hint {
+            font-size: 0.8rem;
+            color: #b45309;
+            margin: 0 0 0.65rem;
+            line-height: 1.4;
+        }
+
+        .temple-staff-scan__done-wrap {
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
         .temple-staff-scan__section-title {
             font-size: 0.75rem;
             font-weight: 800;
@@ -2350,8 +2471,6 @@
             display: flex;
             flex-direction: column;
             gap: 0.65rem;
-            max-height: 50vh;
-            overflow-y: auto;
         }
 
         .temple-staff-scan__btn {
@@ -2368,6 +2487,12 @@
         .temple-staff-scan__btn:hover:not(:disabled) {
             border-color: #99f6e4;
             box-shadow: 0 6px 18px rgba(13, 148, 136, 0.12);
+        }
+
+        .temple-staff-scan__btn.is-selected {
+            border-color: #14b8a6;
+            background: #ecfeff;
+            box-shadow: 0 6px 18px rgba(20, 184, 166, 0.18);
         }
 
         .temple-staff-scan__btn:disabled {
@@ -2453,11 +2578,20 @@
                     <strong id="templeStaffVisitorName">Visitor</strong>
                     <span id="templeStaffVisitorMeta">Checking in</span>
                 </div>
+                <div class="temple-staff-scan__add-user">
+                    <button type="button" id="templeStaffAddUserBtn" class="temple-staff-scan__add-btn">+ Add visitor</button>
+                </div>
+                <div id="templeStaffUsers" class="temple-staff-scan__users" role="list"></div>
+                <p id="templeStaffSelectedSummary" class="temple-staff-scan__summary"></p>
+                <p class="temple-staff-scan__save-hint">Temple choices are not saved yet. Scroll to select temples, then tap Done at the bottom.</p>
                 <p class="temple-staff-scan__section-title">Select temple</p>
                 <input type="search" id="templeStaffSearch" class="temple-staff-scan__search"
                     placeholder="Search temples…" autocomplete="off" aria-label="Search temples" />
                 <p id="templeStaffSearchMeta" class="temple-staff-scan__search-meta"></p>
                 <div id="templeStaffList" class="temple-staff-scan__list" role="list"></div>
+                <div class="temple-staff-scan__done-wrap">
+                    <button type="button" id="templeStaffDoneBtn" class="temple-staff-scan__done-btn" disabled>Done — Save to admin</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2528,9 +2662,6 @@
                                     data-index="0">
                                     <img alt="Tirumala temple" decoding="async" loading="eager"
                                         src="images/tirumala-temple.jpg" />
-                                </div>
-                                <div class="hero-slideshow__frame" data-label="Slide 1" data-index="1">
-                                    <img alt="Slide 1" decoding="async" loading="lazy" src="images/1.jpg" />
                                 </div>
                                 <div class="hero-slideshow__frame" data-label="Slide 2" data-index="2">
                                     <img alt="Slide 2" decoding="async" loading="lazy" src="images/2.webp" />
@@ -6002,13 +6133,34 @@
     <script>
         (function () {
             var pathParts = window.location.pathname.split('/').filter(Boolean);
-            var staffScanToken =
+            var staffScanTokenRaw =
                 pathParts.length >= 2 && pathParts[0] === 'user' ? decodeURIComponent(pathParts[1]) : '';
+
+            function parseToken(raw) {
+                var v = (raw || '').trim();
+                if (!v) return '';
+                var m = v.match(/\/user\/([A-Za-z0-9-]+)/i);
+                if (m && m[1]) return m[1].toUpperCase();
+                return v.toUpperCase();
+            }
+
+            var staffScanToken = parseToken(staffScanTokenRaw);
 
             if (staffScanToken) {
                 window.__GTP_TEMPLE_SCAN__ = staffScanToken;
                 document.body.classList.add('main-temple-scan-view');
                 document.title = 'Temple check-in — GeoTrip Planner';
+
+                function hideScanPageChrome() {
+                    ['.gt-chatbot-btn', '.gt-chatbot-window', '#recFab', '#recPanel'].forEach(function (sel) {
+                        document.querySelectorAll(sel).forEach(function (el) {
+                            el.style.setProperty('display', 'none', 'important');
+                        });
+                    });
+                }
+                hideScanPageChrome();
+                setTimeout(hideScanPageChrome, 400);
+                setTimeout(hideScanPageChrome, 1500);
 
                 var scanRoot = document.getElementById('templeStaffScanRoot');
                 var toastHost = document.getElementById('templeStaffToastHost');
@@ -6026,8 +6178,20 @@
                 var templeList = document.getElementById('templeStaffList');
                 var templeSearch = document.getElementById('templeStaffSearch');
                 var templeSearchMeta = document.getElementById('templeStaffSearchMeta');
+                var addUserBtn = document.getElementById('templeStaffAddUserBtn');
+                var usersRoot = document.getElementById('templeStaffUsers');
+                var summaryEl = document.getElementById('templeStaffSelectedSummary');
+                var doneBtn = document.getElementById('templeStaffDoneBtn');
                 var allTemples = [];
                 var searchDebounce = null;
+                var usersState = [];
+                var activeKey = '';
+                var isAddingUser = false;
+                var isSavingBatch = false;
+
+                function userKey(u) {
+                    return 'visitor:' + (u.visitorNumber || 1);
+                }
 
                 function staffToast(msg, ok) {
                     if (!toastHost) return;
@@ -6061,6 +6225,91 @@
                         count + ' temple(s)' + (q ? ' matching "' + q + '"' : ' from Tirupati dataset');
                 }
 
+                function findUserByKey(key) {
+                    for (var i = 0; i < usersState.length; i++) {
+                        if (userKey(usersState[i]) === key) return usersState[i];
+                    }
+                    return null;
+                }
+
+                function nextVisitorNumber() {
+                    var maxN = 1;
+                    usersState.forEach(function (u) {
+                        if (u.visitorNumber && u.visitorNumber > maxN) maxN = u.visitorNumber;
+                    });
+                    return maxN + 1;
+                }
+
+                function selectedCount(user) {
+                    return Object.keys(user.selectedTempleIds || {}).length;
+                }
+
+                function totalPendingCheckins() {
+                    var total = 0;
+                    usersState.forEach(function (u) {
+                        total += selectedCount(u);
+                    });
+                    return total;
+                }
+
+                function updateSummary() {
+                    if (!summaryEl) return;
+                    var active = findUserByKey(activeKey);
+                    var activeCount = active ? selectedCount(active) : 0;
+                    var pending = totalPendingCheckins();
+                    summaryEl.textContent =
+                        usersState.length +
+                        ' visitor(s) · ' +
+                        pending +
+                        ' temple(s) selected (not saved) · ' +
+                        activeCount +
+                        ' for active visitor';
+                    if (doneBtn) {
+                        doneBtn.disabled = isSavingBatch || pending < 1;
+                        doneBtn.textContent =
+                            pending > 0
+                                ? 'Done — Save ' + pending + ' check-in(s) to admin'
+                                : 'Done — Save to admin';
+                    }
+                }
+
+                function renderUsers() {
+                    if (!usersRoot) return;
+                    usersRoot.innerHTML = '';
+                    usersState.forEach(function (u, idx) {
+                        var b = document.createElement('button');
+                        b.type = 'button';
+                        b.className =
+                            'temple-staff-scan__user-chip' + (userKey(u) === activeKey ? ' is-active' : '');
+                        b.textContent =
+                            (idx + 1) +
+                            '. ' +
+                            (u.name || 'Visitor') +
+                            ' (' +
+                            selectedCount(u) +
+                            ')';
+                        b.addEventListener('click', function () {
+                            activeKey = userKey(u);
+                            syncActiveUser();
+                        });
+                        usersRoot.appendChild(b);
+                    });
+                    updateSummary();
+                }
+
+                function syncActiveUser() {
+                    var active = findUserByKey(activeKey);
+                    if (!active) return;
+                    if (visitorName) visitorName.textContent = active.name || 'Visitor';
+                    if (visitorMeta) {
+                        visitorMeta.textContent =
+                            (active.visitorNumber === 1 ? 'QR account holder' : 'Companion') +
+                            ' · saved under same login email · tap Done when finished';
+                    }
+                    renderUsers();
+                    staffRenderTempleButtons(allTemples);
+                }
+
                 function staffRenderTempleButtons(temples) {
                     if (!templeList) return;
                     templeList.innerHTML = '';
@@ -6069,10 +6318,14 @@
                             '<p class="temple-staff-scan__search-meta">No temples match your search.</p>';
                         return;
                     }
+                    var active = findUserByKey(activeKey);
                     temples.forEach(function (t, idx) {
                         var btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'temple-staff-scan__btn';
+                        if (active && active.selectedTempleIds && active.selectedTempleIds[t.id]) {
+                            btn.classList.add('is-selected');
+                        }
                         btn.innerHTML =
                             '<span class="temple-staff-scan__btn-short">' +
                             (idx + 1) +
@@ -6083,91 +6336,237 @@
                             staffEscapeHtml(t.fullName) +
                             '</span>';
                         btn.addEventListener('click', function () {
-                            staffRecordVisit(t, btn);
+                            toggleTempleForActive(t, btn);
                         });
                         templeList.appendChild(btn);
                     });
                     staffUpdateSearchMeta(temples.length, templeSearch ? templeSearch.value.trim() : '');
                 }
 
-                function staffRecordVisit(temple, btn) {
-                    if (!templeList) return;
-                    templeList.querySelectorAll('.temple-staff-scan__btn').forEach(function (b) {
-                        b.disabled = true;
-                    });
-                    fetch('/api/temple-visits', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ userToken: staffScanToken, templeId: temple.id })
-                    })
+                function toggleTempleForActive(temple, btn) {
+                    /* Local selection only — admin DB is updated in saveAllEntries (Done). */
+                    var active = findUserByKey(activeKey);
+                    if (!active) {
+                        staffToast('Add/select a visitor first.', false);
+                        return;
+                    }
+                    active.selectedTempleIds = active.selectedTempleIds || {};
+                    if (active.selectedTempleIds[temple.id]) {
+                        delete active.selectedTempleIds[temple.id];
+                        if (btn) btn.classList.remove('is-selected');
+                    } else {
+                        active.selectedTempleIds[temple.id] = {
+                            id: temple.id,
+                            templeName: temple.templeName || temple.fullName || 'Temple'
+                        };
+                        if (btn) btn.classList.add('is-selected');
+                    }
+                    renderUsers();
+                }
+
+                function seedPrimaryVisitor() {
+                    if (!staffScanToken) return;
+                    var key = 'visitor:1';
+                    if (!findUserByKey(key)) {
+                        usersState.push({
+                            visitorNumber: 1,
+                            name: 'Visitor 1',
+                            phone: '',
+                            selectedTempleIds: {}
+                        });
+                    }
+                    if (!activeKey) activeKey = key;
+                }
+
+                function loadPrimaryVisitorProfile(makeActive) {
+                    if (!staffScanToken) return Promise.resolve(null);
+                    seedPrimaryVisitor();
+                    var key = 'visitor:1';
+                    isAddingUser = true;
+                    if (addUserBtn) addUserBtn.disabled = true;
+                    return fetch('/api/scan-user/' + encodeURIComponent(staffScanToken))
                         .then(function (r) {
                             return r.json();
                         })
                         .then(function (data) {
-                            if (data.status === 'ok') {
-                                staffToast(
-                                    data.message +
-                                        ' — ' +
-                                        ((data.temple && data.temple.templeName) || temple.templeName),
-                                    true
-                                );
-                            } else {
-                                staffToast(data.message || 'Check-in failed.', false);
+                            var v1 = findUserByKey(key);
+                            if (!v1) return null;
+                            if (data.status === 'ok' && data.user) {
+                                v1.name = data.user.name
+                                    ? data.user.name + ' (Visitor 1)'
+                                    : 'Visitor 1';
+                                v1.phone = data.user.phone || '';
                             }
+                            if (makeActive !== false || !activeKey) activeKey = key;
+                            syncActiveUser();
+                            return staffScanToken;
                         })
                         .catch(function () {
-                            staffToast('Network error.', false);
+                            staffToast('Could not load QR visitor profile.', false);
+                            return null;
                         })
                         .finally(function () {
-                            templeList.querySelectorAll('.temple-staff-scan__btn').forEach(function (b) {
-                                b.disabled = false;
+                            isAddingUser = false;
+                            if (addUserBtn) addUserBtn.disabled = false;
+                        });
+                }
+
+                function addVisitor() {
+                    if (isAddingUser || isSavingBatch) return;
+                    var n = nextVisitorNumber();
+                    if (n < 2) n = 2;
+                    var key = 'visitor:' + n;
+                    if (findUserByKey(key)) {
+                        staffToast('Visitor ' + n + ' already added.', false);
+                        activeKey = key;
+                        syncActiveUser();
+                        return;
+                    }
+                    usersState.push({
+                        visitorNumber: n,
+                        name: 'Visitor ' + n,
+                        phone: '',
+                        selectedTempleIds: {}
+                    });
+                    activeKey = key;
+                    syncActiveUser();
+                    staffToast('Added Visitor ' + n + ' — select temples', true);
+                }
+
+                function postVisit(entry) {
+                    var body = {
+                        templeId: entry.templeId,
+                        scanToken: staffScanToken,
+                        userToken: staffScanToken,
+                        visitorNumber: entry.visitorNumber || 1
+                    };
+                    if (!staffScanToken) {
+                        return Promise.resolve({
+                            status: 'error',
+                            message: 'Missing visitor QR token.'
+                        });
+                    }
+                    return fetch('/api/temple-visits', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    }).then(function (r) {
+                        return r.json().then(function (data) {
+                            if (!r.ok && data && !data.message) {
+                                data.message = 'Save failed (HTTP ' + r.status + ')';
+                            }
+                            return data;
+                        });
+                    });
+                }
+
+                function saveAllEntries() {
+                    if (isSavingBatch) return;
+                    var payload = [];
+                    usersState.forEach(function (u) {
+                        Object.keys(u.selectedTempleIds || {}).forEach(function (tid) {
+                            payload.push({
+                                visitorNumber: u.visitorNumber || 1,
+                                name: u.name || 'Visitor ' + (u.visitorNumber || 1),
+                                templeId: Number(tid),
+                                templeName: u.selectedTempleIds[tid].templeName || 'Temple'
                             });
                         });
+                    });
+                    if (!payload.length) {
+                        staffToast('Select at least one temple for at least one user.', false);
+                        return;
+                    }
+
+                    isSavingBatch = true;
+                    if (doneBtn) doneBtn.disabled = true;
+                    if (addUserBtn) addUserBtn.disabled = true;
+                    templeList.querySelectorAll('.temple-staff-scan__btn').forEach(function (b) {
+                        b.disabled = true;
+                    });
+
+                    var okCount = 0;
+                    var failCount = 0;
+                    var p = Promise.resolve();
+                    payload.forEach(function (item) {
+                        p = p.then(function () {
+                            return postVisit(item)
+                                .then(function (res) {
+                                    if (res.status === 'ok') okCount += 1;
+                                    else {
+                                        failCount += 1;
+                                        if (res.message) staffToast(res.message, false);
+                                    }
+                                })
+                                .catch(function () {
+                                    failCount += 1;
+                                });
+                        });
+                    });
+
+                    p.then(function () {
+                        if (failCount === 0 && okCount > 0) {
+                            staffToast(
+                                okCount + ' check-in(s) saved to admin panel.',
+                                true
+                            );
+                        } else {
+                            staffToast(
+                                'Saved ' + okCount + ' to admin' + (failCount ? ', failed ' + failCount : '') + '.',
+                                failCount === 0
+                            );
+                        }
+                        usersState.forEach(function (u) {
+                            u.selectedTempleIds = {};
+                        });
+                        syncActiveUser();
+                    }).finally(function () {
+                        isSavingBatch = false;
+                        if (doneBtn) doneBtn.disabled = false;
+                        if (addUserBtn) addUserBtn.disabled = false;
+                        templeList.querySelectorAll('.temple-staff-scan__btn').forEach(function (b) {
+                            b.disabled = false;
+                        });
+                    });
+                }
+
+                if (addUserBtn) {
+                    addUserBtn.addEventListener('click', addVisitor);
+                }
+                if (doneBtn) {
+                    doneBtn.addEventListener('click', saveAllEntries);
                 }
 
                 fetch('/api/qr/validate/' + encodeURIComponent(staffScanToken))
                     .then(function (r) {
-                        return r.json().then(function (d) {
-                            return { ok: r.ok, d: d };
-                        });
+                        return r.json();
                     })
                     .then(function (res) {
-                        if (!res.d.valid && res.d.status !== 'ok') {
-                            staffShowError(res.d.message || 'Invalid or expired QR token.');
+                        if (!res.valid || res.status !== 'ok') {
+                            staffShowError(res.message || 'Invalid or expired QR token.');
                             return null;
                         }
-                        return Promise.all([
-                            Promise.resolve(res.d),
-                            fetch('/api/scan-user/' + encodeURIComponent(staffScanToken)).then(function (r) {
-                                return r.json();
-                            }),
-                            fetch('/api/temples').then(function (r) {
-                                return r.json();
-                            })
-                        ]);
+                        return fetch('/api/temples').then(function (r) {
+                            return r.json();
+                        });
                     })
-                    .then(function (results) {
-                        if (!results) return;
-                        var userRes = results[1];
-                        var templeRes = results[2];
-                        if (userRes.status !== 'ok') {
-                            staffShowError(userRes.message || 'User not found.');
-                            return;
-                        }
+                    .then(function (templeRes) {
+                        if (!templeRes) return;
                         if (templeRes.status !== 'ok' || !templeRes.temples || !templeRes.temples.length) {
                             staffShowError('No temples loaded. Restart server to sync tirupati_main_data.csv.');
                             return;
                         }
+
+                        allTemples = templeRes.temples;
                         if (loadingState) loadingState.classList.add('hidden');
                         if (mainPanel) mainPanel.classList.remove('hidden');
-                        if (visitorName) visitorName.textContent = userRes.user.name || 'Visitor';
-                        if (visitorMeta) {
-                            visitorMeta.textContent = userRes.user.phone
-                                ? 'Phone: ' + userRes.user.phone
-                                : 'Verified QR';
-                        }
-                        allTemples = templeRes.temples;
                         staffRenderTempleButtons(allTemples);
+                        seedPrimaryVisitor();
+                        syncActiveUser();
+                        updateSummary();
+
+                        loadPrimaryVisitorProfile(true);
+
                         if (templeSearch) {
                             templeSearch.addEventListener('input', function () {
                                 clearTimeout(searchDebounce);
@@ -6193,7 +6592,7 @@
                         }
                     })
                     .catch(function () {
-                        staffShowError('Could not validate QR. Check connection.');
+                        staffShowError('Could not initialize scan panel. Check connection.');
                     });
 
                 return;

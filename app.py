@@ -107,6 +107,7 @@ class TempleVisit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     temple_id = db.Column(db.Integer, db.ForeignKey('temples.id'), nullable=False, index=True)
     visit_date = db.Column(db.Date, nullable=False, index=True)
+    visitor_number = db.Column(db.Integer, default=1, nullable=False, server_default='1')
     visit_count = db.Column(db.Integer, default=1, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now())
     updated_at = db.Column(
@@ -116,7 +117,10 @@ class TempleVisit(db.Model):
     )
 
     __table_args__ = (
-        db.UniqueConstraint('user_id', 'temple_id', 'visit_date', name='uq_user_temple_day'),
+        db.UniqueConstraint(
+            'user_id', 'temple_id', 'visit_date', 'visitor_number',
+            name='uq_user_temple_day_visitor',
+        ),
     )
 
     user = db.relationship('User', backref=db.backref('temple_visits', lazy=True))
@@ -222,11 +226,26 @@ def _check_twilio_verify(phone_e164, code):
         return False, 'Verification failed. Try again.'
 
 
-def _record_visit_for_user(user, temple_id):
+def _parse_visitor_number(data):
+    """Visitor slot on a QR batch (1 = QR holder, 2+ = companions). Same login email for all."""
+    raw = data.get('visitorNumber')
+    if raw is None:
+        raw = data.get('guestNumber')
+    if raw is None or str(raw).strip() in ('', 'null', 'None'):
+        return 1
+    try:
+        n = int(raw)
+    except (TypeError, ValueError):
+        return 1
+    return max(1, n)
+
+
+def _record_visit_for_user(user, temple_id, visitor_number=1):
     temple = db.session.get(Temple, int(temple_id))
     if not temple:
         return None, {'message': 'Temple not found.'}, 404
 
+    visitor_number = max(1, int(visitor_number or 1))
     today = date.today()
     now = _visit_now()
     cooldown_sec = _cooldown_seconds()
@@ -236,6 +255,7 @@ def _record_visit_for_user(user, temple_id):
         user_id=user.id,
         temple_id=temple.id,
         visit_date=today,
+        visitor_number=visitor_number,
     ).first()
 
     if visit:
@@ -263,6 +283,7 @@ def _record_visit_for_user(user, temple_id):
             user_id=user.id,
             temple_id=temple.id,
             visit_date=today,
+            visitor_number=visitor_number,
             visit_count=1,
             created_at=now,
             updated_at=now,
@@ -284,7 +305,9 @@ def _record_visit_for_user(user, temple_id):
             'fullName': temple.full_name,
             'location': temple.location or '',
         },
-        'user': {'id': user.id, 'name': user.username},
+        'user': {'id': user.id, 'name': user.username, 'email': user.email},
+        'visitorNumber': visitor_number,
+        'visitorLabel': f'Visitor {visitor_number}',
         'visitDate': today.isoformat(),
     }, None, 200
 
@@ -360,6 +383,36 @@ def _ensure_user_columns():
             db.session.commit()
         except ProgrammingError:
             db.session.rollback()
+
+
+def _ensure_visit_columns():
+    try:
+        cols = {c['name'] for c in inspect(db.engine).get_columns('temple_visits')}
+    except Exception:
+        return
+    if 'visitor_number' not in cols:
+        try:
+            db.session.execute(text(
+                'ALTER TABLE temple_visits ADD COLUMN visitor_number INTEGER NOT NULL DEFAULT 1'
+            ))
+            db.session.commit()
+        except ProgrammingError:
+            db.session.rollback()
+    try:
+        db.session.execute(text(
+            'ALTER TABLE temple_visits DROP CONSTRAINT IF EXISTS uq_user_temple_day'
+        ))
+        db.session.commit()
+    except ProgrammingError:
+        db.session.rollback()
+    try:
+        db.session.execute(text(
+            'ALTER TABLE temple_visits ADD CONSTRAINT uq_user_temple_day_visitor '
+            'UNIQUE (user_id, temple_id, visit_date, visitor_number)'
+        ))
+        db.session.commit()
+    except ProgrammingError:
+        db.session.rollback()
 
 
 def _ensure_temple_columns():
@@ -466,6 +519,7 @@ def _seed_default_admin():
 def init_db():
     db.create_all()
     _ensure_user_columns()
+    _ensure_visit_columns()
     _ensure_temple_columns()
     _sync_temples_from_csv()
     _backfill_qr_tokens()
@@ -1006,6 +1060,32 @@ def list_temples():
     })
 
 
+def _resolve_visit_user(data):
+    """QR scan: all visitor slots (1, 2, …) save under the scanned account email."""
+    visitor_number = _parse_visitor_number(data)
+    primary_token = (
+        data.get('primaryToken') or data.get('scanToken') or ''
+    ).strip().upper()
+    user_token = (data.get('userToken') or '').strip().upper()
+    token = user_token or primary_token
+
+    if token:
+        if not is_valid_qr_token(token):
+            return None, visitor_number, {'message': 'Invalid QR token.'}, 400
+        user = resolve_user(token)
+        if user:
+            return user, visitor_number, None, None
+        return None, visitor_number, {'message': 'QR token not recognized.'}, 404
+
+    uid = session.get('user_id')
+    if uid:
+        user = db.session.get(User, uid)
+        if user:
+            return user, visitor_number, None, None
+
+    return None, visitor_number, {'message': 'Valid user token or login required.'}, 401
+
+
 @app.route('/api/temple-visits', methods=['POST'])
 def record_temple_visit():
     data = request.get_json(silent=True) or {}
@@ -1013,19 +1093,15 @@ def record_temple_visit():
     if not temple_id:
         return jsonify({'status': 'error', 'message': 'Temple is required.'}), 400
 
-    user = None
-    user_token = (data.get('userToken') or '').strip()
-    if user_token:
-        if not is_valid_qr_token(user_token):
-            return jsonify({'status': 'error', 'message': 'Invalid QR token.'}), 400
-        user = resolve_user(user_token)
-    elif session.get('user_id'):
-        user = db.session.get(User, session['user_id'])
-
+    user, visitor_number, err_payload, code = _resolve_visit_user(data)
+    if err_payload:
+        body = {'status': 'error'}
+        body.update(err_payload)
+        return jsonify(body), code
     if not user:
         return jsonify({'status': 'error', 'message': 'Valid user token or login required.'}), 401
 
-    result, err_payload, code = _record_visit_for_user(user, temple_id)
+    result, err_payload, code = _record_visit_for_user(user, temple_id, visitor_number=visitor_number)
     if err_payload:
         body = {'status': 'error'}
         if isinstance(err_payload, dict):
@@ -1058,6 +1134,8 @@ def temple_visit_history():
                 'fullName': v.temple.full_name if v.temple else '',
                 'visitDate': v.visit_date.isoformat(),
                 'visitCount': v.visit_count,
+                'visitorNumber': getattr(v, 'visitor_number', None) or 1,
+                'visitorLabel': f'Visitor {getattr(v, "visitor_number", None) or 1}',
                 'createdAt': v.created_at.isoformat() if v.created_at else None,
             }
             for v in rows
@@ -1114,7 +1192,7 @@ def temple_visit_analytics():
     all_rows = TempleVisit.query.filter_by(user_id=uid).all()
 
     visits_today_total = sum((r.visit_count or 0) for r in today_rows)
-    temples_today = len(today_rows)
+    temples_today = len({r.temple_id for r in today_rows})
     lifetime_visits = sum((r.visit_count or 0) for r in all_rows)
 
     by_temple_today = [
@@ -1122,6 +1200,8 @@ def temple_visit_analytics():
             'templeId': r.temple_id,
             'templeName': r.temple.temple_name if r.temple else '',
             'visitCount': r.visit_count,
+            'visitorNumber': getattr(r, 'visitor_number', None) or 1,
+            'visitorLabel': f'Visitor {getattr(r, "visitor_number", None) or 1}',
         }
         for r in today_rows
     ]
@@ -1467,6 +1547,8 @@ def admin_visits():
                 'id': v.id,
                 'userName': v.user.username if v.user else '',
                 'userEmail': v.user.email if v.user else '',
+                'visitorNumber': getattr(v, 'visitor_number', None) or 1,
+                'visitorLabel': f'Visitor {getattr(v, "visitor_number", None) or 1}',
                 'templeName': v.temple.temple_name if v.temple else '',
                 'visitDate': v.visit_date.isoformat(),
                 'visitCount': v.visit_count,
@@ -1493,6 +1575,23 @@ def admin_user_details(user_id):
     ).all()
     today_visits = [v for v in all_visits if v.visit_date == today]
 
+    by_visitor_today = {}
+    for v in today_visits:
+        vn = getattr(v, 'visitor_number', None) or 1
+        if vn not in by_visitor_today:
+            by_visitor_today[vn] = {'visitorNumber': vn, 'visitsToday': 0, 'templeIds': set()}
+        by_visitor_today[vn]['visitsToday'] += v.visit_count or 0
+        by_visitor_today[vn]['templeIds'].add(v.temple_id)
+    visitors_today = [
+        {
+            'visitorNumber': vn,
+            'visitorLabel': f'Visitor {vn}',
+            'visitsToday': info['visitsToday'],
+            'templesToday': len(info['templeIds']),
+        }
+        for vn, info in sorted(by_visitor_today.items())
+    ]
+
     by_temple = {}
     for v in all_visits:
         tid = v.temple_id
@@ -1517,7 +1616,8 @@ def admin_user_details(user_id):
             'phone': user.phone or '',
         },
         'visitsToday': sum((v.visit_count or 0) for v in today_visits),
-        'templesToday': len(today_visits),
+        'templesToday': len({v.temple_id for v in today_visits}),
+        'visitorsToday': visitors_today,
         'lifetimeVisits': sum((v.visit_count or 0) for v in all_visits),
         'visitedTemples': visited_temples,
         'history': [
@@ -1525,6 +1625,8 @@ def admin_user_details(user_id):
                 'templeName': v.temple.temple_name if v.temple else '',
                 'visitDate': v.visit_date.isoformat(),
                 'visitCount': v.visit_count,
+                'visitorNumber': getattr(v, 'visitor_number', None) or 1,
+                'visitorLabel': f'Visitor {getattr(v, "visitor_number", None) or 1}',
             }
             for v in all_visits[:50]
         ],
