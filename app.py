@@ -27,6 +27,27 @@ except ImportError:
 
 load_dotenv()
 
+import logging
+
+_STATIC_RE = re.compile(
+    r'\.(?:js|css|png|jpg|jpeg|avif|webp|gif|svg|ico|mp4|mp3|csv|woff2?|ttf|eot|map)\b',
+    re.IGNORECASE,
+)
+
+class _QuietStatic(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+        if '/api/' in msg:
+            return True
+        if _STATIC_RE.search(msg):
+            return False
+        if '" 304 ' in msg or '" 206 ' in msg:
+            return False
+        return True
+
+_wz = logging.getLogger('werkzeug')
+_wz.addFilter(_QuietStatic())
+
 app = Flask(__name__, static_url_path='', static_folder='.')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")
