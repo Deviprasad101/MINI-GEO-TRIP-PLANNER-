@@ -374,10 +374,10 @@
                         </div>
                     </div>
                     <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Phone Number</label>
+                        <label class="text-[11px] font-bold text-purple-600 uppercase ml-1">Phone Number <span class="text-slate-400 font-semibold normal-case">(optional)</span></label>
                         <div class="input-group">
                             <i class="fa-solid fa-phone leading-icon"></i>
-                            <input type="tel" id="regPhone" placeholder="" required autocomplete="off"
+                            <input type="tel" id="regPhone" placeholder="10-digit mobile (optional)" autocomplete="off"
                                 class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 pl-12 outline-none focus:border-purple-600 transition-all"
                                 pattern="[6-9][0-9]{9}">
                         </div>
@@ -433,7 +433,7 @@
                     </div>
                     <button type="button" id="verifyBtn"
                         class="btn-gradient w-full py-4 rounded-2xl font-bold text-white shadow-lg flex items-center justify-center gap-3 active:scale-95">
-                        <span id="verifyBtnText">Verify Email</span>
+                        <span id="verifyBtnText">Verify Email &amp; Create Account</span>
                         <div class="loader" id="verifyLoader"></div>
                     </button>
                     <button type="button" onclick="showStep(1)" class="w-full text-xs text-slate-400 font-medium hover:text-purple-600 transition-colors">
@@ -441,8 +441,8 @@
                     </button>
                 </div>
 
-                <!-- Phone OTP Step -->
-                <div id="phoneOtpStep" class="hidden space-y-6">
+                <!-- Phone OTP Step (disabled — mobile verification optional) -->
+                <div id="phoneOtpStep" class="hidden space-y-6" hidden aria-hidden="true">
                     <h3 class="text-center text-lg font-bold text-slate-700">Verify your Mobile</h3>
                     <p class="text-center text-sm text-slate-500 font-medium">
                         We've sent a 6-digit code to <br><span id="displayPhone" class="text-purple-600 font-bold"></span>
@@ -844,7 +844,10 @@
                 });
                 const result = await response.json();
 
-                if (result.status === 'success' && result.step === 'phone') {
+                if (result.status === 'success' && (result.step === 'complete' || result.user)) {
+                    alert(result.message || 'Account created successfully!');
+                    location.reload();
+                } else if (result.status === 'success' && result.step === 'phone') {
                     document.getElementById('displayPhone').innerText = result.maskedPhone || '';
                     document.querySelectorAll('.phone-otp-input').forEach(i => i.value = '');
                     showStep(3);

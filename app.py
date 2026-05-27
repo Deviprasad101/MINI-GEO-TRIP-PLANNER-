@@ -734,6 +734,23 @@ def package_share_qr_png(share_id):
         )
 
 
+def _finalize_registration(reg_data):
+    """Create account after email OTP is verified (phone optional, not SMS-verified)."""
+    phone = reg_data.get('phone') or None
+    new_user = User(
+        username=reg_data['username'],
+        email=reg_data['email'].lower(),
+        password_hash=generate_password_hash(reg_data['password']),
+        phone=phone,
+        is_verified=True,
+        qr_token=generate_qr_token(),
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    ensure_qr_token(new_user)
+    return new_user
+
+
 # Authentication Routes
 @app.route('/api/auth/register', methods=['POST'])
 def register():
@@ -744,19 +761,20 @@ def register():
         password = data.get('password')
         raw_phone = (data.get('phone') or '').strip()
 
-        if not raw_phone:
-            return jsonify({"status": "error", "message": "Phone number is required"}), 400
+        if not email:
+            return jsonify({"status": "error", "message": "Email is required"}), 400
 
-        phone = normalize_phone(raw_phone)
-        if not phone:
-            return jsonify({"status": "error", "message": "Enter a valid 10-digit Indian mobile number"}), 400
+        phone = None
+        if raw_phone:
+            phone = normalize_phone(raw_phone)
+            if not phone:
+                return jsonify({"status": "error", "message": "Enter a valid 10-digit Indian mobile number"}), 400
+            existing_phone = User.query.filter_by(phone=phone).first()
+            if existing_phone:
+                return jsonify({"status": "error", "message": "Phone number already registered"}), 400
 
         if User.query.filter_by(email=email).first():
             return jsonify({"status": "error", "message": "Email already registered"}), 400
-
-        existing_phone = User.query.filter_by(phone=phone).first()
-        if existing_phone:
-            return jsonify({"status": "error", "message": "Phone number already registered"}), 400
 
         otp = str(random.randint(100000, 999999))
         print(f"[DEBUG] Generated email OTP for {email}: {otp}")
@@ -783,7 +801,7 @@ def register():
 
 @app.route('/api/auth/verify_otp', methods=['POST'])
 def verify_otp():
-    """Step 1: verify email OTP, then trigger phone OTP via Twilio."""
+    """Verify email OTP and create account (email required; phone optional)."""
     try:
         data = request.json
         user_otp = data.get('otp')
@@ -804,23 +822,14 @@ def verify_otp():
             return jsonify({"status": "error", "message": "Invalid OTP code"}), 400
 
         reg_data['email_verified'] = True
-        reg_data['step'] = 'phone'
-        session['registration_data'] = reg_data
-
-        phone = reg_data['phone']
-        ok, err = _send_twilio_verify(phone)
-        if not ok:
-            reg_data['step'] = 'email'
-            reg_data['email_verified'] = False
-            session['registration_data'] = reg_data
-            return jsonify({"status": "error", "message": f"Email verified but could not send SMS: {err}"}), 500
-
-        masked = phone[:4] + '••••••' + phone[-2:]
+        new_user = _finalize_registration(reg_data)
+        session.pop('registration_data', None)
+        print(f"[DEBUG] User {reg_data['email']} verified (email) and created.")
         return jsonify({
             "status": "success",
-            "step": "phone",
-            "message": f"Email verified! OTP sent to {masked}",
-            "maskedPhone": masked,
+            "step": "complete",
+            "message": "Email verified and account created!",
+            "user": user_public_dict(new_user),
         })
 
     except Exception as e:
@@ -830,46 +839,11 @@ def verify_otp():
 
 @app.route('/api/auth/verify_phone_otp', methods=['POST'])
 def verify_phone_otp():
-    """Step 2: verify phone OTP via Twilio Verify, then create the user."""
-    try:
-        data = request.json
-        user_otp = data.get('otp')
-        reg_data = session.get('registration_data')
-
-        if not reg_data or not reg_data.get('email_verified'):
-            return jsonify({"status": "error", "message": "Session expired. Please register again."}), 400
-
-        if reg_data.get('step') != 'phone':
-            return jsonify({"status": "error", "message": "Complete email verification first."}), 400
-
-        phone = reg_data['phone']
-        approved, err = _check_twilio_verify(phone, user_otp)
-        if not approved:
-            return jsonify({"status": "error", "message": err or "Invalid OTP code"}), 400
-
-        new_user = User(
-            username=reg_data['username'],
-            email=reg_data['email'].lower(),
-            password_hash=generate_password_hash(reg_data['password']),
-            phone=phone,
-            is_verified=True,
-            qr_token=generate_qr_token(),
-        )
-        db.session.add(new_user)
-        db.session.commit()
-        ensure_qr_token(new_user)
-
-        session.pop('registration_data', None)
-        print(f"[DEBUG] User {reg_data['email']} verified (email + phone) and created.")
-        return jsonify({
-            "status": "success",
-            "message": "Phone verified and account created!",
-            "user": user_public_dict(new_user),
-        })
-
-    except Exception as e:
-        print(f"Phone Verification Error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+    """Legacy endpoint — phone SMS verification is no longer required."""
+    return jsonify({
+        "status": "error",
+        "message": "Mobile verification is optional. Complete email verification to create your account.",
+    }), 400
 
 @app.route('/api/auth/resend_otp', methods=['POST'])
 def resend_otp():
@@ -891,14 +865,6 @@ def resend_otp():
             msg.body = f"Your new OTP is: {otp}"
             mail.send(msg)
             return jsonify({"status": "success", "step": "email", "message": "New email OTP sent"})
-
-        if step == 'phone':
-            phone = reg_data['phone']
-            ok, err = _send_twilio_verify(phone)
-            if not ok:
-                return jsonify({"status": "error", "message": f"Could not resend SMS: {err}"}), 500
-            masked = phone[:4] + '••••••' + phone[-2:]
-            return jsonify({"status": "success", "step": "phone", "message": f"New OTP sent to {masked}"})
 
         return jsonify({"status": "error", "message": "Invalid registration step"}), 400
     except Exception as e:
@@ -1486,9 +1452,10 @@ def admin_stats():
     total_visits = db.session.query(db.func.coalesce(db.func.sum(TempleVisit.visit_count), 0)).scalar()
     unique_visitors = db.session.query(db.func.count(db.func.distinct(TempleVisit.user_id))).scalar()
     today = date.today()
-    visits_today = db.session.query(
-        db.func.coalesce(db.func.sum(TempleVisit.visit_count), 0)
-    ).filter(TempleVisit.visit_date == today).scalar()
+    # Count unique visitor-temple rows for today (repeat taps on same temple do not inflate)
+    visits_today = db.session.query(db.func.count(TempleVisit.id)).filter(
+        TempleVisit.visit_date == today
+    ).scalar()
     return jsonify({
         'status': 'ok',
         'totalUsers': total_users,
@@ -1511,8 +1478,8 @@ def admin_users():
     for u in users:
         all_visits = TempleVisit.query.filter_by(user_id=u.id).all()
         today_visits = [v for v in all_visits if v.visit_date == today]
-        total = sum((v.visit_count or 0) for v in all_visits)
-        today_total = sum((v.visit_count or 0) for v in today_visits)
+        total = len(all_visits)
+        today_total = len(today_visits)
         last_visit = max((v.visit_date for v in all_visits), default=None)
         result.append({
             'id': u.id,
@@ -1551,7 +1518,9 @@ def admin_visits():
                 'visitorLabel': f'Visitor {getattr(v, "visitor_number", None) or 1}',
                 'templeName': v.temple.temple_name if v.temple else '',
                 'visitDate': v.visit_date.isoformat(),
-                'visitCount': v.visit_count,
+                # Visits tab shows unique entry count per visitor+temple+date
+                'visitCount': 1,
+                'rawVisitCount': v.visit_count,
                 'createdAt': v.created_at.isoformat() if v.created_at else '',
             }
             for v in rows
@@ -1580,7 +1549,7 @@ def admin_user_details(user_id):
         vn = getattr(v, 'visitor_number', None) or 1
         if vn not in by_visitor_today:
             by_visitor_today[vn] = {'visitorNumber': vn, 'visitsToday': 0, 'templeIds': set()}
-        by_visitor_today[vn]['visitsToday'] += v.visit_count or 0
+        by_visitor_today[vn]['visitsToday'] += 1
         by_visitor_today[vn]['templeIds'].add(v.temple_id)
     visitors_today = [
         {
@@ -1602,10 +1571,14 @@ def admin_user_details(user_id):
                 'totalVisits': 0,
                 'lastDate': v.visit_date.isoformat(),
             }
-        by_temple[tid]['totalVisits'] += v.visit_count or 0
+        by_temple[tid]['totalVisits'] += 1
         if v.visit_date.isoformat() > by_temple[tid]['lastDate']:
             by_temple[tid]['lastDate'] = v.visit_date.isoformat()
     visited_temples = sorted(by_temple.values(), key=lambda x: x['lastDate'], reverse=True)
+
+    lifetime_visits_primary = len([
+        v for v in all_visits if (getattr(v, 'visitor_number', None) or 1) == 1
+    ])
 
     return jsonify({
         'status': 'ok',
@@ -1615,16 +1588,17 @@ def admin_user_details(user_id):
             'email': user.email,
             'phone': user.phone or '',
         },
-        'visitsToday': sum((v.visit_count or 0) for v in today_visits),
+        'visitsToday': len(today_visits),
         'templesToday': len({v.temple_id for v in today_visits}),
         'visitorsToday': visitors_today,
-        'lifetimeVisits': sum((v.visit_count or 0) for v in all_visits),
+        # Lifetime card should represent only the account holder (Visitor 1)
+        'lifetimeVisits': lifetime_visits_primary,
         'visitedTemples': visited_temples,
         'history': [
             {
                 'templeName': v.temple.temple_name if v.temple else '',
                 'visitDate': v.visit_date.isoformat(),
-                'visitCount': v.visit_count,
+                'visitCount': 1,
                 'visitorNumber': getattr(v, 'visitor_number', None) or 1,
                 'visitorLabel': f'Visitor {getattr(v, "visitor_number", None) or 1}',
             }
