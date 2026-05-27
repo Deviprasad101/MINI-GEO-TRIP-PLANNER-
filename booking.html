@@ -643,13 +643,92 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 2rem;
-            align-items: start;
+            align-items: stretch;
         }
         @media (min-width: 1024px) {
             .booking-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 2.25rem;
             }
+        }
+
+        .booking-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: 0;
+            height: 100%;
+        }
+
+        .booking-column-head {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 9.5rem;
+            padding: 1.25rem 1.25rem 1.15rem;
+            border-radius: 1.25rem;
+            border: 1px solid rgba(219, 234, 254, 0.9);
+            background: linear-gradient(135deg, #ffffff 0%, #eff6ff 50%, #fef3c7 100%);
+            box-shadow: 0 8px 24px rgba(23, 37, 84, 0.06);
+            box-sizing: border-box;
+        }
+
+        .booking-column-head--temple {
+            border-color: rgba(219, 234, 254, 0.9);
+            background: linear-gradient(135deg, #ffffff 0%, #eff6ff 50%, #fef3c7 100%);
+        }
+
+        .booking-column-head__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            flex-shrink: 0;
+            border-radius: 0.75rem;
+            margin-bottom: 0.55rem;
+            font-size: 1.35rem;
+        }
+
+        .booking-column-head__icon--transport {
+            background: rgba(59, 130, 246, 0.12);
+            color: #2563eb;
+        }
+
+        .booking-column-head__icon--temple {
+            background: rgba(180, 83, 9, 0.12);
+            color: #b45309;
+        }
+
+        .booking-column-head h2 {
+            font-family: 'Noto Serif', Georgia, serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--gov-navy);
+            margin: 0 0 0.4rem;
+            line-height: 1.3;
+            min-height: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            letter-spacing: -0.01em;
+        }
+
+        .booking-column-head p {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--gov-muted);
+            line-height: 1.5;
+            max-width: 22rem;
+            min-height: 2.45rem;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            text-align: center;
         }
 
         .booking-card {
@@ -1637,16 +1716,15 @@
     </aside>
 
     <main class="shell">
-        <section class="hero">
-            <span class="hero__eyebrow"><span class="material-symbols-outlined" style="font-size:15px"
-                    aria-hidden="true">account_balance</span> Official booking interface</span>
-            <h1>Book Your Journey</h1>
-            <p>Book transport, temple darshan, and view your shortlisted places — all in one place.</p>
-        </section>
-
         <div class="booking-grid">
 
         <!-- LEFT: Transport Booking -->
+        <div class="booking-column">
+            <div class="booking-column-head">
+                <span class="booking-column-head__icon booking-column-head__icon--transport material-symbols-outlined" aria-hidden="true">directions_bus</span>
+                <h2>Book Your Journey</h2>
+                <p>Search and book buses, local taxis, and trains for your Tirupati trip.</p>
+            </div>
         <section class="booking-card" aria-label="Booking modes">
             <nav class="tabs" role="tablist" aria-label="Booking mode">
                 <button class="tab-btn is-active" id="tabBus" role="tab" aria-selected="true" aria-controls="panelBus"
@@ -1864,9 +1942,15 @@
                 <p class="toast" aria-live="polite"></p>
             </section>
         </section>
+        </div><!-- /booking-column transport -->
 
-        <!-- RIGHT COLUMN -->
-        <!-- RIGHT: Shortlisted Places Only -->
+        <!-- RIGHT: Temple tickets & shortlisted places -->
+        <div class="booking-column">
+            <div class="booking-column-head booking-column-head--temple">
+                <span class="booking-column-head__icon booking-column-head__icon--temple material-symbols-outlined" aria-hidden="true">temple_hindu</span>
+                <h2>Book Tickets for Temples</h2>
+                <p>Book darshan for your shortlisted temples using official TTD links when available.</p>
+            </div>
         <div class="shortlisted-card">
             <div class="shortlisted-head">
                 <span class="material-symbols-outlined" style="font-size:1.3rem;color:#3b82f6">route</span>
@@ -1880,6 +1964,7 @@
                 </div>
             </div>
         </div>
+        </div><!-- /booking-column temple -->
 
         </div><!-- /booking-grid -->
 
