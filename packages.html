@@ -4487,7 +4487,6 @@
                 }).filter(Boolean);
                 closePlacePicker();
                 renderSelectionStrip();
-                showTripMapInline();
             }
 
             function renderSelectionStrip() {
@@ -4569,7 +4568,9 @@
                 updatePickerProgressUi();
                 if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
             });
-            document.getElementById('showMapFromStripBtn').addEventListener('click', showTripMapInline);
+            document.getElementById('showMapFromStripBtn').addEventListener('click', function () {
+                showTripMapInline({ revealQr: true });
+            });
 
             function ensurePkgMap() {
                 if (typeof L === 'undefined') return false;
@@ -5027,7 +5028,7 @@
                 var panel = document.getElementById('pkgQrPanel');
                 var link = document.getElementById('pkgQrLink');
                 if (!panel) return;
-                panel.classList.remove('hidden');
+                if (panel.classList.contains('hidden')) panel.classList.remove('hidden');
                 setQrPanelStatus('Generating share link…', false);
                 lastShareUrl = '';
                 lastShareId = '';
@@ -5092,7 +5093,9 @@
                 });
             })();
 
-            function showTripMapInline() {
+            function showTripMapInline(opts) {
+                opts = opts || {};
+                var revealQr = opts.revealQr === true;
                 if (!lastSelectedStops.length) return;
                 var locInput = document.getElementById('userStartLocation');
                 var gpsEl = document.getElementById('useLiveGps');
@@ -5163,8 +5166,13 @@
                     );
 
                     var sharePayload = buildTripSharePayload(ordered, startLabel, startLat, startLng);
-                    renderPkgShareItinerary(sharePayload);
-                    publishTripShareAndRenderQr(ordered, startLabel, startLat, startLng, sharePayload);
+                    if (revealQr) {
+                        renderPkgShareItinerary(sharePayload);
+                        publishTripShareAndRenderQr(ordered, startLabel, startLat, startLng, sharePayload);
+                        if (typeof window.showFloatingTempleQr === 'function') {
+                            window.showFloatingTempleQr();
+                        }
+                    }
 
                     setMapStatus('Loading road route...');
                     fetchOsrmRoute(waypoints, signal).then(function (coords) {
@@ -5870,6 +5878,7 @@
     </div>
     <script>
         async function handleLogout() {
+            try { sessionStorage.removeItem('geotripTempleQrVisible'); } catch (e) {}
             try {
                 await fetch('/api/auth/logout', { method: 'POST' });
                 localStorage.removeItem('currentUser');
@@ -5880,17 +5889,18 @@
             }
         }
         (function(){
+            var QR_KEY = 'geotripTempleQrVisible';
+            var wrap = document.getElementById('floatingQr');
+            if (!wrap) return;
             var userStr = localStorage.getItem('currentUser');
             if (!userStr) return;
             var u = JSON.parse(userStr);
             if (!u || !u.qrToken) return;
             var origin = encodeURIComponent(window.location.origin);
             var qrUrl = '/api/user/' + encodeURIComponent(u.qrToken) + '/qr.png?clientOrigin=' + origin + '&t=' + Date.now();
-            var wrap = document.getElementById('floatingQr');
             document.getElementById('fqrImage').src = qrUrl;
             document.getElementById('fqrName').textContent = u.name || 'Guest';
             document.getElementById('fqrToken').textContent = 'Token: ' + u.qrToken;
-            wrap.style.display = 'flex';
             document.getElementById('fqrDownload').addEventListener('click', function(){
                 var a = document.createElement('a');
                 a.href = qrUrl; a.download = 'GeoTrip-QR-' + u.qrToken + '.png'; a.click();
@@ -5899,6 +5909,13 @@
                 var link = u.qrUrl || (window.location.origin + '/user/' + u.qrToken);
                 navigator.clipboard.writeText(link).then(function(){ alert('QR link copied!'); }).catch(function(){ prompt('Copy this link:', link); });
             });
+            window.showFloatingTempleQr = function() {
+                wrap.style.display = 'flex';
+                try { sessionStorage.setItem(QR_KEY, '1'); } catch (e) {}
+            };
+            try {
+                if (sessionStorage.getItem(QR_KEY) === '1') wrap.style.display = 'flex';
+            } catch (e) {}
         })();
     </script>
 </body>

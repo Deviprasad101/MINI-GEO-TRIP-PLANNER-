@@ -5446,9 +5446,10 @@
                     showMainLandingMap();
                     // Auto-open recommendations
                     if (window._showRecPanel) window._showRecPanel();
-                    // Reveal QR code section
+                    // Reveal QR on main page + unlock floating QR on about / booking / packages
                     var qrSec = document.getElementById('myQrSection');
                     if (qrSec) qrSec.style.display = '';
+                    try { sessionStorage.setItem('geotripTempleQrVisible', '1'); } catch (e) {}
                 });
             });
 
@@ -6876,6 +6877,7 @@
         })();
 
         async function handleLogout() {
+            try { sessionStorage.removeItem('geotripTempleQrVisible'); } catch (e) {}
             try {
                 const response = await fetch('/api/auth/logout', { method: 'POST' });
                 localStorage.removeItem('currentUser');

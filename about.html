@@ -801,23 +801,25 @@
 
     <script>
         async function handleLogout() {
+            try { sessionStorage.removeItem('geotripTempleQrVisible'); } catch (e) {}
             try { await fetch('/api/auth/logout', { method: 'POST' }); localStorage.removeItem('currentUser'); window.location.href = '/'; }
             catch(e) { localStorage.removeItem('currentUser'); window.location.href = '/'; }
         }
 
-        // Floating QR
+        // Floating temple QR — after Show map on main page (session flag)
         (function(){
+            var QR_KEY = 'geotripTempleQrVisible';
+            var wrap = document.getElementById('floatingQr');
+            if (!wrap) return;
             var userStr = localStorage.getItem('currentUser');
             if (!userStr) return;
             var u = JSON.parse(userStr);
             if (!u || !u.qrToken) return;
             var origin = encodeURIComponent(window.location.origin);
             var qrUrl = '/api/user/' + encodeURIComponent(u.qrToken) + '/qr.png?clientOrigin=' + origin + '&t=' + Date.now();
-            var wrap = document.getElementById('floatingQr');
             document.getElementById('fqrImage').src = qrUrl;
             document.getElementById('fqrName').textContent = u.name || 'Guest';
             document.getElementById('fqrToken').textContent = 'Token: ' + u.qrToken;
-            wrap.style.display = 'flex';
             document.getElementById('fqrDownload').addEventListener('click', function(){
                 var a = document.createElement('a'); a.href = qrUrl; a.download = 'GeoTrip-QR-' + u.qrToken + '.png'; a.click();
             });
@@ -825,6 +827,13 @@
                 var link = u.qrUrl || (window.location.origin + '/user/' + u.qrToken);
                 navigator.clipboard.writeText(link).then(function(){ alert('QR link copied!'); }).catch(function(){ prompt('Copy this link:', link); });
             });
+            window.showFloatingTempleQr = function() {
+                wrap.style.display = 'flex';
+                try { sessionStorage.setItem(QR_KEY, '1'); } catch (e) {}
+            };
+            try {
+                if (sessionStorage.getItem(QR_KEY) === '1') wrap.style.display = 'flex';
+            } catch (e) {}
         })();
 
         // Stat counter animation
