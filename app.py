@@ -62,12 +62,37 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_USERNAME'] = (os.getenv('MAIL_USERNAME') or '').strip()
+# Gmail App Passwords are often pasted with spaces — remove them for SMTP
+app.config['MAIL_PASSWORD'] = (os.getenv('MAIL_PASSWORD') or '').replace(' ', '')
+app.config['MAIL_DEFAULT_SENDER'] = app.config['MAIL_USERNAME']
 
 db = SQLAlchemy(app)
 mail = Mail(app)
+
+
+def _email_otp_fallback_enabled():
+    return os.getenv('EMAIL_OTP_CONSOLE_FALLBACK', 'true').lower() in ('1', 'true', 'yes')
+
+
+def _send_email_message(msg, otp_hint=None):
+    """Send email; on SMTP failure optionally allow dev console OTP fallback."""
+    try:
+        mail.send(msg)
+        return True, None
+    except Exception as e:
+        print(f'[ERROR] Email send failed: {e}')
+        if otp_hint and _email_otp_fallback_enabled():
+            recipients = ', '.join(msg.recipients or [])
+            print(f'[DEV] Email OTP for {recipients}: {otp_hint}')
+            return True, 'otp_console_fallback'
+        err_text = str(e)
+        if '535' in err_text or 'BadCredentials' in err_text or 'Username and Password' in err_text:
+            return False, (
+                'Email server login failed. In .env set MAIL_USERNAME and a valid Gmail App Password '
+                '(Google Account → Security → 2-Step Verification → App passwords).'
+            )
+        return False, 'Could not send email. Please try again later.'
 
 # User Model
 class User(db.Model):
@@ -501,19 +526,28 @@ def _backfill_qr_tokens():
             ensure_qr_token(user)
 
 
-def _seed_default_admin():
-    """Create the default admin from .env if no admins exist yet."""
-    if Admin.query.first():
+def _sync_admin_credentials():
+    """Ensure admin exists and password matches ADMIN_USERNAME / ADMIN_PASSWORD in .env."""
+    uname = (os.getenv('ADMIN_USERNAME') or 'admin').strip()
+    pwd = os.getenv('ADMIN_PASSWORD') or 'admin'
+    if not uname:
         return
-    uname = os.getenv('ADMIN_USERNAME', 'admin')
-    pwd = os.getenv('ADMIN_PASSWORD', 'admin')
+
+    admin = Admin.query.filter_by(username=uname).first()
+    if admin:
+        if not check_password_hash(admin.password_hash, pwd):
+            admin.password_hash = generate_password_hash(pwd)
+            db.session.commit()
+            print(f'[INFO] Admin "{uname}" password synced from .env')
+        return
+
     admin = Admin(
         username=uname,
         password_hash=generate_password_hash(pwd),
     )
     db.session.add(admin)
     db.session.commit()
-    print(f'[INFO] Default admin "{uname}" created from .env')
+    print(f'[INFO] Admin "{uname}" created from .env')
 
 
 def init_db():
@@ -523,7 +557,7 @@ def init_db():
     _ensure_temple_columns()
     _sync_temples_from_csv()
     _backfill_qr_tokens()
-    _seed_default_admin()
+    _sync_admin_credentials()
 
 
 with app.app_context():
@@ -792,12 +826,21 @@ def register():
 
         msg = Message('GeoTrip Planner - Verify Your Email', recipients=[email])
         msg.body = f"Hello {username},\n\nYour OTP for GeoTrip Planner registration is: {otp}\n\nThis code expires in 5 minutes."
-        mail.send(msg)
+        ok, send_err = _send_email_message(msg, otp_hint=otp)
+        if not ok:
+            session.pop('registration_data', None)
+            return jsonify({"status": "error", "message": send_err}), 503
 
-        return jsonify({"status": "success", "step": "email", "message": "OTP sent to email"})
+        user_message = "OTP sent to email"
+        if send_err == 'otp_console_fallback':
+            user_message = (
+                "Email could not be sent (SMTP). Use the OTP printed in the server terminal "
+                "(dev fallback enabled)."
+            )
+        return jsonify({"status": "success", "step": "email", "message": user_message})
     except Exception as e:
         print(f"Registration Error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": "Registration failed. Please try again."}), 500
 
 @app.route('/api/auth/verify_otp', methods=['POST'])
 def verify_otp():
@@ -863,12 +906,18 @@ def resend_otp():
 
             msg = Message('GeoTrip Planner - Resend OTP', recipients=[reg_data['email']])
             msg.body = f"Your new OTP is: {otp}"
-            mail.send(msg)
-            return jsonify({"status": "success", "step": "email", "message": "New email OTP sent"})
+            ok, send_err = _send_email_message(msg, otp_hint=otp)
+            if not ok:
+                return jsonify({"status": "error", "message": send_err}), 503
+            user_message = "New email OTP sent"
+            if send_err == 'otp_console_fallback':
+                user_message = "Check server terminal for the new OTP (dev fallback)."
+            return jsonify({"status": "success", "step": "email", "message": user_message})
 
         return jsonify({"status": "error", "message": "Invalid registration step"}), 400
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        print(f"Resend OTP Error: {e}")
+        return jsonify({"status": "error", "message": "Could not resend OTP."}), 500
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
@@ -1242,12 +1291,17 @@ def forgot_password():
 
         msg = Message('GeoTrip Planner - Password Reset Verification', recipients=[email])
         msg.body = f"Hello {user.username},\n\nYou requested a password reset for your GeoTrip Planner account.\nYour reset OTP is: {otp}\n\nThis code expires in 5 minutes. If you did not request this reset, please ignore this email."
-        mail.send(msg)
-
-        return jsonify({"status": "success", "message": "Reset OTP sent to your email"})
+        ok, send_err = _send_email_message(msg, otp_hint=otp)
+        if not ok:
+            session.pop('reset_data', None)
+            return jsonify({"status": "error", "message": send_err}), 503
+        user_message = "Reset OTP sent to your email"
+        if send_err == 'otp_console_fallback':
+            user_message = "Check server terminal for reset OTP (dev fallback)."
+        return jsonify({"status": "success", "message": user_message})
     except Exception as e:
         print(f"Forgot Password Error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": "Could not send reset email."}), 500
 
 @app.route('/api/auth/reset_password', methods=['POST'])
 def reset_password():
@@ -1564,17 +1618,62 @@ def admin_user_details(user_id):
     by_temple = {}
     for v in all_visits:
         tid = v.temple_id
+        vn = getattr(v, 'visitor_number', None) or 1
         if tid not in by_temple:
             by_temple[tid] = {
+                'templeId': tid,
                 'templeName': v.temple.temple_name if v.temple else '',
                 'location': (v.temple.location or '') if v.temple else '',
-                'totalVisits': 0,
+                'visitsToday': 0,
+                'visitorsTodaySet': set(),
+                'lifetime': 0,
                 'lastDate': v.visit_date.isoformat(),
+                'byVisitor': {},
             }
-        by_temple[tid]['totalVisits'] += 1
+        if vn not in by_temple[tid]['byVisitor']:
+            by_temple[tid]['byVisitor'][vn] = {'visitsToday': 0, 'lifetime': 0}
+        by_temple[tid]['byVisitor'][vn]['lifetime'] += 1
+        by_temple[tid]['lifetime'] += 1
+        if v.visit_date == today:
+            by_temple[tid]['visitsToday'] += 1
+            by_temple[tid]['visitorsTodaySet'].add(vn)
+            by_temple[tid]['byVisitor'][vn]['visitsToday'] += 1
         if v.visit_date.isoformat() > by_temple[tid]['lastDate']:
             by_temple[tid]['lastDate'] = v.visit_date.isoformat()
-    visited_temples = sorted(by_temple.values(), key=lambda x: x['lastDate'], reverse=True)
+
+    temple_stats = []
+    for tid, info in by_temple.items():
+        temple_stats.append({
+            'templeId': info['templeId'],
+            'templeName': info['templeName'],
+            'location': info['location'],
+            'visitsToday': info['visitsToday'],
+            'templesToday': len(info['visitorsTodaySet']),
+            'lifetime': info['lifetime'],
+            'lastDate': info['lastDate'],
+            'visitors': [
+                {
+                    'visitorNumber': vn,
+                    'visitorLabel': f'Visitor {vn}',
+                    'visitsToday': vinfo['visitsToday'],
+                    'lifetime': vinfo['lifetime'],
+                }
+                for vn, vinfo in sorted(info['byVisitor'].items())
+            ],
+        })
+    temple_stats.sort(key=lambda x: (x['visitsToday'], x['lastDate']), reverse=True)
+
+    visited_temples = [
+        {
+            'templeName': t['templeName'],
+            'location': t['location'],
+            'visitsToday': t['visitsToday'],
+            'templesToday': t['templesToday'],
+            'lifetime': t['lifetime'],
+            'lastDate': t['lastDate'],
+        }
+        for t in temple_stats
+    ]
 
     lifetime_visits_primary = len([
         v for v in all_visits if (getattr(v, 'visitor_number', None) or 1) == 1
@@ -1591,6 +1690,7 @@ def admin_user_details(user_id):
         'visitsToday': len(today_visits),
         'templesToday': len({v.temple_id for v in today_visits}),
         'visitorsToday': visitors_today,
+        'templeStats': temple_stats,
         # Lifetime card should represent only the account holder (Visitor 1)
         'lifetimeVisits': lifetime_visits_primary,
         'visitedTemples': visited_temples,

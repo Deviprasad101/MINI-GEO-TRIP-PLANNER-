@@ -1123,18 +1123,13 @@
                         <div class="w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 text-white font-extrabold text-xl flex items-center justify-center shrink-0" id="admUdAvatar">?</div>
                         <div><p class="font-bold text-lg text-slate-800" id="admUdName">—</p><p class="text-sm text-slate-500" id="admUdMeta">—</p></div>
                     </div>
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100"><p class="text-2xl font-extrabold text-teal-700" id="admUdVisitsToday">0</p><p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Visits Today</p></div>
-                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100"><p class="text-2xl font-extrabold text-teal-700" id="admUdTemplesToday">0</p><p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Temples Today</p></div>
-                        <div class="text-center p-4 bg-teal-50 rounded-xl border border-teal-100"><p class="text-2xl font-extrabold text-teal-700" id="admUdLifetime">0</p><p class="text-[11px] font-bold text-slate-500 uppercase mt-1">Lifetime</p></div>
-                    </div>
                     <div class="mb-6">
-                        <h3 class="text-xs font-bold uppercase text-amber-700 mb-2"><i class="fa-solid fa-users mr-1.5"></i>Visitors today (same account)</h3>
-                        <div id="admUdVisitorsToday" class="space-y-2"><p class="text-sm text-slate-400">No visitors checked in today</p></div>
+                        <h3 class="text-xs font-bold uppercase text-teal-700 mb-3"><i class="fa-solid fa-gopuram mr-1.5"></i>Temple-wise stats (today &amp; lifetime)</h3>
+                        <div id="admUdTempleStats" class="space-y-3 max-h-[420px] overflow-y-auto"><p class="text-sm text-slate-400">No temple visits yet</p></div>
                     </div>
                     <div class="grid md:grid-cols-2 gap-5">
-                        <div><h3 class="text-xs font-bold uppercase text-teal-700 mb-3"><i class="fa-solid fa-gopuram mr-1.5"></i>Visited Temples</h3><div id="admUdVisitedTemples" class="space-y-2 max-h-[300px] overflow-y-auto"><p class="text-sm text-slate-400">Select a user to view</p></div></div>
                         <div><h3 class="text-xs font-bold uppercase text-teal-700 mb-3"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>Visit History</h3><div id="admUdVisitHistory" class="space-y-2 max-h-[300px] overflow-y-auto"><p class="text-sm text-slate-400">Select a user to view</p></div></div>
+                        <div><h3 class="text-xs font-bold uppercase text-amber-700 mb-3"><i class="fa-solid fa-users mr-1.5"></i>Visitors today</h3><div id="admUdVisitorsToday" class="space-y-2 max-h-[300px] overflow-y-auto"><p class="text-sm text-slate-400">No visitors checked in today</p></div></div>
                     </div>
                 </div>
                 <p id="admUserDetailEmpty" class="text-center text-slate-400 py-10 text-sm">Select a user from the dropdown above to view their visit details</p>
@@ -1283,9 +1278,34 @@
             document.getElementById('admUdAvatar').textContent = (u.username || '?')[0].toUpperCase();
             document.getElementById('admUdName').textContent = u.username;
             document.getElementById('admUdMeta').textContent = (u.phone ? 'Phone: ' + u.phone + ' · ' : '') + 'Email: ' + u.email + ' · ID #' + u.id;
-            document.getElementById('admUdVisitsToday').textContent = d.visitsToday;
-            document.getElementById('admUdTemplesToday').textContent = d.templesToday;
-            document.getElementById('admUdLifetime').textContent = d.lifetimeVisits;
+            var tsEl = document.getElementById('admUdTempleStats');
+            var templeRows = d.templeStats || d.visitedTemples || [];
+            if (!templeRows.length) {
+                tsEl.innerHTML = '<p class="text-sm text-slate-400">No temple visits yet</p>';
+            } else {
+                tsEl.innerHTML = templeRows.map(function(t) {
+                    var visitorRows = (t.visitors && t.visitors.length)
+                        ? t.visitors.map(function(v) {
+                            return '<div class="flex items-center justify-between p-2.5 bg-amber-50 rounded-lg border border-amber-100 text-xs">' +
+                                '<span class="font-bold text-amber-900">' + admEsc(v.visitorLabel || ('Visitor ' + (v.visitorNumber || 1))) + '</span>' +
+                                '<span class="text-slate-600">' +
+                                (v.visitsToday || 0) + ' visit(s) today · ' +
+                                (v.lifetime || 0) + ' lifetime</span></div>';
+                        }).join('')
+                        : '';
+                    return '<div class="p-4 bg-teal-50 rounded-xl border border-teal-100">' +
+                        '<div class="flex items-start gap-3 mb-3"><i class="fa-solid fa-gopuram text-teal-600 mt-0.5"></i>' +
+                        '<div><p class="font-bold text-slate-800 text-sm">' + admEsc(t.templeName) + '</p>' +
+                        '<p class="text-xs text-slate-500">' + admEsc(t.location || '') + (t.lastDate ? ' · Last: ' + t.lastDate : '') + '</p></div></div>' +
+                        '<div class="grid grid-cols-3 gap-2 text-center mb-3">' +
+                        '<div class="bg-white rounded-lg p-2 border border-teal-100"><p class="text-lg font-extrabold text-teal-700">' + (t.visitsToday || 0) + '</p><p class="text-[10px] font-bold text-slate-500 uppercase">Visits Today</p></div>' +
+                        '<div class="bg-white rounded-lg p-2 border border-teal-100"><p class="text-lg font-extrabold text-teal-700">' + (t.templesToday || 0) + '</p><p class="text-[10px] font-bold text-slate-500 uppercase">Temples Today</p></div>' +
+                        '<div class="bg-white rounded-lg p-2 border border-teal-100"><p class="text-lg font-extrabold text-teal-700">' + (t.lifetime || 0) + '</p><p class="text-[10px] font-bold text-slate-500 uppercase">Lifetime</p></div>' +
+                        '</div>' +
+                        (visitorRows ? '<div class="space-y-1.5 pt-1 border-t border-teal-100">' + visitorRows + '</div>' : '') +
+                        '</div>';
+                }).join('');
+            }
             var vtEl = document.getElementById('admUdVisitorsToday');
             if (!d.visitorsToday || d.visitorsToday.length === 0) {
                 vtEl.innerHTML = '<p class="text-sm text-slate-400">No visitors checked in today</p>';
@@ -1296,9 +1316,6 @@
                         '<span class="text-slate-600">' + v.visitsToday + ' visit(s) · ' + v.templesToday + ' temple(s)</span></div>';
                 }).join('');
             }
-            var vtEl = document.getElementById('admUdVisitedTemples');
-            if (d.visitedTemples.length === 0) { vtEl.innerHTML = '<p class="text-sm text-slate-400">No temples visited yet</p>'; }
-            else { vtEl.innerHTML = d.visitedTemples.map(function(t) { return '<div class="flex items-start gap-3 p-3 bg-teal-50 rounded-xl border border-teal-100"><i class="fa-solid fa-gopuram text-teal-600 mt-0.5"></i><div><p class="font-semibold text-slate-800 text-sm">' + admEsc(t.templeName) + '</p><p class="text-xs text-slate-500">' + admEsc(t.location) + ' · ' + t.totalVisits + ' visit(s) · Last: ' + t.lastDate + '</p></div></div>'; }).join(''); }
             var vhEl = document.getElementById('admUdVisitHistory');
             if (d.history.length === 0) { vhEl.innerHTML = '<p class="text-sm text-slate-400">No visit history</p>'; }
             else { vhEl.innerHTML = d.history.map(function(h) { return '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm"><div><p class="font-semibold text-slate-800">' + admEsc(h.templeName) + '</p><p class="text-xs text-slate-500">' + admEsc(h.visitorLabel || ('Visitor ' + (h.visitorNumber || 1))) + ' · ' + h.visitDate + '</p></div><span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-bold">' + h.visitCount + 'x</span></div>'; }).join(''); }
