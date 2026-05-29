@@ -153,57 +153,221 @@
 
         .pricing-grid--budget-driven .pricing-card.is-budget-active {
             display: flex;
-            animation: pkg-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+            flex-direction: column;
+            animation: none;
             max-width: 100%;
+            min-height: 0;
         }
 
         .pricing-grid--budget-driven .pricing-card__header {
-            padding: 1.15rem 1.5rem 0.35rem;
+            padding: 1.5rem 1.5rem 1rem;
+            flex-shrink: 0;
         }
 
         .pricing-grid--budget-driven .pricing-card__icon-wrap {
-            width: 5rem;
-            height: 5rem;
-            margin-bottom: 0.35rem;
+            width: 5.5rem;
+            height: 5.5rem;
+            margin-bottom: 0.55rem;
         }
 
         .pricing-grid--budget-driven .pricing-card__icon-main {
-            font-size: 2.35rem;
+            font-size: 2.5rem;
         }
 
         .pricing-grid--budget-driven .pricing-card__tagline {
             font-size: clamp(1.35rem, 4vw, 1.65rem);
             max-width: 22rem;
-            margin-top: 0.15rem;
+            margin-top: 0.2rem;
+            line-height: 1.28;
         }
 
         .pricing-grid--budget-driven .pricing-card__body {
-            padding: 0 1.5rem 1rem;
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 1rem;
+            padding: 0.25rem 1.5rem 1.5rem;
         }
 
         .pricing-grid--budget-driven .pricing-card__friendly {
-            font-size: 0.95rem;
-            margin-bottom: 0.45rem;
+            font-size: 0.98rem;
+            margin: 0;
+            line-height: 1.5;
         }
 
         .pricing-grid--budget-driven .pricing-card__friendly-list {
-            gap: 0.2rem;
+            gap: 0.4rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__friendly-list li {
+            line-height: 1.48;
+            padding-top: 0.05rem;
+            padding-bottom: 0.05rem;
+            color: #0f172a;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__friendly-list li,
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__friendly-list li {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .pricing-grid--budget-driven .pricing-card__highlights {
+            padding: 0.75rem 0.9rem;
+            border-radius: 0.8rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights,
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.22);
+        }
+
+        .pricing-grid--budget-driven .pricing-card__highlights-title,
+        .pricing-grid--budget-driven .pricing-card__features-title {
+            margin: 0 0 0.45rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights-title,
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights-title,
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-title,
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features-title {
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .pricing-grid--budget-driven .pricing-card__highlights ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.38rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__highlights li {
+            position: relative;
+            padding-left: 1.35rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            line-height: 1.45;
+            color: #0f172a;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights li,
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights li {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .pricing-grid--budget-driven .pricing-card__highlights li::before {
+            content: "check";
+            font-family: "Material Symbols Outlined";
+            position: absolute;
+            left: 0;
+            top: 0.05rem;
+            font-size: 1rem;
+            font-variation-settings: "FILL" 1, "wght" 700, "GRAD" 0, "opsz" 20;
+            color: var(--check-color, #ea580c);
+        }
+
+        .pricing-grid--budget-driven .pricing-card--standard {
+            --check-color: #2563eb;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium {
+            --check-color: #6ee7b7;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--superpremium {
+            --check-color: #c4b5fd;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--elite {
+            --check-color: #d97706;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__features-panel {
+            padding: 0.75rem 0.9rem;
+            border-radius: 0.8rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-panel,
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features-panel {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.22);
         }
 
         .pricing-grid--budget-driven .pricing-card__features {
-            flex: none;
+            flex: 0 0 auto;
+            margin: 0;
+            max-width: none;
         }
 
         .pricing-grid--budget-driven .pricing-card__features li {
-            font-size: 1rem;
-            padding: 0.35rem 0;
-            margin-bottom: 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.98rem;
+            font-weight: 700;
+            padding: 0.42rem 0;
+            margin: 0;
+            max-width: none;
+            width: 100%;
+            line-height: 1.42;
+            color: #0f172a;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features li,
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features li {
+            color: rgba(255, 255, 255, 0.96);
+            border-bottom-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .pricing-grid--budget-driven .pricing-card__features li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__features li .material-symbols-outlined {
+            flex-shrink: 0;
+            font-size: 1.2rem;
+            margin-top: 0.05rem;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__includes {
+            margin: 0;
+            padding: 0.65rem 0.85rem;
+            border-radius: 0.65rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            line-height: 1.45;
+            text-align: center;
+            color: #475569;
+            background: linear-gradient(180deg, #fffbeb 0%, #fff7ed 100%);
+            border: 1px dashed rgba(251, 146, 60, 0.45);
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__includes,
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__includes {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.28);
         }
 
         .pricing-grid--budget-driven .pricing-card__cta {
-            margin-top: 0.65rem;
-            padding: 0.85rem 1.2rem;
-            font-size: 1rem;
+            margin-top: 0.35rem;
+            padding: 1rem 1.35rem;
+            font-size: 1.05rem;
         }
 
         /* Plan picker header + slider — same width as budget-driven cards */
@@ -3971,6 +4135,12 @@
                     pickLimit: 5,
                     friendlyLine1: 'Great choice for a quick, low-stress local trip.',
                     friendlyLine2: 'Pick your places and we map the easiest route for you.',
+                    highlights: [
+                        'Optimized stop order for less travel time',
+                        'Ideal for same-day local temple runs',
+                        'Clear budget with no hidden extras'
+                    ],
+                    includesNote: 'Place picker, interactive map & shareable route included.',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 1 – 2',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 1 Day',
                     placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select exactly 5 stops',
@@ -3987,6 +4157,12 @@
                     pickLimit: 10,
                     friendlyLine1: 'Balanced plan for couples, friends, and small families.',
                     friendlyLine2: 'More places, clear budget, and smooth trip flow.',
+                    highlights: [
+                        'Room for couples, friends & small families',
+                        'Balanced days with sensible driving gaps',
+                        'Upgrade path when your trip grows'
+                    ],
+                    includesNote: 'Full itinerary tools plus budget-fit tier matching.',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 2 – 4',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 1 – 2 Days',
                     placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select exactly 10 stops',
@@ -4003,6 +4179,12 @@
                     pickLimit: 20,
                     friendlyLine1: 'Perfect when you want comfort, coverage, and flexibility.',
                     friendlyLine2: 'Plan bigger days without worrying about route complexity.',
+                    highlights: [
+                        'Wider coverage for multi-day pilgrimages',
+                        'Comfortable pacing across more stops',
+                        'Best value when you need flexibility'
+                    ],
+                    includesNote: 'Priority routing logic & extended place limits.',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 6 – 8',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 3 – 5 Days',
                     placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 20 stops',
@@ -4019,6 +4201,12 @@
                     pickLimit: 30,
                     friendlyLine1: 'Best for grand trips with maximum place coverage.',
                     friendlyLine2: 'More control, more stops, and premium trip planning feel.',
+                    highlights: [
+                        'Maximum stops for grand circle trips',
+                        'VIP-style planning with dense coverage',
+                        'Built for large groups & long itineraries'
+                    ],
+                    includesNote: 'Best-value tier for ambitious multi-stop routes.',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 8+',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 5 – 7 Days',
                     placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 30 stops',
@@ -4036,6 +4224,12 @@
                     pickLimit: 35,
                     friendlyLine1: 'Our top tier for large groups and luxury pilgrimages.',
                     friendlyLine2: 'Every stop mapped with priority routing and full support.',
+                    highlights: [
+                        'Top tier for luxury pilgrimages & big groups',
+                        'Highest place limit on the platform',
+                        'Priority routing on every leg of the trip'
+                    ],
+                    includesNote: 'Elite limits, map share & full planner access.',
                     peopleLine: '<span class="material-symbols-outlined">group</span> People: 10+',
                     durationLine: '<span class="material-symbols-outlined">calendar_month</span> Duration: 7+ Days',
                     placesLine: '<span class="material-symbols-outlined">location_on</span> Places: Select 35 stops',
@@ -4242,6 +4436,23 @@
                 );
             }
 
+            function renderTierHighlightsHtml(tier) {
+                var items = tier.highlights || [];
+                if (!items.length) return '';
+                var lis = items
+                    .map(function (line) {
+                        return '<li>' + escapeHtml(line) + '</li>';
+                    })
+                    .join('');
+                return (
+                    '<div class="pricing-card__highlights">' +
+                    '<p class="pricing-card__highlights-title">What you get</p>' +
+                    '<ul>' +
+                    lis +
+                    '</ul></div>'
+                );
+            }
+
             function renderPackageCards() {
                 var root = document.getElementById('packageCards');
                 if (!root) return;
@@ -4272,11 +4483,17 @@
                         '<li>' + escapeHtml(tier.friendlyLine2 || '') + '</li>' +
                         '</ul>' +
                         '</div>' +
+                        renderTierHighlightsHtml(tier) +
+                        '<div class="pricing-card__features-panel">' +
+                        '<p class="pricing-card__features-title">Trip limits</p>' +
                         '<ul class="pricing-card__features">' +
                         '<li>' + tier.peopleLine + '</li>' +
                         '<li>' + tier.durationLine + '</li>' +
                         '<li>' + tier.placesLine + '</li>' +
-                        '</ul>' +
+                        '</ul></div>' +
+                        (tier.includesNote
+                            ? '<p class="pricing-card__includes">' + escapeHtml(tier.includesNote) + '</p>'
+                            : '') +
                         '<button type="button" class="pricing-card__cta" data-cta-package="' +
                         escapeHtml(tier.id) +
                         '">Choose places <span class="material-symbols-outlined" style="font-size: 1.1rem; font-weight: 900;">arrow_forward</span></button>' +
