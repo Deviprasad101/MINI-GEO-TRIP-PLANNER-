@@ -136,11 +136,26 @@
         .about-intro__title em { font-style: italic; color: var(--gov-amber); }
 
         /* ─── Steps ─── */
-        .steps-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        .steps-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; perspective: 1200px; }
         @media (min-width: 640px) { .steps-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1024px) { .steps-grid { grid-template-columns: repeat(4, 1fr); } }
-        .step-card { background: #fff; border: 1px solid #e8e4de; border-radius: 1.25rem; padding: 1.75rem 1.5rem; position: relative; transition: all 0.3s ease; }
-        .step-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(23,37,84,0.1); }
+        .step-card {
+            background: #fff; border: 1px solid #e8e4de; border-radius: 1.25rem; padding: 1.75rem 1.5rem;
+            position: relative; transform-style: preserve-3d; will-change: transform;
+            transition: box-shadow 0.3s ease;
+        }
+        .step-card.is-tilt-hover { box-shadow: 0 16px 40px rgba(23,37,84,0.1); }
+        .step-card__inner { transform-style: preserve-3d; }
+        .step-card__inner img { transform: translateZ(24px); }
+        .step-card__inner .step-num { transform: translateZ(16px); }
+        .step-card__inner h3,
+        .step-card__inner p { transform: translateZ(12px); }
+        @media (prefers-reduced-motion: reduce) {
+            .step-card__inner img,
+            .step-card__inner .step-num,
+            .step-card__inner h3,
+            .step-card__inner p { transform: none; }
+        }
         .step-num { font-family: "Noto Serif", Georgia, serif; font-size: 2.5rem; font-weight: 800; color: #e8e4de; line-height: 1; margin-bottom: 1rem; }
         .step-card:hover .step-num { color: var(--gov-amber); }
         .step-card h3 { font-family: "Noto Serif", Georgia, serif; font-size: 1.05rem; font-weight: 700; color: var(--gov-navy); margin: 0 0 0.5rem; }
@@ -172,19 +187,54 @@
         .why-item p { font-size: 0.82rem; color: var(--gov-muted); line-height: 1.55; margin: 0; }
 
         /* ─── Storytelling snapshots (scrapbook style) ─── */
-        .story-board { position: relative; background: linear-gradient(135deg, #faf5eb 0%, #f5efe3 50%, #faf5eb 100%); border-radius: 1.5rem; padding: 3rem 2rem 2rem; border: 1px solid #e0d5c3; box-shadow: inset 0 2px 20px rgba(180,160,120,0.08), 0 8px 32px rgba(23,37,84,0.06); overflow: hidden; }
+        .story-board { position: relative; background: linear-gradient(135deg, #faf5eb 0%, #f5efe3 50%, #faf5eb 100%); border-radius: 1.5rem; padding: 3rem 2rem 2.5rem; border: 1px solid #e0d5c3; box-shadow: inset 0 2px 20px rgba(180,160,120,0.08), 0 8px 32px rgba(23,37,84,0.06); overflow: hidden; }
+        .story-board:has(.snap-stack) { overflow: visible; }
         .story-board::before { content: ""; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4c8a8' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; opacity: 0.6; z-index: 0; }
-        .story-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; position: relative; z-index: 1; }
-        @media (min-width: 640px) { .story-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 1024px) { .story-grid { grid-template-columns: repeat(3, 1fr); } }
-        .snap-card { background: #fff; border-radius: 0.5rem; padding: 0.6rem 0.6rem 1.4rem; box-shadow: 0 4px 16px rgba(60,40,20,0.12), 0 1px 3px rgba(60,40,20,0.08); transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1); position: relative; cursor: default; }
-        .snap-card:nth-child(1) { transform: rotate(-2deg); }
-        .snap-card:nth-child(2) { transform: rotate(1.5deg); }
-        .snap-card:nth-child(3) { transform: rotate(-1deg); }
-        .snap-card:nth-child(4) { transform: rotate(2deg); }
-        .snap-card:nth-child(5) { transform: rotate(-1.5deg); }
-        .snap-card:nth-child(6) { transform: rotate(1deg); }
-        .snap-card:hover { transform: rotate(0deg) translateY(-8px) scale(1.03); box-shadow: 0 20px 50px rgba(60,40,20,0.18); z-index: 2; }
+        /* Project Snapshots — fan stack (CardStack-style) */
+        .snap-stack { position: relative; z-index: 1; width: 100%; max-width: 920px; margin: 0 auto; }
+        .snap-stack__stage {
+            position: relative;
+            height: clamp(400px, 58vw, 440px);
+            margin: 0 auto;
+            perspective: 1100px;
+            outline: none;
+        }
+        .snap-stack__stage:focus-visible { box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.35); border-radius: 0.75rem; }
+        .snap-stack__wash {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 45% at 50% 85%, rgba(23,37,84,0.06), transparent 70%);
+        }
+        .snap-stack .snap-card {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: min(92vw, 400px);
+            margin-left: calc(min(92vw, 400px) / -2);
+            transform-origin: center bottom;
+            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease, box-shadow 0.45s ease;
+            cursor: pointer;
+            will-change: transform;
+            user-select: none;
+            touch-action: pan-y;
+        }
+        .snap-stack .snap-card.is-hidden { opacity: 0; pointer-events: none; }
+        .snap-stack .snap-card.is-active { cursor: grab; box-shadow: 0 22px 50px rgba(60,40,20,0.2); }
+        .snap-stack .snap-card.is-active:active { cursor: grabbing; }
+        .snap-stack__nav { margin-top: 1.75rem; display: flex; flex-direction: column; align-items: center; gap: 0.65rem; }
+        .snap-stack__dots { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+        .snap-stack__dot {
+            width: 0.55rem; height: 0.55rem; border-radius: 999px; border: none; padding: 0;
+            background: rgba(23,37,84,0.28); cursor: pointer; transition: transform 0.2s, background 0.2s;
+        }
+        .snap-stack__dot:hover { background: rgba(23,37,84,0.5); }
+        .snap-stack__dot.is-active { background: var(--gov-navy); transform: scale(1.25); }
+        .snap-stack__hint { margin: 0; font-size: 0.75rem; color: var(--gov-muted); text-align: center; transition: color 0.2s; }
+        .snap-stack.is-paused .snap-stack__hint { color: var(--gov-navy); font-weight: 600; }
+        .snap-stack.is-playing .snap-card.is-active { outline: 2px solid transparent; outline-offset: 4px; transition: outline-color 0.2s; }
+        .snap-stack.is-paused .snap-card.is-active { outline-color: rgba(180, 83, 9, 0.45); }
+        .snap-card { background: #fff; border-radius: 0.5rem; padding: 0.6rem 0.6rem 1.4rem; box-shadow: 0 4px 16px rgba(60,40,20,0.12), 0 1px 3px rgba(60,40,20,0.08); position: relative; }
         .snap-card__img { width: 100%; height: 200px; object-fit: cover; border-radius: 0.25rem; display: block; border: 1px solid #e8e0d0; }
         .snap-card__pin { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 3; }
         .snap-card__pin::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.6); }
@@ -195,7 +245,10 @@
         .story-deco--compass { bottom: 1rem; right: 1.5rem; font-size: 4rem; color: #8B7355; transform: rotate(15deg); }
         .story-deco--route { top: 1rem; left: 1.5rem; font-size: 3rem; color: #92400e; transform: rotate(-10deg); }
         .story-deco--pin { top: 2rem; right: 3rem; font-size: 2.5rem; color: #dc2626; transform: rotate(20deg); }
-        @media (max-width: 639px) { .story-board { padding: 2.5rem 1rem 1.5rem; } .snap-card:nth-child(n) { transform: rotate(0); } }
+        @media (max-width: 639px) { .story-board { padding: 2.5rem 1rem 1.5rem; } .snap-stack__stage { height: 420px; } }
+        @media (prefers-reduced-motion: reduce) {
+            .snap-stack .snap-card { transition: opacity 0.2s ease; }
+        }
 
         /* ─── Lab card ─── */
         .lab-card { border: 1px solid #e8e4de; border-radius: 1.5rem; background: #fff; padding: 2.5rem; position: relative; overflow: hidden; }
@@ -353,29 +406,37 @@
                 <p class="sec-desc">From sign-up to exploring temples — here's how GeoTrip Planner makes travel effortless.</p>
             </div>
             <div class="steps-grid reveal" style="transition-delay:0.15s">
-                <div class="step-card">
-                    <img src="images/how_step_1.png" alt="Sign up and verify" loading="lazy" decoding="async" />
-                    <p class="step-num">01</p>
-                    <h3>Sign Up &amp; Verify</h3>
-                    <p>Register with your email and phone number. Verify both via OTP for a secure, personalized experience.</p>
+                <div class="step-card" data-tilt-card>
+                    <div class="step-card__inner">
+                        <img src="images/how_step_1.png" alt="Sign up and verify" loading="lazy" decoding="async" />
+                        <p class="step-num">01</p>
+                        <h3>Sign Up &amp; Verify</h3>
+                        <p>Register with your email and phone number. Verify both via OTP for a secure, personalized experience.</p>
+                    </div>
                 </div>
-                <div class="step-card">
-                    <img src="images/how_step_2.png" alt="Plan your trip" loading="lazy" decoding="async" />
-                    <p class="step-num">02</p>
-                    <h3>Plan Your Trip</h3>
-                    <p>Select your preferred categories, outing timings, budget range, and group size to customize your journey.</p>
+                <div class="step-card" data-tilt-card>
+                    <div class="step-card__inner">
+                        <img src="images/how_step_2.png" alt="Plan your trip" loading="lazy" decoding="async" />
+                        <p class="step-num">02</p>
+                        <h3>Plan Your Trip</h3>
+                        <p>Select your preferred categories, outing timings, budget range, and group size to customize your journey.</p>
+                    </div>
                 </div>
-                <div class="step-card">
-                    <img src="images/how_step_3.png" alt="Get AI itinerary" loading="lazy" decoding="async" />
-                    <p class="step-num">03</p>
-                    <h3>Get AI Itinerary</h3>
-                    <p>Gemini AI generates a personalized day plan with OSRM-optimized driving routes and time estimates.</p>
+                <div class="step-card" data-tilt-card>
+                    <div class="step-card__inner">
+                        <img src="images/how_step_3.png" alt="Get AI itinerary" loading="lazy" decoding="async" />
+                        <p class="step-num">03</p>
+                        <h3>Get AI Itinerary</h3>
+                        <p>Gemini AI generates a personalized day plan with OSRM-optimized driving routes and time estimates.</p>
+                    </div>
                 </div>
-                <div class="step-card">
-                    <img src="images/how_step_4.png" alt="Explore and check-in" loading="lazy" decoding="async" />
-                    <p class="step-num">04</p>
-                    <h3>Explore &amp; Check-in</h3>
-                    <p>Follow the interactive map, scan your QR at temples, and book transport — all from one platform.</p>
+                <div class="step-card" data-tilt-card>
+                    <div class="step-card__inner">
+                        <img src="images/how_step_4.png" alt="Explore and check-in" loading="lazy" decoding="async" />
+                        <p class="step-num">04</p>
+                        <h3>Explore &amp; Check-in</h3>
+                        <p>Follow the interactive map, scan your QR at temples, and book transport — all from one platform.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -498,48 +559,55 @@
                 <span class="story-deco story-deco--route material-symbols-outlined">route</span>
                 <span class="story-deco story-deco--pin material-symbols-outlined">location_on</span>
 
-                <div class="story-grid">
-                    <div class="snap-card">
+                <div class="snap-stack" id="projectSnapStack">
+                    <div class="snap-stack__stage" id="snapStackStage" tabindex="0" aria-roledescription="carousel" aria-label="Project snapshot cards">
+                        <div class="snap-stack__wash" aria-hidden="true"></div>
+                    <div class="snap-card" data-snap-index="0">
                         <div class="snap-card__pin" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"></div>
                         <div class="snap-card__num" style="background:#2563eb">1</div>
                         <img class="snap-card__img" src="images/Sign Up & OTP Verification.avif" alt="Sign Up & OTP Verification — dual-factor registration" loading="lazy" decoding="async" />
                         <h3>Sign Up &amp; OTP Verification</h3>
                         <p>Secure dual-factor registration with email OTP and mobile OTP via Twilio Verify. Both channels are verified before dashboard access.</p>
                     </div>
-                    <div class="snap-card">
+                    <div class="snap-card" data-snap-index="1">
                         <div class="snap-card__pin" style="background:linear-gradient(135deg,#f59e0b,#b45309)"></div>
                         <div class="snap-card__num" style="background:#b45309">2</div>
                         <img class="snap-card__img" src="images/Trip Details & Category Cards.png" alt="Trip Details & Category Cards — 5 travel categories" loading="lazy" decoding="async" />
                         <h3>Trip Details &amp; Category Cards</h3>
                         <p>Select from 5 travel categories, set outing timings, group size, and budget. Time-aware filtering shows only places open during your window.</p>
                     </div>
-                    <div class="snap-card">
+                    <div class="snap-card" data-snap-index="2">
                         <div class="snap-card__pin" style="background:linear-gradient(135deg,#10b981,#065f46)"></div>
                         <div class="snap-card__num" style="background:#065f46">3</div>
                         <img class="snap-card__img" src="images/AI Itinerary & Route Map.png" alt="AI Itinerary & Route Map — Gemini AI powered planning" loading="lazy" decoding="async" />
                         <h3>AI Itinerary &amp; Route Map</h3>
                         <p>Gemini AI generates a full day itinerary. Leaflet.js map displays shortlisted places with OSRM-optimized driving routes and travel time.</p>
                     </div>
-                    <div class="snap-card">
+                    <div class="snap-card" data-snap-index="3">
                         <div class="snap-card__pin" style="background:linear-gradient(135deg,#ec4899,#9d174d)"></div>
                         <div class="snap-card__num" style="background:#9d174d">4</div>
                         <img class="snap-card__img" src="images/QR Scan & Temple Check-in.png" alt="QR Scan & Temple Check-in — unique QR for each user" loading="lazy" decoding="async" />
                         <h3>QR Scan &amp; Temple Check-in</h3>
                         <p>Each user gets a unique QR code. Scanning opens temple selection for check-in. All visit data is tracked in the admin panel.</p>
                     </div>
-                    <div class="snap-card">
+                    <div class="snap-card" data-snap-index="4">
                         <div class="snap-card__pin" style="background:linear-gradient(135deg,#6366f1,#1d4ed8)"></div>
                         <div class="snap-card__num" style="background:#1d4ed8">5</div>
                         <img class="snap-card__img" src="images/Transport & Booking.png" alt="Transport & Booking — buses, taxis, and trains" loading="lazy" decoding="async" />
                         <h3>Transport &amp; Booking</h3>
                         <p>Integrated booking for APSRTC buses, Uber/Ola taxis, and IRCTC trains. Shortlisted places appear with direct TTD darshan booking links.</p>
                     </div>
-                    <div class="snap-card">
+                    <div class="snap-card" data-snap-index="5">
                         <div class="snap-card__pin" style="background:linear-gradient(135deg,#f97316,#c2410c)"></div>
                         <div class="snap-card__num" style="background:#c2410c">6</div>
                         <img class="snap-card__img" src="images/All Categories Overview .png" alt="All Categories Overview — 116+ places across 5 categories" loading="lazy" decoding="async" />
                         <h3>All Categories Overview</h3>
                         <p>Unified dashboard with 116+ places across 5 categories. TF-IDF cosine similarity engine suggests personalized recommendations.</p>
+                    </div>
+                    </div>
+                    <div class="snap-stack__nav">
+                        <div class="snap-stack__dots" id="snapStackDots" role="tablist" aria-label="Choose snapshot"></div>
+                        <p class="snap-stack__hint" id="snapStackHint">Auto-playing — hover the center card to pause</p>
                     </div>
                 </div>
             </div>
@@ -785,6 +853,353 @@
             }, { threshold: 0.3 });
             var stats = document.querySelector('.inline-stats');
             if (stats) observer.observe(stats);
+        })();
+
+        // How It Works — 3D tilt on step cards (InteractiveTravelCard-style)
+        (function(){
+            var tiltCards = document.querySelectorAll('[data-tilt-card]');
+            if (!tiltCards.length) return;
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var maxDeg = 10.5;
+            var liftPx = 4;
+            var spring = 0.14;
+
+            tiltCards.forEach(function(card) {
+                var curX = 0;
+                var curY = 0;
+                var tgtX = 0;
+                var tgtY = 0;
+                var hovering = false;
+                var rafId = 0;
+
+                function applyTransform() {
+                    curX += (tgtX - curX) * spring;
+                    curY += (tgtY - curY) * spring;
+                    var rotateX = -curY * (maxDeg * 2);
+                    var rotateY = curX * (maxDeg * 2);
+                    var lift = hovering ? -liftPx : 0;
+                    card.style.transform =
+                        'rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(' + lift + 'px)';
+                    if (Math.abs(tgtX - curX) > 0.001 || Math.abs(tgtY - curY) > 0.001 || hovering) {
+                        rafId = requestAnimationFrame(applyTransform);
+                    } else {
+                        rafId = 0;
+                    }
+                }
+
+                function startLoop() {
+                    if (!rafId) rafId = requestAnimationFrame(applyTransform);
+                }
+
+                if (reduceMotion) {
+                    card.addEventListener('mouseenter', function() {
+                        card.classList.add('is-tilt-hover');
+                        card.style.transform = 'translateY(-' + liftPx + 'px)';
+                    });
+                    card.addEventListener('mouseleave', function() {
+                        card.classList.remove('is-tilt-hover');
+                        card.style.transform = '';
+                    });
+                    return;
+                }
+
+                card.addEventListener('mousemove', function(e) {
+                    var rect = card.getBoundingClientRect();
+                    var xPct = (e.clientX - rect.left) / rect.width - 0.5;
+                    var yPct = (e.clientY - rect.top) / rect.height - 0.5;
+                    tgtX = Math.max(-0.5, Math.min(0.5, xPct));
+                    tgtY = Math.max(-0.5, Math.min(0.5, yPct));
+                    hovering = true;
+                    card.classList.add('is-tilt-hover');
+                    startLoop();
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    tgtX = 0;
+                    tgtY = 0;
+                    hovering = false;
+                    card.classList.remove('is-tilt-hover');
+                    startLoop();
+                });
+            });
+        })();
+
+        // Project Snapshots — fan stack (CardStack-style, vanilla)
+        (function(){
+            var stack = document.getElementById('projectSnapStack');
+            var stage = document.getElementById('snapStackStage');
+            var dotsRoot = document.getElementById('snapStackDots');
+            if (!stack || !stage || !dotsRoot) return;
+
+            var cards = Array.prototype.slice.call(stage.querySelectorAll('.snap-card'));
+            if (!cards.length) return;
+
+            var len = cards.length;
+            var active = 0;
+            var pauseAutoplay = false;
+            var inView = false;
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var hintEl = document.getElementById('snapStackHint');
+
+            var cfg = {
+                maxVisible: 5,
+                overlap: 0.4,
+                spreadDeg: 42,
+                depthPx: 120,
+                tiltXDeg: 12,
+                activeLiftPx: 22,
+                activeScale: 1.03,
+                inactiveScale: 0.94,
+                loop: true,
+                autoAdvance: !reduceMotion,
+                intervalMs: 2600
+            };
+
+            function wrapIndex(n) {
+                return ((n % len) + len) % len;
+            }
+
+            function signedOffset(i, act) {
+                var raw = i - act;
+                if (!cfg.loop || len <= 1) return raw;
+                var alt = raw > 0 ? raw - len : raw + len;
+                return Math.abs(alt) < Math.abs(raw) ? alt : raw;
+            }
+
+            function cardWidth() {
+                var w = cards[0].offsetWidth;
+                return w > 0 ? w : Math.min(window.innerWidth * 0.92, 400);
+            }
+
+            function buildDots() {
+                dotsRoot.innerHTML = '';
+                cards.forEach(function(card, idx) {
+                    var titleEl = card.querySelector('h3');
+                    var label = titleEl ? titleEl.textContent.trim() : 'Snapshot ' + (idx + 1);
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'snap-stack__dot' + (idx === active ? ' is-active' : '');
+                    btn.setAttribute('role', 'tab');
+                    btn.setAttribute('aria-selected', idx === active ? 'true' : 'false');
+                    btn.setAttribute('aria-label', label);
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        setActive(idx);
+                    });
+                    dotsRoot.appendChild(btn);
+                });
+            }
+
+            function updateDots() {
+                var dots = dotsRoot.querySelectorAll('.snap-stack__dot');
+                dots.forEach(function(dot, idx) {
+                    var on = idx === active;
+                    dot.classList.toggle('is-active', on);
+                    dot.setAttribute('aria-selected', on ? 'true' : 'false');
+                });
+            }
+
+            function layout() {
+                var cw = cardWidth();
+                var maxOffset = Math.max(0, Math.floor(cfg.maxVisible / 2));
+                var cardSpacing = Math.max(10, Math.round(cw * (1 - cfg.overlap)));
+                var stepDeg = maxOffset > 0 ? cfg.spreadDeg / maxOffset : 0;
+
+                cards.forEach(function(card, i) {
+                    var off = signedOffset(i, active);
+                    var abs = Math.abs(off);
+                    var visible = abs <= maxOffset;
+                    var isActive = off === 0;
+
+                    card.classList.toggle('is-active', isActive);
+                    card.classList.toggle('is-hidden', !visible);
+                    card.setAttribute('aria-hidden', visible ? 'false' : 'true');
+
+                    if (!visible) {
+                        card.style.zIndex = '0';
+                        card.style.transform = 'translateX(0) translateY(40px) scale(0.9)';
+                        card.style.opacity = '0';
+                        return;
+                    }
+
+                    var rotateZ = off * stepDeg;
+                    var x = off * cardSpacing;
+                    var y = abs * 10 + (isActive ? -cfg.activeLiftPx : 0);
+                    var z = -abs * cfg.depthPx;
+                    var scale = isActive ? cfg.activeScale : cfg.inactiveScale;
+                    var rotateX = isActive ? 0 : cfg.tiltXDeg;
+
+                    card.style.zIndex = String(100 - abs);
+                    card.style.opacity = '1';
+                    card.style.transform =
+                        'translateX(' + x + 'px) translateY(' + y + 'px) translateZ(' + z + 'px) ' +
+                        'rotateX(' + rotateX + 'deg) rotateZ(' + rotateZ + 'deg) scale(' + scale + ')';
+                });
+
+                updateDots();
+            }
+
+            function setPaused(paused) {
+                pauseAutoplay = paused;
+                stack.classList.toggle('is-paused', paused);
+                stack.classList.toggle('is-playing', cfg.autoAdvance && !paused);
+                if (hintEl) {
+                    hintEl.textContent = paused
+                        ? 'Paused — move cursor away to resume'
+                        : 'Auto-playing — hover the center card to pause';
+                }
+            }
+
+            function pointerOverActiveCard(clientX, clientY) {
+                var activeCard = cards[active];
+                if (!activeCard || activeCard.classList.contains('is-hidden')) return false;
+                var rect = activeCard.getBoundingClientRect();
+                return clientX >= rect.left && clientX <= rect.right &&
+                    clientY >= rect.top && clientY <= rect.bottom;
+            }
+
+            function setActive(idx) {
+                active = wrapIndex(idx);
+                layout();
+            }
+
+            function prev() {
+                if (!cfg.loop && active <= 0) return;
+                setActive(active - 1);
+            }
+
+            function next() {
+                if (!cfg.loop && active >= len - 1) return;
+                setActive(active + 1);
+            }
+
+            buildDots();
+            layout();
+            if (reduceMotion && hintEl) {
+                hintEl.textContent = 'Swipe the front card or tap dots to browse';
+            } else {
+                setPaused(false);
+            }
+
+            cards.forEach(function(card, i) {
+                card.addEventListener('click', function() {
+                    if (i !== active) setActive(i);
+                });
+            });
+
+            stage.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+            });
+
+            stack.addEventListener('mousemove', function(e) {
+                if (!cfg.autoAdvance) return;
+                setPaused(pointerOverActiveCard(e.clientX, e.clientY));
+            });
+            stack.addEventListener('mouseleave', function() {
+                if (cfg.autoAdvance) setPaused(false);
+            });
+            stack.addEventListener('touchend', function() {
+                if (cfg.autoAdvance) setPaused(false);
+            }, { passive: true });
+
+            var viewObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    inView = entry.isIntersecting;
+                    if (inView && cfg.autoAdvance) stack.classList.add('is-playing');
+                });
+            }, { threshold: 0.25 });
+            viewObserver.observe(stack);
+
+            if (cfg.autoAdvance) {
+                stack.classList.add('is-playing');
+                setInterval(function() {
+                    if (!inView || pauseAutoplay || dragging) return;
+                    if (!cfg.loop && active >= len - 1) return;
+                    next();
+                }, Math.max(700, cfg.intervalMs));
+            }
+
+            var resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(layout, 120);
+            });
+
+            // Drag / swipe on active card
+            var dragCard = null;
+            var dragStartX = 0;
+            var dragDx = 0;
+            var dragging = false;
+
+            function onDragStart(clientX, card) {
+                if (reduceMotion) return;
+                var idx = cards.indexOf(card);
+                if (idx !== active) return;
+                dragCard = card;
+                dragStartX = clientX;
+                dragDx = 0;
+                dragging = true;
+                setPaused(true);
+                card.style.transition = 'none';
+            }
+
+            function onDragMove(clientX) {
+                if (!dragging || !dragCard) return;
+                dragDx = clientX - dragStartX;
+                var cw = cardWidth();
+                var maxOffset = Math.max(0, Math.floor(cfg.maxVisible / 2));
+                var cardSpacing = Math.max(10, Math.round(cw * (1 - cfg.overlap)));
+                var stepDeg = maxOffset > 0 ? cfg.spreadDeg / maxOffset : 0;
+                var y = -cfg.activeLiftPx;
+                dragCard.style.transform =
+                    'translateX(' + dragDx + 'px) translateY(' + y + 'px) translateZ(0px) ' +
+                    'rotateX(0deg) rotateZ(' + (dragDx * 0.04) + 'deg) scale(' + cfg.activeScale + ')';
+            }
+
+            function onDragEnd() {
+                if (!dragging || !dragCard) return;
+                var cw = cardWidth();
+                var threshold = Math.min(160, cw * 0.22);
+                var endedOn = dragCard;
+                dragCard.style.transition = '';
+                if (dragDx > threshold) prev();
+                else if (dragDx < -threshold) next();
+                else layout();
+                dragCard = null;
+                dragging = false;
+                dragDx = 0;
+                if (cfg.autoAdvance && endedOn) {
+                    var rect = endedOn.getBoundingClientRect();
+                    setPaused(pointerOverActiveCard(rect.left + rect.width / 2, rect.top + rect.height / 2));
+                }
+            }
+
+            cards.forEach(function(card) {
+                card.addEventListener('mouseenter', function() {
+                    if (!cfg.autoAdvance) return;
+                    if (card.classList.contains('is-active')) setPaused(true);
+                });
+                card.addEventListener('touchstart', function() {
+                    if (!cfg.autoAdvance) return;
+                    if (card.classList.contains('is-active')) setPaused(true);
+                }, { passive: true });
+                card.addEventListener('pointerdown', function(e) {
+                    if (e.button !== 0) return;
+                    onDragStart(e.clientX, card);
+                    try { card.setPointerCapture(e.pointerId); } catch (err) {}
+                });
+                card.addEventListener('pointermove', function(e) {
+                    if (!dragging) return;
+                    onDragMove(e.clientX);
+                });
+                card.addEventListener('pointerup', function(e) {
+                    if (!dragging) return;
+                    try { card.releasePointerCapture(e.pointerId); } catch (err) {}
+                    onDragEnd();
+                });
+                card.addEventListener('pointercancel', onDragEnd);
+            });
         })();
 
         // Scroll reveal animations
