@@ -25,9 +25,25 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('images/tirupati_travel_bg_v2.jpg') center/cover no-repeat;
-            z-index: 1;
-            transition: transform 0.1s ease-out;
+            background: url('images/login page backgroung image .jpg') center/cover no-repeat;
+            background-attachment: fixed;
+            z-index: 0;
+            transform: none !important;
+            transition: none;
+            will-change: auto;
+        }
+
+        .scenery::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(15, 23, 42, 0.45) 0%,
+                rgba(15, 23, 42, 0.25) 45%,
+                rgba(15, 23, 42, 0.5) 100%
+            );
+            pointer-events: none;
         }
 
         /* Luxury Glassmorphism Card */
@@ -228,7 +244,7 @@
             <span class="flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur px-2.5 py-1 rounded-xl shadow-sm border border-slate-200 shrink min-w-0">
                 <img src="images/iittirupati.png" alt="IIT Tirupati" class="h-12 sm:h-14 w-auto object-contain" />
                 <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
-                <img src="images/Powered by Geo-Intel Lab (1).png" alt="Powered by Geo-Intel Lab" class="h-12 sm:h-14 w-auto object-contain" />
+                <img src="images/IITTNiF logo.png" alt="IIT Tirupati Navavishkār I-Hub Foundation" class="h-12 sm:h-14 w-auto object-contain" />
                 <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
                 <img src="images/make_in_india_logo.png" alt="Make in India" class="h-12 sm:h-14 w-auto object-contain" />
             </span>
@@ -291,18 +307,15 @@
         </div>
 
         <!-- Login Card -->
-        <div class="glass-card p-10 rounded-[2.5rem] w-full max-w-[460px] text-slate-800 z-50 mt-4 sm:mt-0">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-2xl shadow-lg mb-4 border border-purple-400/30">
-                    <i class="fa-solid fa-compass text-3xl"></i>
-                </div>
-                <h2 class="text-3xl font-black tracking-tight mb-1 text-white drop-shadow-md">Welcome Back</h2>
-                <p class="text-slate-300 text-sm font-medium drop-shadow-sm">Enter your credentials to access your dashboard</p>
+        <div class="glass-card p-8 sm:p-10 rounded-[2.5rem] w-full max-w-[460px] text-slate-800 z-50 mt-4 sm:mt-0">
+            <div class="text-center mb-6 pb-2 border-b border-slate-100">
+                <h2 class="text-4xl font-white font-bold mb-1.5 text-white">Welcome Back</h2>
+                <p class="text-white text-sm tracking-tight mb-1.5 text-white">Enter your credentials to access your dashboard</p>
             </div>
 
             <form id="loginForm" class="space-y-4" autocomplete="off">
                 <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-purple-600 uppercase ml-1 text-white">Email Address</label>
+                    <label class="text-[11px] font-bold text-white uppercase ml-1">Email Address</label>
                     <div class="input-group">
                         <i class="fa-solid fa-envelope leading-icon"></i>
                         <input type="email" id="email" required placeholder="" autocomplete="off">
@@ -310,7 +323,7 @@
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-purple-600 uppercase ml-1 text-white">Password</label>
+                    <label class="text-[11px] font-bold text-white uppercase ml-1">Password</label>
                     <div class="input-group flex items-center relative">
                         <i class="fa-solid fa-lock leading-icon"></i>
                         <input type="password" id="password" required placeholder="" autocomplete="off" class="pr-12">
@@ -322,9 +335,9 @@
                 <div class="flex items-center justify-between text-xs mb-4">
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input type="checkbox" class="w-4 h-4 accent-purple-600 rounded">
-                        <span class="text-white font-medium drop-shadow-sm">Remember Me</span>
+                        <span class="text- [11px] font-bold text-white">Remember Me</span>
                     </label>
-                    <a href="javascript:void(0)" id="openForgot" class="text-purple-600 font-bold hover:underline text-white">Forgot Password?</a>
+                    <a href="javascript:void(0)" id="openForgot" class="text-white font-bold hover:underline">Forgot Password?</a>
                 </div>
 
                 <button type="submit" id="loginBtn"
@@ -334,9 +347,9 @@
                     <div class="loader" id="loader"></div>
                 </button>
 
-                <p class="text-center text-sm text-white mt-8 font-medium drop-shadow-sm">
+                <p class="text-center text-sm text-slate-600 mt-6 font-medium">
                     Don't have an account? <a href="javascript:void(0)" id="openRegister"
-                        class="text-purple-600 font-extrabold hover:underline">Register</a>
+                        class="text-white font-extrabold hover:underline">Register</a>
                 </p>
             </form>
         </div>
@@ -937,13 +950,7 @@
             }
         });
 
-        // Parallax
-        document.addEventListener('mousemove', (e) => {
-            const scenery = document.querySelector('.scenery');
-            const x = (window.innerWidth - e.pageX * 2) / 120;
-            const y = (window.innerHeight - e.pageY * 2) / 120;
-            scenery.style.transform = `translateX(${x}px) translateY(${y}px) scale(1.1)`;
-        });
+        // Background fixed — no parallax movement
 
         // Reset button state when page is shown (fixes "back" button loader issue)
         window.addEventListener('pageshow', (event) => {
@@ -957,6 +964,8 @@
 
         // Force-clear all fields after browser autofill kicks in
         window.addEventListener('DOMContentLoaded', () => {
+            var scenery = document.querySelector('.scenery');
+            if (scenery) scenery.style.transform = 'none';
             setTimeout(() => {
                 document.querySelectorAll('#loginForm input, #registerForm input, #forgotForm input').forEach(i => { i.value = ''; });
             }, 50);
