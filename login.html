@@ -431,6 +431,10 @@
                     <p class="text-center text-sm text-slate-500 font-medium">
                         We've sent a 6-digit code to <br><span id="displayEmail" class="text-purple-600 font-bold"></span>
                     </p>
+                    <div id="regDevOtpBanner" class="hidden rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-900">
+                        <p class="font-bold">Dev mode — email not sent</p>
+                        <p class="mt-1">Use this OTP: <span id="regDevOtpCode" class="font-black tracking-widest text-lg text-purple-700"></span></p>
+                    </div>
                     <div class="flex justify-center gap-2">
                         <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 1)">
                         <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 2)">
@@ -519,6 +523,10 @@
                     <p class="text-center text-sm text-slate-500 font-medium">
                         We've sent a 6-digit code to <br><span id="displayForgotEmail" class="text-purple-600 font-bold"></span>
                     </p>
+                    <div id="forgotDevOtpBanner" class="hidden rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-900">
+                        <p class="font-bold">Dev mode — email not sent</p>
+                        <p class="mt-1">Use this OTP: <span id="forgotDevOtpCode" class="font-black tracking-widest text-lg text-purple-700"></span></p>
+                    </div>
                     <div class="flex justify-center gap-2">
                         <input type="text" maxlength="1" class="forgot-otp-input otp-input" onkeyup="moveForgotFocus(this, 1)">
                         <input type="text" maxlength="1" class="forgot-otp-input otp-input" onkeyup="moveForgotFocus(this, 2)">
@@ -666,6 +674,12 @@
 
                 if (result.status === 'success') {
                     document.getElementById('displayForgotEmail').innerText = email;
+                    if (result.dev_otp) {
+                        showDevOtp('forgotDevOtpBanner', 'forgotDevOtpCode', result.dev_otp);
+                        fillOtpInputs('.forgot-otp-input', result.dev_otp);
+                    } else {
+                        hideDevOtp('forgotDevOtpBanner');
+                    }
                     showForgotStep(2);
                 } else {
                     alert(result.message);
@@ -715,6 +729,29 @@
             }
         });
 
+        function showDevOtp(bannerId, codeId, otp) {
+            const banner = document.getElementById(bannerId);
+            const codeEl = document.getElementById(codeId);
+            if (!banner || !codeEl || !otp) {
+                if (banner) banner.classList.add('hidden');
+                return;
+            }
+            codeEl.textContent = otp;
+            banner.classList.remove('hidden');
+        }
+
+        function hideDevOtp(bannerId) {
+            const banner = document.getElementById(bannerId);
+            if (banner) banner.classList.add('hidden');
+        }
+
+        function fillOtpInputs(selector, otp) {
+            if (!otp || otp.length !== 6) return;
+            document.querySelectorAll(selector).forEach((input, index) => {
+                input.value = otp[index] || '';
+            });
+        }
+
         // Register Logic
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -744,6 +781,12 @@
 
                 if (result.status === 'success') {
                     document.getElementById('displayEmail').innerText = email;
+                    if (result.dev_otp) {
+                        showDevOtp('regDevOtpBanner', 'regDevOtpCode', result.dev_otp);
+                        fillOtpInputs('.email-otp-input', result.dev_otp);
+                    } else {
+                        hideDevOtp('regDevOtpBanner');
+                    }
                     showStep(2);
                     startTimer();
                 } else {
@@ -774,7 +817,10 @@
                 document.getElementById('regStep1').classList.add('hidden');
             document.getElementById('otpStep').classList.add('hidden');
             document.getElementById('phoneOtpStep').classList.add('hidden');
-            if (step === 1) document.getElementById('regStep1').classList.remove('hidden');
+            if (step === 1) {
+                hideDevOtp('regDevOtpBanner');
+                document.getElementById('regStep1').classList.remove('hidden');
+            }
             else if (step === 2) document.getElementById('otpStep').classList.remove('hidden');
             else if (step === 3) document.getElementById('phoneOtpStep').classList.remove('hidden');
         }
@@ -825,6 +871,10 @@
                 const res = await fetch('/api/auth/resend_otp', { method: 'POST' });
                 const result = await res.json();
                 if (result.status === 'success') {
+                    if (result.dev_otp) {
+                        showDevOtp('regDevOtpBanner', 'regDevOtpCode', result.dev_otp);
+                        fillOtpInputs('.email-otp-input', result.dev_otp);
+                    }
                     startTimer();
                 }
             } catch (err) { alert("Resend failed"); }
@@ -1086,14 +1136,23 @@
         </div>
         <div id="admtab-users" class="adm-tab-content adm-fade-in">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
                     <h2 class="font-bold text-slate-800"><i class="fa-solid fa-users mr-2 text-purple-500"></i>Registered Users</h2>
-                    <div class="relative"><i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" id="admUserSearch" placeholder="Search users..." class="pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-purple-400 w-48">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="button" id="admDeleteSelectedUsersBtn" disabled
+                            class="px-4 py-2 text-xs font-bold rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                            <i class="fa-solid fa-trash mr-1"></i>Delete selected (<span id="admSelectedUserCount">0</span>)
+                        </button>
+                        <div class="relative"><i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="admUserSearch" placeholder="Search users..." class="pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-purple-400 w-48">
+                        </div>
                     </div>
                 </div>
                 <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
                     <table class="w-full text-sm"><thead class="bg-gray-50"><tr>
+                        <th class="px-4 py-3 text-xs font-bold text-slate-500 uppercase w-10">
+                            <input type="checkbox" id="admSelectAllUsers" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" title="Select all">
+                        </th>
                         <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">ID</th>
                         <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Name</th>
                         <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Email</th>
@@ -1108,9 +1167,18 @@
         </div>
         <div id="admtab-visits" class="adm-tab-content hidden adm-fade-in">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-5 border-b border-gray-100"><h2 class="font-bold text-slate-800"><i class="fa-solid fa-location-dot mr-2 text-purple-500"></i>Temple Visit Log</h2></div>
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+                    <h2 class="font-bold text-slate-800"><i class="fa-solid fa-location-dot mr-2 text-purple-500"></i>Temple Visit Log</h2>
+                    <button type="button" id="admDeleteSelectedVisitsBtn" disabled
+                        class="px-4 py-2 text-xs font-bold rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                        <i class="fa-solid fa-trash mr-1"></i>Delete selected (<span id="admSelectedVisitCount">0</span>)
+                    </button>
+                </div>
                 <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
                     <table class="w-full text-sm"><thead class="bg-gray-50"><tr>
+                        <th class="px-4 py-3 text-xs font-bold text-slate-500 uppercase w-10">
+                            <input type="checkbox" id="admSelectAllVisits" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" title="Select all">
+                        </th>
                         <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Account</th>
                         <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Email</th>
                         <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Visitor</th>
@@ -1154,6 +1222,10 @@
 <script>
 (function(){
     function admEsc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function admAttr(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;');
+    }
     function admFormatDate(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
     function admShowToast(msg, type) {
         var c = document.getElementById('admToastContainer');
@@ -1218,29 +1290,95 @@
         } catch(ex) {}
     }
 
+    function admClearUserDetails() {
+        document.getElementById('admUserDetailSelect').value = '';
+        document.getElementById('admUserDetailContent').classList.add('hidden');
+        document.getElementById('admUserDetailEmpty').classList.remove('hidden');
+    }
+
+    function admAfterUserDelete(deletedIds) {
+        var ids = (deletedIds || []).map(String);
+        var selected = String(document.getElementById('admUserDetailSelect').value || '');
+        if (selected && ids.indexOf(selected) !== -1) {
+            admClearUserDetails();
+        }
+        document.getElementById('admSelectAllUsers').checked = false;
+        admLoadUsers();
+        admLoadStats();
+        admLoadVisits();
+        admPopulateUserDropdown();
+    }
+
+    function admUpdateUserSelectionUI() {
+        var boxes = Array.from(document.querySelectorAll('.adm-user-check'));
+        var checked = boxes.filter(function(b) { return b.checked; });
+        document.getElementById('admSelectedUserCount').textContent = checked.length;
+        document.getElementById('admDeleteSelectedUsersBtn').disabled = checked.length === 0;
+        var visible = boxes.filter(function(b) {
+            return b.closest('tr') && b.closest('tr').style.display !== 'none';
+        });
+        var selectAll = document.getElementById('admSelectAllUsers');
+        if (!visible.length) {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+            return;
+        }
+        selectAll.checked = visible.every(function(b) { return b.checked; });
+        selectAll.indeterminate = checked.length > 0 && !selectAll.checked;
+    }
+
+    function admUpdateVisitSelectionUI() {
+        var boxes = Array.from(document.querySelectorAll('.adm-visit-check'));
+        var checked = boxes.filter(function(b) { return b.checked; });
+        document.getElementById('admSelectedVisitCount').textContent = checked.length;
+        document.getElementById('admDeleteSelectedVisitsBtn').disabled = checked.length === 0;
+        var visible = boxes.filter(function(b) {
+            return b.closest('tr') && b.closest('tr').style.display !== 'none';
+        });
+        var selectAll = document.getElementById('admSelectAllVisits');
+        if (!visible.length) {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+            return;
+        }
+        selectAll.checked = visible.every(function(b) { return b.checked; });
+        selectAll.indeterminate = checked.length > 0 && !selectAll.checked;
+    }
+
     async function admLoadUsers() {
         try { var res = await fetch('/api/admin/users'); var d = await res.json();
             var tbody = document.getElementById('admUsersTableBody'); var empty = document.getElementById('admUsersEmpty');
-            if (!d.users || d.users.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+            if (!d.users || d.users.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); admUpdateUserSelectionUI(); return; }
             empty.classList.add('hidden');
             tbody.innerHTML = d.users.map(function(u) { return '<tr class="hover:bg-gray-50 transition">' +
+                '<td class="px-4 py-3"><input type="checkbox" class="adm-user-check rounded border-gray-300 text-purple-600 focus:ring-purple-500" value="' + u.id + '"></td>' +
                 '<td class="px-5 py-3 text-slate-500 font-mono text-xs">' + u.id + '</td>' +
                 '<td class="px-5 py-3 font-semibold text-slate-800">' + admEsc(u.username) + '</td>' +
                 '<td class="px-5 py-3 text-slate-600">' + admEsc(u.email) + '</td>' +
                 '<td class="px-5 py-3 text-slate-500">' + (admEsc(u.phone) || '<span class="text-slate-300">—</span>') + '</td>' +
                 '<td class="px-5 py-3">' + (u.isVerified ? '<span class="inline-flex items-center gap-1 text-green-600 text-xs font-bold"><i class="fa-solid fa-circle-check"></i> Yes</span>' : '<span class="text-slate-400 text-xs">No</span>') + '</td>' +
                 '<td class="px-5 py-3 text-slate-400 text-xs">' + admFormatDate(u.createdAt) + '</td>' +
-                '<td class="px-5 py-3"><button onclick="admDeleteUser(' + u.id + ',\'' + admEsc(u.email) + '\')" class="text-red-400 hover:text-red-600 text-xs font-bold transition" title="Delete user"><i class="fa-solid fa-trash"></i></button></td></tr>';
+                '<td class="px-5 py-3"><button type="button" data-user-id="' + u.id + '" data-user-email="' + admAttr(u.email) + '" class="adm-delete-user-btn text-red-400 hover:text-red-600 text-xs font-bold transition" title="Delete user"><i class="fa-solid fa-trash"></i></button></td></tr>';
             }).join('');
+            document.querySelectorAll('.adm-user-check').forEach(function(box) {
+                box.addEventListener('change', admUpdateUserSelectionUI);
+            });
+            document.querySelectorAll('.adm-delete-user-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    admDeleteUser(parseInt(btn.dataset.userId, 10), btn.dataset.userEmail || '');
+                });
+            });
+            admUpdateUserSelectionUI();
         } catch(ex) {}
     }
 
     async function admLoadVisits() {
         try { var res = await fetch('/api/admin/visits?limit=200'); var d = await res.json();
             var tbody = document.getElementById('admVisitsTableBody'); var empty = document.getElementById('admVisitsEmpty');
-            if (!d.visits || d.visits.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+            if (!d.visits || d.visits.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); admUpdateVisitSelectionUI(); return; }
             empty.classList.add('hidden');
             tbody.innerHTML = d.visits.map(function(v) { return '<tr class="hover:bg-gray-50 transition">' +
+                '<td class="px-4 py-3"><input type="checkbox" class="adm-visit-check rounded border-gray-300 text-purple-600 focus:ring-purple-500" value="' + v.id + '"></td>' +
                 '<td class="px-5 py-3 font-semibold text-slate-800">' + admEsc(v.userName) + '</td>' +
                 '<td class="px-5 py-3 text-slate-500">' + admEsc(v.userEmail) + '</td>' +
                 '<td class="px-5 py-3"><span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-bold">' + admEsc(v.visitorLabel || ('Visitor ' + (v.visitorNumber || 1))) + '</span></td>' +
@@ -1248,16 +1386,84 @@
                 '<td class="px-5 py-3 text-slate-500 text-xs">' + v.visitDate + '</td>' +
                 '<td class="px-5 py-3"><span class="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-bold">' + v.visitCount + '</span></td></tr>';
             }).join('');
+            document.querySelectorAll('.adm-visit-check').forEach(function(box) {
+                box.addEventListener('change', admUpdateVisitSelectionUI);
+            });
+            admUpdateVisitSelectionUI();
         } catch(ex) {}
     }
 
     window.admDeleteUser = async function(id, email) {
-        if (!confirm('Delete user "' + email + '"? This also deletes their temple visits.')) return;
+        if (!confirm('Delete user "' + email + '"? This removes their account, profile, and all temple visit records.')) return;
         try { var res = await fetch('/api/admin/users/' + id, { method: 'DELETE' }); var d = await res.json();
-            if (d.status === 'ok') { admShowToast(d.message); admLoadUsers(); admLoadStats(); admLoadVisits(); }
-            else { admShowToast(d.message, 'error'); }
+            if (d.status === 'ok') {
+                admShowToast(d.message);
+                admAfterUserDelete([d.deletedUserId || id]);
+            } else { admShowToast(d.message, 'error'); }
         } catch(ex) { admShowToast('Delete failed', 'error'); }
     };
+
+    document.getElementById('admSelectAllUsers').addEventListener('change', function(e) {
+        var checked = e.target.checked;
+        document.querySelectorAll('#admUsersTableBody tr').forEach(function(row) {
+            if (row.style.display === 'none') return;
+            var box = row.querySelector('.adm-user-check');
+            if (box) box.checked = checked;
+        });
+        admUpdateUserSelectionUI();
+    });
+
+    document.getElementById('admDeleteSelectedUsersBtn').addEventListener('click', async function() {
+        var ids = Array.from(document.querySelectorAll('.adm-user-check:checked')).map(function(b) { return parseInt(b.value, 10); });
+        if (!ids.length) return;
+        if (!confirm('Delete ' + ids.length + ' selected user(s)? This removes their accounts and all visit records.')) return;
+        try {
+            var res = await fetch('/api/admin/users/bulk-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_ids: ids })
+            });
+            var d = await res.json();
+            if (d.status === 'ok') {
+                admShowToast(d.message);
+                admAfterUserDelete(d.deletedUserIds || ids);
+            } else {
+                admShowToast(d.message, 'error');
+            }
+        } catch(ex) { admShowToast('Bulk delete failed', 'error'); }
+    });
+
+    document.getElementById('admSelectAllVisits').addEventListener('change', function(e) {
+        var checked = e.target.checked;
+        document.querySelectorAll('#admVisitsTableBody tr').forEach(function(row) {
+            var box = row.querySelector('.adm-visit-check');
+            if (box) box.checked = checked;
+        });
+        admUpdateVisitSelectionUI();
+    });
+
+    document.getElementById('admDeleteSelectedVisitsBtn').addEventListener('click', async function() {
+        var ids = Array.from(document.querySelectorAll('.adm-visit-check:checked')).map(function(b) { return parseInt(b.value, 10); });
+        if (!ids.length) return;
+        if (!confirm('Delete ' + ids.length + ' selected visit record(s)?')) return;
+        try {
+            var res = await fetch('/api/admin/visits/bulk-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ visit_ids: ids })
+            });
+            var d = await res.json();
+            if (d.status === 'ok') {
+                admShowToast(d.message);
+                document.getElementById('admSelectAllVisits').checked = false;
+                admLoadVisits();
+                admLoadStats();
+                admLoadUsers();
+            } else {
+                admShowToast(d.message, 'error');
+            }
+        } catch(ex) { admShowToast('Bulk delete failed', 'error'); }
+    });
 
     document.querySelectorAll('.adm-tab-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -1335,6 +1541,7 @@
     document.getElementById('admUserSearch').addEventListener('input', function(e) {
         var q = e.target.value.toLowerCase();
         document.querySelectorAll('#admUsersTableBody tr').forEach(function(row) { row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+        admUpdateUserSelectionUI();
     });
 
     if (window.location.pathname === '/admin') { toggleAdminPanel(true); }

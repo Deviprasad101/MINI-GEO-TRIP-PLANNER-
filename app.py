@@ -59,9 +59,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Mail Configuration
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_SERVER'] = (os.getenv('MAIL_SERVER') or 'smtp.gmail.com').strip()
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', 'False').lower() in ('1', 'true', 'yes')
 app.config['MAIL_USERNAME'] = (os.getenv('MAIL_USERNAME') or '').strip()
 # Gmail App Passwords are often pasted with spaces — remove them for SMTP
 app.config['MAIL_PASSWORD'] = (os.getenv('MAIL_PASSWORD') or '').replace(' ', '')
@@ -75,10 +76,74 @@ def _email_otp_fallback_enabled():
     return os.getenv('EMAIL_OTP_CONSOLE_FALLBACK', 'true').lower() in ('1', 'true', 'yes')
 
 
+def _smtp_login_error_message():
+    return (
+        'Email server login failed. In .env set MAIL_USERNAME and a valid App Password '
+        '(Google Account → Security → 2-Step Verification → App passwords). '
+        'Regenerate the password if it was revoked.'
+    )
+
+
+def _send_via_smtp(recipients, subject, body):
+    """Send email with smtplib; retry port 465 SSL if STARTTLS on 587 fails."""
+    import smtplib
+    import ssl
+
+    username = app.config['MAIL_USERNAME']
+    password = app.config['MAIL_PASSWORD']
+    sender = app.config['MAIL_DEFAULT_SENDER'] or username
+    if not username or not password:
+        raise ValueError('MAIL_USERNAME and MAIL_PASSWORD must be set in .env')
+
+    message = (
+        f'From: {sender}\r\n'
+        f'To: {", ".join(recipients)}\r\n'
+        f'Subject: {subject}\r\n'
+        f'Content-Type: text/plain; charset=utf-8\r\n'
+        f'\r\n'
+        f'{body}'
+    )
+    context = ssl.create_default_context()
+    host = app.config['MAIL_SERVER']
+    attempts = []
+    if app.config['MAIL_USE_SSL']:
+        attempts.append(('ssl', host, app.config['MAIL_PORT']))
+    else:
+        attempts.append(('starttls', host, app.config['MAIL_PORT']))
+        if app.config['MAIL_PORT'] != 465:
+            attempts.append(('ssl', host, 465))
+
+    last_error = None
+    for mode, smtp_host, smtp_port in attempts:
+        try:
+            if mode == 'ssl':
+                with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=20, context=context) as smtp:
+                    smtp.login(username, password)
+                    smtp.sendmail(sender, recipients, message.encode('utf-8'))
+            else:
+                with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as smtp:
+                    smtp.ehlo()
+                    if app.config['MAIL_USE_TLS']:
+                        smtp.starttls(context=context)
+                        smtp.ehlo()
+                    smtp.login(username, password)
+                    smtp.sendmail(sender, recipients, message.encode('utf-8'))
+            return
+        except Exception as exc:
+            last_error = exc
+    raise last_error
+
+
+def _otp_response_extra(send_err, otp):
+    if send_err == 'otp_console_fallback' and otp and _email_otp_fallback_enabled():
+        return {'dev_otp': otp}
+    return {}
+
+
 def _send_email_message(msg, otp_hint=None):
-    """Send email; on SMTP failure optionally allow dev console OTP fallback."""
+    """Send email; on SMTP failure optionally allow dev OTP fallback."""
     try:
-        mail.send(msg)
+        _send_via_smtp(msg.recipients or [], msg.subject or '', msg.body or '')
         return True, None
     except Exception as e:
         print(f'[ERROR] Email send failed: {e}')
@@ -87,12 +152,39 @@ def _send_email_message(msg, otp_hint=None):
             print(f'[DEV] Email OTP for {recipients}: {otp_hint}')
             return True, 'otp_console_fallback'
         err_text = str(e)
-        if '535' in err_text or 'BadCredentials' in err_text or 'Username and Password' in err_text:
-            return False, (
-                'Email server login failed. In .env set MAIL_USERNAME and a valid Gmail App Password '
-                '(Google Account → Security → 2-Step Verification → App passwords).'
-            )
+        if '535' in err_text or 'BadCredentials' in err_text or 'Username and Password' in err_text or 'Authentication Failed' in err_text:
+            return False, _smtp_login_error_message()
         return False, 'Could not send email. Please try again later.'
+
+
+def _check_mail_config():
+    if not app.config['MAIL_USERNAME'] or not app.config['MAIL_PASSWORD']:
+        print('[WARN] MAIL_USERNAME or MAIL_PASSWORD missing in .env — email OTP will use dev fallback only.')
+        return
+    import smtplib
+    import ssl
+
+    username = app.config['MAIL_USERNAME']
+    password = app.config['MAIL_PASSWORD']
+    host = app.config['MAIL_SERVER']
+    context = ssl.create_default_context()
+    try:
+        if app.config['MAIL_USE_SSL']:
+            with smtplib.SMTP_SSL(host, app.config['MAIL_PORT'], timeout=15, context=context) as smtp:
+                smtp.login(username, password)
+        else:
+            with smtplib.SMTP(host, app.config['MAIL_PORT'], timeout=15) as smtp:
+                smtp.ehlo()
+                if app.config['MAIL_USE_TLS']:
+                    smtp.starttls(context=context)
+                    smtp.ehlo()
+                smtp.login(username, password)
+        print(f"[OK] SMTP login verified for {username}")
+    except Exception as e:
+        print(f'[WARN] SMTP login failed for {username}: {e}')
+        if _email_otp_fallback_enabled():
+            print('[WARN] EMAIL_OTP_CONSOLE_FALLBACK is on — OTP codes will appear in the UI/server terminal until mail is fixed.')
+        print('[WARN] Fix .env: regenerate App Password at https://myaccount.google.com/apppasswords')
 
 # User Model
 class User(db.Model):
@@ -577,6 +669,130 @@ api_key = os.getenv("GEMINI_API_KEY")
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 client = genai.Client(api_key=api_key) if api_key else None
 
+_WMO_LABELS = {
+    0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+    45: 'Foggy', 48: 'Foggy',
+    51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
+    61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
+    71: 'Light snow', 73: 'Snow', 75: 'Heavy snow',
+    80: 'Light showers', 81: 'Showers', 82: 'Heavy showers',
+    95: 'Thunderstorm', 96: 'Thunderstorm with hail', 99: 'Thunderstorm with hail',
+}
+
+_WMO_ICONS = {
+    0: 'clear-day', 1: 'partly-cloudy-day', 2: 'partly-cloudy-day', 3: 'overcast',
+    45: 'fog', 48: 'fog',
+    51: 'drizzle', 53: 'drizzle', 55: 'drizzle',
+    61: 'rain', 63: 'rain', 65: 'rain',
+    71: 'snow', 73: 'snow', 75: 'snow',
+    80: 'rain', 81: 'rain', 82: 'rain',
+    95: 'thunderstorms-rain', 96: 'thunderstorms-rain', 99: 'thunderstorms-rain',
+}
+
+
+def _wmo_label(code):
+    return _WMO_LABELS.get(int(code), 'Cloudy')
+
+
+def _wmo_icon_url(code):
+    icon = _WMO_ICONS.get(int(code), 'cloudy')
+    return (
+        'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@2.0.0/'
+        f'production/fill/all/{icon}.svg'
+    )
+
+
+def _parse_lat_lon(query):
+    parts = [p.strip() for p in query.split(',', 1)]
+    if len(parts) != 2:
+        return None
+    try:
+        return float(parts[0]), float(parts[1])
+    except ValueError:
+        return None
+
+
+def _weather_from_weatherapi(city_query):
+    if not WEATHER_API_KEY:
+        return None
+    url = f'https://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={quote(city_query)}'
+    response = requests.get(url, timeout=15)
+    data = response.json()
+    if response.status_code != 200:
+        err = (data.get('error') or {}).get('message') or 'Weather API request failed'
+        raise ValueError(err)
+    current = data.get('current') or {}
+    location = data.get('location') or {}
+    if not current or 'temp_c' not in current:
+        return None
+    icon = current.get('condition', {}).get('icon') or ''
+    if icon.startswith('//'):
+        icon = 'https:' + icon
+    return {
+        'city': location.get('name') or city_query,
+        'country': location.get('country') or '',
+        'temperature': current.get('temp_c'),
+        'condition': (current.get('condition') or {}).get('text') or 'Unknown',
+        'icon': icon,
+        'humidity': current.get('humidity'),
+        'wind': current.get('wind_kph'),
+    }
+
+
+def _weather_from_open_meteo(city_query):
+    coords = _parse_lat_lon(city_query)
+    if coords:
+        lat, lon = coords
+        name, country = 'Current location', ''
+    else:
+        geo_resp = requests.get(
+            'https://geocoding-api.open-meteo.com/v1/search',
+            params={'name': city_query, 'count': 1, 'language': 'en', 'format': 'json'},
+            timeout=15,
+        )
+        geo_resp.raise_for_status()
+        results = (geo_resp.json() or {}).get('results') or []
+        if not results:
+            raise ValueError(f'City "{city_query}" not found')
+        place = results[0]
+        lat, lon = place['latitude'], place['longitude']
+        name = place.get('name') or city_query
+        country = place.get('country') or ''
+
+    wx_resp = requests.get(
+        'https://api.open-meteo.com/v1/forecast',
+        params={
+            'latitude': lat,
+            'longitude': lon,
+            'current': 'temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code',
+            'wind_speed_unit': 'kmh',
+        },
+        timeout=15,
+    )
+    wx_resp.raise_for_status()
+    current = (wx_resp.json() or {}).get('current') or {}
+    code = int(current.get('weather_code') or 0)
+    return {
+        'city': name,
+        'country': country,
+        'temperature': current.get('temperature_2m'),
+        'condition': _wmo_label(code),
+        'icon': _wmo_icon_url(code),
+        'humidity': current.get('relative_humidity_2m'),
+        'wind': round(float(current.get('wind_speed_10m') or 0), 1),
+    }
+
+
+def _fetch_weather(city_query):
+    city_query = (city_query or 'Tirupati').strip() or 'Tirupati'
+    try:
+        payload = _weather_from_weatherapi(city_query)
+        if payload:
+            return payload
+    except Exception as e:
+        print(f'[WARN] WeatherAPI failed for {city_query!r}: {e}')
+    return _weather_from_open_meteo(city_query)
+
 # Configure Ollama (local LLM — runs alongside Gemini, not a replacement)
 OLLAMA_BASE = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
@@ -833,11 +1049,13 @@ def register():
 
         user_message = "OTP sent to email"
         if send_err == 'otp_console_fallback':
-            user_message = (
-                "Email could not be sent (SMTP). Use the OTP printed in the server terminal "
-                "(dev fallback enabled)."
-            )
-        return jsonify({"status": "success", "step": "email", "message": user_message})
+            user_message = "SMTP unavailable - use the dev OTP shown below to continue."
+        return jsonify({
+            "status": "success",
+            "step": "email",
+            "message": user_message,
+            **_otp_response_extra(send_err, otp),
+        })
     except Exception as e:
         print(f"Registration Error: {e}")
         return jsonify({"status": "error", "message": "Registration failed. Please try again."}), 500
@@ -911,8 +1129,13 @@ def resend_otp():
                 return jsonify({"status": "error", "message": send_err}), 503
             user_message = "New email OTP sent"
             if send_err == 'otp_console_fallback':
-                user_message = "Check server terminal for the new OTP (dev fallback)."
-            return jsonify({"status": "success", "step": "email", "message": user_message})
+                user_message = "SMTP unavailable - use the dev OTP shown below."
+            return jsonify({
+                "status": "success",
+                "step": "email",
+                "message": user_message,
+                **_otp_response_extra(send_err, otp),
+            })
 
         return jsonify({"status": "error", "message": "Invalid registration step"}), 400
     except Exception as e:
@@ -1297,8 +1520,12 @@ def forgot_password():
             return jsonify({"status": "error", "message": send_err}), 503
         user_message = "Reset OTP sent to your email"
         if send_err == 'otp_console_fallback':
-            user_message = "Check server terminal for reset OTP (dev fallback)."
-        return jsonify({"status": "success", "message": user_message})
+            user_message = "SMTP unavailable - use the dev OTP shown below."
+        return jsonify({
+            "status": "success",
+            "message": user_message,
+            **_otp_response_extra(send_err, otp),
+        })
     except Exception as e:
         print(f"Forgot Password Error: {e}")
         return jsonify({"status": "error", "message": "Could not send reset email."}), 500
@@ -1339,21 +1566,12 @@ def reset_password():
 @app.route('/weather')
 def get_weather():
     city = request.args.get('city', 'Tirupati')
-    url = f"http://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={city}"
     try:
-        response = requests.get(url)
-        data = response.json()
-        if response.status_code != 200:
-            return jsonify({"error": "Failed to fetch weather"}), response.status_code
-        return jsonify({
-            "city": data["location"]["name"],
-            "temperature": data["current"]["temp_c"],
-            "condition": data["current"]["condition"]["text"],
-            "icon": data["current"]["condition"]["icon"],
-            "humidity": data["current"]["humidity"],
-            "wind": data["current"]["wind_kph"]
-        })
-    except: return jsonify({"error": "Weather error"}), 500
+        payload = _fetch_weather(city)
+        return jsonify(payload)
+    except Exception as e:
+        print(f'[ERROR] Weather fetch failed for {city!r}: {e}')
+        return jsonify({'error': str(e) or 'Could not fetch weather'}), 500
 
 @app.route('/api/recommend', methods=['POST'])
 def recommend():
@@ -1715,12 +1933,90 @@ def admin_delete_user(user_id):
     user = db.session.get(User, user_id)
     if not user:
         return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    email = user.email
+    username = user.username
     TempleVisit.query.filter_by(user_id=user.id).delete()
     db.session.delete(user)
     db.session.commit()
-    return jsonify({'status': 'ok', 'message': f'User {user.email} deleted'})
+    return jsonify({
+        'status': 'ok',
+        'message': f'User "{username}" ({email}) and all visit records deleted',
+        'deletedUserId': user_id,
+    })
+
+
+@app.route('/api/admin/users/bulk-delete', methods=['POST'])
+def admin_bulk_delete_users():
+    err = _require_admin()
+    if err:
+        return err
+    data = request.json or {}
+    raw_ids = data.get('user_ids') or []
+    if not isinstance(raw_ids, list) or not raw_ids:
+        return jsonify({'status': 'error', 'message': 'No users selected'}), 400
+
+    deleted_ids = []
+    for raw_id in raw_ids:
+        try:
+            user_id = int(raw_id)
+        except (TypeError, ValueError):
+            continue
+        user = db.session.get(User, user_id)
+        if not user:
+            continue
+        TempleVisit.query.filter_by(user_id=user.id).delete()
+        db.session.delete(user)
+        deleted_ids.append(user_id)
+
+    if not deleted_ids:
+        return jsonify({'status': 'error', 'message': 'No matching users found'}), 404
+
+    db.session.commit()
+    return jsonify({
+        'status': 'ok',
+        'message': f'Deleted {len(deleted_ids)} user(s) and their visit records',
+        'deletedUserIds': deleted_ids,
+        'deletedCount': len(deleted_ids),
+    })
+
+
+@app.route('/api/admin/visits/bulk-delete', methods=['POST'])
+def admin_bulk_delete_visits():
+    err = _require_admin()
+    if err:
+        return err
+    data = request.json or {}
+    raw_ids = data.get('visit_ids') or []
+    if not isinstance(raw_ids, list) or not raw_ids:
+        return jsonify({'status': 'error', 'message': 'No visits selected'}), 400
+
+    visit_ids = []
+    for raw_id in raw_ids:
+        try:
+            visit_ids.append(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+
+    if not visit_ids:
+        return jsonify({'status': 'error', 'message': 'No valid visit IDs'}), 400
+
+    deleted_count = (
+        TempleVisit.query
+        .filter(TempleVisit.id.in_(visit_ids))
+        .delete(synchronize_session=False)
+    )
+    if not deleted_count:
+        return jsonify({'status': 'error', 'message': 'No matching visits found'}), 404
+
+    db.session.commit()
+    return jsonify({
+        'status': 'ok',
+        'message': f'Deleted {deleted_count} visit record(s)',
+        'deletedCount': deleted_count,
+    })
 
 
 if __name__ == '__main__':
+    _check_mail_config()
     # 0.0.0.0 so browser works without Cursor port-forward; use http://127.0.0.1:5000
     app.run(debug=True, host='0.0.0.0', port=5000)

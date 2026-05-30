@@ -89,11 +89,11 @@ async function getWeather() {
             <div class="weather-card bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-amber-100 shadow-sm transition-all hover:shadow-md">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="text-2xl font-bold text-slate-800">${data.city}, ${data.country}</h3>
+                        <h3 class="text-2xl font-bold text-slate-800">${data.city}${data.country ? ', ' + data.country : ''}</h3>
                         <p class="text-slate-500 font-medium">${data.condition}</p>
                     </div>
                     <div class="text-right">
-                        <img src="${data.icon}" alt="Weather Icon" class="w-16 h-16 -my-2">
+                        <img src="${data.icon}" alt="Weather Icon" class="w-16 h-16 -my-2" onerror="this.onerror=null;this.src='';this.outerHTML='<span class=\\'material-symbols-outlined text-5xl text-amber-500\\'>cloud</span>';">
                     </div>
                 </div>
                 
