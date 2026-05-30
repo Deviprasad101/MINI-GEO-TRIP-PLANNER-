@@ -1462,112 +1462,6 @@
         }
 
 
-        .pkg-qr-panel {
-            margin-top: 1.25rem;
-            padding: 1.25rem 1.35rem;
-            border-radius: 1rem;
-            background: linear-gradient(135deg, #fffbeb 0%, #f0fdfa 55%, #ffffff 100%);
-            border: 1px solid rgba(217, 119, 6, 0.35);
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.25rem;
-            align-items: center;
-        }
-
-        @media (min-width: 640px) {
-            .pkg-qr-panel {
-                grid-template-columns: auto 1fr;
-            }
-        }
-
-        .pkg-qr-panel.hidden {
-            display: none;
-        }
-
-        .pkg-qr-panel__canvas-wrap {
-            display: flex;
-            justify-content: center;
-            padding: 0.65rem;
-            background: #fff;
-            border-radius: 0.75rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-        }
-
-        #pkgQrImage {
-            display: block;
-            width: 200px;
-            height: 200px;
-            border-radius: 4px;
-            object-fit: contain;
-        }
-
-        .pkg-qr-panel__title {
-            margin: 0 0 0.35rem;
-            font-family: "Noto Serif", Georgia, serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--pkg-ink);
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .pkg-qr-panel__lead {
-            margin: 0 0 0.75rem;
-            font-size: 0.875rem;
-            line-height: 1.55;
-            color: var(--pkg-muted);
-        }
-
-        .pkg-qr-panel__link {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #0f766e;
-            word-break: break-all;
-            text-decoration: none;
-            margin-bottom: 0.65rem;
-        }
-
-        .pkg-qr-panel__link:hover {
-            text-decoration: underline;
-        }
-
-        .pkg-qr-panel__actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .pkg-qr-copy-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.45rem 0.9rem;
-            border-radius: 999px;
-            border: 1px solid rgba(15, 118, 110, 0.45);
-            background: #0f766e;
-            color: #fff;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .pkg-qr-copy-btn:hover {
-            background: #134e4a;
-        }
-
-        .pkg-qr-panel__status {
-            margin: 0.5rem 0 0;
-            font-size: 0.78rem;
-            color: var(--pkg-muted);
-        }
-
-        .pkg-qr-panel__status.is-error {
-            color: #b91c1c;
-        }
-
         /* Inline / shared trip itinerary (/trip/<id> and packages planner) */
         .pkg-share-itinerary {
             margin-bottom: 1.25rem;
@@ -1855,10 +1749,6 @@
         body.packages-share-view #emergencyFab,
         body.packages-share-view #emergencyBackdrop,
         body.packages-share-view #emergencyPanel {
-            display: none !important;
-        }
-
-        body.packages-share-view #pkgQrPanel {
             display: none !important;
         }
 
@@ -3858,30 +3748,6 @@
                             <span><span class="share-map-legend__line" aria-hidden="true"></span> Driving route</span>
                         </div>
                     </div>
-                    <div id="pkgQrPanel" class="pkg-qr-panel hidden" aria-labelledby="pkgQrTitle">
-                        <div class="pkg-qr-panel__canvas-wrap">
-                            <img id="pkgQrImage" width="200" height="200" alt="QR code to open trip itinerary" />
-                        </div>
-                        <div>
-                            <h3 id="pkgQrTitle" class="pkg-qr-panel__title">
-                                <span class="material-symbols-outlined text-xl text-amber-700"
-                                    aria-hidden="true">qr_code_2</span>
-                                Share this trip
-                            </h3>
-                            <p class="pkg-qr-panel__lead">Scan on your phone (same Wi‑Fi as this PC). The QR uses your
-                                network address—not localhost—so Google Lens can open the full itinerary.</p>
-                            <a id="pkgQrLink" class="pkg-qr-panel__link" href="#" target="_blank"
-                                rel="noopener noreferrer"></a>
-                            <div class="pkg-qr-panel__actions">
-                                <button type="button" class="pkg-qr-copy-btn" id="pkgQrCopyBtn">
-                                    <span class="material-symbols-outlined text-base"
-                                        aria-hidden="true">content_copy</span>
-                                    Copy link
-                                </button>
-                            </div>
-                            <p id="pkgQrStatus" class="pkg-qr-panel__status" role="status"></p>
-                        </div>
-                    </div>
                     <h2 class="share-stops-title">Your route stops</h2>
                     <div class="share-timeline" id="pkgShareStops" aria-live="polite"></div>
                     <p id="pkgShareFoot" class="pkg-share-foot hidden">
@@ -4704,6 +4570,11 @@
                 }).filter(Boolean);
                 closePlacePicker();
                 renderSelectionStrip();
+                window.requestAnimationFrame(function () {
+                    window.setTimeout(function () {
+                        showTripMapInline({ revealQr: true });
+                    }, 100);
+                });
             }
 
             function renderSelectionStrip() {
@@ -5203,35 +5074,6 @@
                 };
             }
 
-            function setQrPanelStatus(msg, isError) {
-                var st = document.getElementById('pkgQrStatus');
-                if (!st) return;
-                st.textContent = msg || '';
-                st.classList.toggle('is-error', !!isError);
-            }
-
-            function renderQrImage(shareId, tripUrl) {
-                var img = document.getElementById('pkgQrImage');
-                if (!img) return;
-                var qrServer =
-                    'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=' +
-                    encodeURIComponent(tripUrl);
-                img.onload = function () {
-                    var hint =
-                        'Scan with your phone (same Wi‑Fi). Opens: ' +
-                        (tripUrl || '').replace(/^https?:\/\//, '');
-                    setQrPanelStatus(hint, false);
-                };
-                img.onerror = function () {
-                    if (img.src !== qrServer) {
-                        img.src = qrServer;
-                    } else {
-                        setQrPanelStatus('Could not load QR image. Use the link below.', true);
-                    }
-                };
-                img.src = '/api/package-share/' + encodeURIComponent(shareId) + '/qr.png?_=' + Date.now();
-            }
-
             function updateShareRoute(shareId, routePath) {
                 if (!shareId || !routePath || !routePath.length) return;
                 fetch('/api/package-share/' + encodeURIComponent(shareId), {
@@ -5242,11 +5084,6 @@
             }
 
             function publishTripShareAndRenderQr(orderedStops, startLabel, startLat, startLng, prebuiltPayload) {
-                var panel = document.getElementById('pkgQrPanel');
-                var link = document.getElementById('pkgQrLink');
-                if (!panel) return;
-                if (panel.classList.contains('hidden')) panel.classList.remove('hidden');
-                setQrPanelStatus('Generating share link…', false);
                 lastShareUrl = '';
                 lastShareId = '';
 
@@ -5266,49 +5103,15 @@
                         });
                     })
                     .then(function (res) {
-                        if (!res.ok || !res.data.url || !res.data.shareId) {
-                            setQrPanelStatus(
-                                (res.data && res.data.message) || 'Could not create share link.',
-                                true
-                            );
-                            return;
-                        }
+                        if (!res.ok || !res.data.url || !res.data.shareId) return;
                         lastShareUrl = res.data.url;
                         lastShareId = res.data.shareId;
                         if (lastShareTripPayload) {
                             lastShareTripPayload.shareUrl = lastShareUrl;
                         }
-                        if (link) {
-                            link.href = lastShareUrl;
-                            link.textContent = lastShareUrl;
-                        }
-                        renderQrImage(res.data.shareId, lastShareUrl);
                     })
-                    .catch(function () {
-                        setQrPanelStatus('Network error while creating share link.', true);
-                    });
+                    .catch(function () { /* non-blocking */ });
             }
-
-            (function initQrCopyBtn() {
-                var btn = document.getElementById('pkgQrCopyBtn');
-                if (!btn) return;
-                btn.addEventListener('click', function () {
-                    if (!lastShareUrl) {
-                        setQrPanelStatus('Wait for the link to be ready.', true);
-                        return;
-                    }
-                    var done = function () {
-                        setQrPanelStatus('Link copied to clipboard.', false);
-                    };
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(lastShareUrl).then(done).catch(function () {
-                            setQrPanelStatus('Copy failed — use the link above.', true);
-                        });
-                    } else {
-                        setQrPanelStatus('Copy not supported — tap the link above.', true);
-                    }
-                });
-            })();
 
             function showTripMapInline(opts) {
                 opts = opts || {};
