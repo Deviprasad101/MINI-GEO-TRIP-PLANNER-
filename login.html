@@ -933,6 +933,7 @@
 
                 if (result.status === 'success') {
                     localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    try { sessionStorage.removeItem('geotripTempleQrVisible'); } catch (e) {}
                     window.location.href = '/dashboard';
                 } else {
                     alert("Login Failed: " + result.message);

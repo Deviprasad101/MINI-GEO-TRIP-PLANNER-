@@ -5189,9 +5189,6 @@
                     if (revealQr) {
                         renderPkgShareItinerary(sharePayload);
                         publishTripShareAndRenderQr(ordered, startLabel, startLat, startLng, sharePayload);
-                        if (typeof window.showFloatingTempleQr === 'function') {
-                            window.showFloatingTempleQr();
-                        }
                     }
 
                     setMapStatus('Loading road route...');
@@ -5912,6 +5909,7 @@
             var QR_KEY = 'geotripTempleQrVisible';
             var wrap = document.getElementById('floatingQr');
             if (!wrap) return;
+            wrap.style.display = 'none';
             var userStr = localStorage.getItem('currentUser');
             if (!userStr) return;
             var u = JSON.parse(userStr);
@@ -5930,8 +5928,12 @@
                 navigator.clipboard.writeText(link).then(function(){ alert('QR link copied!'); }).catch(function(){ prompt('Copy this link:', link); });
             });
             window.showFloatingTempleQr = function() {
+                try {
+                    if (sessionStorage.getItem(QR_KEY) !== '1') return;
+                } catch (e) {
+                    return;
+                }
                 wrap.style.display = 'flex';
-                try { sessionStorage.setItem(QR_KEY, '1'); } catch (e) {}
             };
             try {
                 if (sessionStorage.getItem(QR_KEY) === '1') wrap.style.display = 'flex';

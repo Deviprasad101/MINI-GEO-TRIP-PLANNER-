@@ -5448,10 +5448,24 @@
                     if (window._showRecPanel) window._showRecPanel();
                     // Reveal QR on main page + unlock floating QR on about / booking / packages
                     var qrSec = document.getElementById('myQrSection');
-                    if (qrSec) qrSec.style.display = '';
+                    if (qrSec) qrSec.style.display = 'flex';
                     try { sessionStorage.setItem('geotripTempleQrVisible', '1'); } catch (e) {}
                 });
             });
+
+            (function syncMainPageQrFromSession() {
+                var qrSec = document.getElementById('myQrSection');
+                if (!qrSec) return;
+                try {
+                    if (sessionStorage.getItem('geotripTempleQrVisible') === '1') {
+                        qrSec.style.display = 'flex';
+                    } else {
+                        qrSec.style.display = 'none';
+                    }
+                } catch (e) {
+                    qrSec.style.display = 'none';
+                }
+            })();
 
             window.showMainLandingMap = showMainLandingMap;
             window.setMainGpsCoords = function (coords) {
