@@ -510,15 +510,6 @@
             50% { transform: translateY(-4px); }
         }
 
-        @keyframes planTierLabelIn {
-            from {
-                transform: translateY(6px);
-            }
-            to {
-                transform: translateY(0);
-            }
-        }
-
         @keyframes planBudgetValuePop {
             0% { transform: scale(1); }
             45% { transform: scale(1.05); color: var(--plan-tier-accent); }
@@ -641,14 +632,8 @@
             transform: translateY(-1px);
         }
 
-        #plan-picker-section .plan-budget-slider__tier.is-tier-updated {
-            display: inline-block;
-            animation: planTierLabelIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-            color: var(--plan-tier-accent);
-        }
-
-        #plan-picker-section .plan-budget-slider__value strong.is-budget-updated {
-            display: inline-block;
+        #plan-picker-section .plan-budget-slider__amount.is-budget-updated {
+            display: block;
             animation: planBudgetValuePop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
@@ -707,8 +692,7 @@
             }
 
             #plan-picker-section .pricing-card.is-budget-entering *,
-            #plan-picker-section .plan-budget-slider__tier.is-tier-updated,
-            #plan-picker-section .plan-budget-slider__value strong.is-budget-updated,
+            #plan-picker-section .plan-budget-slider__amount.is-budget-updated,
             #plan-picker-section .plan-slider-link__pulse {
                 animation: none !important;
             }
@@ -926,25 +910,47 @@
             margin-bottom: 0.55rem;
         }
 
-        .plan-budget-slider__value {
-            margin: 1rem 0 0;
+        .plan-budget-slider__summary {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1.1rem 0 0;
+            padding: 0.5rem 0.75rem 0.15rem;
             text-align: center;
+        }
+
+        .plan-budget-slider__value {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            margin: 0;
+            width: 100%;
             font-size: 1.05rem;
             color: #475569;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
-        .plan-budget-slider__value strong {
-            color: #c2410c;
-            font-size: 1.35rem;
+        .plan-budget-slider__value-label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
         }
 
-        .plan-budget-slider__tier {
+        .plan-budget-slider__amount {
             display: block;
-            margin-top: 0.45rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #6d28d9;
+            margin: 0;
+            font-size: clamp(1.45rem, 4.5vw, 1.75rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #c2410c;
+            line-height: 1.15;
+        }
+
+        #plan-picker-section .plan-budget-slider__amount {
+            color: var(--plan-tier-accent, #c2410c);
         }
 
         .sr-only {
@@ -4192,10 +4198,12 @@
                                 step="500" value="3000" aria-valuemin="1000" aria-valuemax="30000" aria-valuenow="3000"
                                 aria-label="Select your trip budget" />
                         </div>
-                        <p class="plan-budget-slider__value">
-                            Your budget: <strong id="planBudgetValue">₹3,000</strong>
-                            <span class="plan-budget-slider__tier" id="planBudgetTierLabel">Basic package</span>
-                        </p>
+                        <div class="plan-budget-slider__summary">
+                            <p class="plan-budget-slider__value">
+                                <span class="plan-budget-slider__value-label">Your budget</span>
+                                <strong id="planBudgetValue" class="plan-budget-slider__amount">₹3,000</strong>
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <div class="plan-slider-link" aria-hidden="true">
@@ -4707,30 +4715,19 @@
                 }, 800);
             }
 
-            function pulseBudgetSliderLabels(tierChanged) {
+            function pulseBudgetSliderLabels() {
                 var valEl = document.getElementById('planBudgetValue');
-                var labEl = document.getElementById('planBudgetTierLabel');
                 if (valEl) {
                     valEl.classList.remove('is-budget-updated');
                     void valEl.offsetWidth;
                     valEl.classList.add('is-budget-updated');
                 }
-                if (tierChanged && labEl) {
-                    labEl.classList.remove('is-tier-updated');
-                    void labEl.offsetWidth;
-                    labEl.classList.add('is-tier-updated');
-                }
             }
 
             function updatePlanBudgetLabels(amount, idx) {
-                var tier = TIERS[idx];
                 var valEl = document.getElementById('planBudgetValue');
-                var labEl = document.getElementById('planBudgetTierLabel');
                 var rangeEl = document.getElementById('planBudgetRange');
                 if (valEl) valEl.textContent = formatPlanBudgetInr(amount);
-                if (labEl && tier) {
-                    labEl.textContent = tier.title + ' · ' + tier.displayRange;
-                }
                 if (rangeEl) rangeEl.setAttribute('aria-valuenow', String(amount));
             }
 
@@ -4743,7 +4740,7 @@
 
                 updatePlanBudgetLabels(amount, idx);
                 updatePlanSliderVisual(amount, idx);
-                pulseBudgetSliderLabels(tierChanged);
+                pulseBudgetSliderLabels();
 
                 if (!tierChanged) {
                     return;
