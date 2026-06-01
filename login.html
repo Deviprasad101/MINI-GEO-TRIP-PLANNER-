@@ -89,25 +89,234 @@
             }
         }
 
-        body > header {
-            border-bottom: none;
-            box-shadow:
-                0 1px 0 rgba(255, 255, 255, 0.1) inset,
-                0 8px 28px rgba(0, 0, 0, 0.35);
+        .site-header--login {
+            flex-shrink: 0;
         }
 
-        body > header::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 3px;
-            background: linear-gradient(90deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.9), rgba(251, 191, 36, 0.25));
+        .site-header__aptdc-logo {
+            display: block;
+            height: 4.5rem;
+            width: auto;
+            max-width: 10rem;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        @media (min-width: 1024px) {
+            body > header.site-header--login {
+                border-bottom: none;
+                box-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+                    0 8px 28px rgba(0, 0, 0, 0.35);
+            }
+
+            body > header.site-header--login::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 3px;
+                background: linear-gradient(90deg, rgba(251, 191, 36, 0.25), rgba(251, 191, 36, 0.9), rgba(251, 191, 36, 0.25));
+            }
+        }
+
+        @media (max-width: 1023px) {
+            body.site-header-mobile > header.site-header--login {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-bottom: 1px solid rgba(251, 191, 36, 0.35);
+                box-shadow: 0 4px 18px rgba(15, 23, 42, 0.12);
+            }
+
+            body.site-header-mobile > header.site-header--login::after {
+                content: "";
+                display: block;
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #92400e 0%, #fbbf24 45%, #d97706 55%, #92400e 100%);
+            }
+
+            .site-header-mobile .site-header__layout {
+                --header-mobile-edge: 0.65rem;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                flex-wrap: nowrap !important;
+                overflow: visible !important;
+                gap: 0.3rem !important;
+                padding: 0.45rem var(--header-mobile-edge) 0.5rem !important;
+                min-height: auto !important;
+            }
+
+            .site-header-mobile .site-header__mobile-logos {
+                display: flex !important;
+                flex-wrap: nowrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 0.5rem;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .site-header-mobile .site-header__mobile-logos .site-header__aptdc {
+                flex-shrink: 0;
+            }
+
+            .site-header-mobile .site-header__mobile-partner-col {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0.25rem;
+                flex: 1 1 auto;
+                min-width: 0;
+                margin-left: auto;
+            }
+
+            .site-header-mobile .site-header__mobile-logos .site-header__aptdc-logo {
+                height: 3.35rem !important;
+                max-width: 5.85rem !important;
+                width: auto;
+                object-fit: contain;
+            }
+
+            .site-header-mobile .site-header__mobile-logos .site-header__logo-wrap {
+                height: auto !important;
+                min-height: 0;
+                flex: 1 1 auto;
+                min-width: 0 !important;
+                max-width: none !important;
+                justify-content: space-evenly;
+                padding: 0.42rem 0.5rem !important;
+                gap: 0.35rem !important;
+            }
+
+            .site-header-mobile .site-header__mobile-logos .site-header__logo-wrap img {
+                height: 2.2rem !important;
+                max-height: 2.2rem;
+                width: auto !important;
+            }
+
+            .site-header-mobile .site-header__mobile-logos .site-header__logo-wrap > div {
+                height: 1.15rem !important;
+            }
+
+            .site-header-mobile .site-header__mobile-partner-line {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                max-width: 100%;
+                text-align: right;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: #64748b;
+                line-height: 1.25;
+            }
+
+            .site-header-mobile .site-header__mobile-brand {
+                width: 100%;
+                text-align: center;
+                padding: 0.1rem 0 0.15rem;
+            }
+
+            .site-header-mobile .site-header__mobile-brand .site-header__brand-name {
+                display: inline-block;
+                margin: 0 !important;
+                font-size: clamp(1.2rem, 5.2vw, 1.65rem) !important;
+                line-height: 1.15;
+                font-weight: 700;
+                color: #92400e;
+                letter-spacing: -0.02em;
+            }
+
+            .site-header-mobile .site-header__layout .hero-mobile-actions {
+                display: flex !important;
+                flex-wrap: nowrap;
+                align-items: stretch;
+                justify-content: center;
+                gap: 0.4rem;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                padding: 0.4rem 0 0.5rem;
+                border-top: 1px solid rgba(251, 191, 36, 0.12);
+                background: transparent;
+                box-sizing: border-box;
+            }
+
+            .site-header-mobile .login-mobile-admin {
+                flex: 1 1 100%;
+                width: 100%;
+                min-width: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.45rem;
+                border: 1px solid rgba(124, 58, 237, 0.45);
+                border-radius: 9999px;
+                background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+                color: #fff;
+                font-size: clamp(0.72rem, 2.8vw, 0.85rem);
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                padding: 0.5rem 0.75rem;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: filter 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .site-header-mobile .login-mobile-admin:hover {
+                filter: brightness(1.08);
+                box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+            }
+
+            .site-header-mobile .login-header__desktop {
+                display: none !important;
+            }
+
+            body.site-header-mobile > main {
+                padding-top: 10.75rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .site-header-mobile .site-header__mobile-logos,
+            .site-header-mobile .site-header__mobile-brand,
+            .site-header-mobile .hero-mobile-actions {
+                display: none !important;
+            }
+
+            .site-header-mobile .login-header__desktop {
+                display: flex !important;
+                width: 100%;
+                align-items: center;
+                justify-content: space-between;
+                position: relative;
+                min-height: 3.5rem;
+            }
         }
 
         body > main {
             box-shadow: inset 0 12px 28px -16px rgba(0, 0, 0, 0.45);
+        }
+
+        @media (min-width: 1024px) {
+            body > main {
+                padding-top: 8rem;
+            }
         }
 
         /* Input Styling */
@@ -222,37 +431,61 @@
     </style>
 </head>
 
-<body class="relative min-h-screen flex flex-col">
+<body class="site-header-mobile relative min-h-screen flex flex-col">
 
     <div class="scenery"></div>
 
-    <header class="absolute top-0 left-0 right-0 z-50 px-6 py-3 sm:py-4 border-b border-white/20 bg-black/40 backdrop-blur-md flex items-center justify-between">
-        <!-- Left Title -->
-        <div class="flex items-center gap-3 min-w-0 z-10">
-            <span class="text-xl sm:text-2xl lg:text-3xl font-black bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent tracking-tight drop-shadow truncate">Geo Trip Planner</span>
-        </div>
+    <header class="site-header site-header--login absolute top-0 left-0 right-0 z-50 lg:flex lg:items-center lg:border-b lg:border-white/20 lg:bg-black/40 lg:backdrop-blur-md lg:px-6 lg:py-4">
+        <div class="site-header__layout min-w-0 w-full lg:min-h-0">
+            <div class="site-header__mobile-logos max-lg:flex lg:hidden">
+                <div class="site-header__aptdc shrink-0" aria-label="APTDC">
+                    <img src="images/aptdc-logo.png" alt="APTDC logo" class="site-header__aptdc-logo" width="224" height="112" decoding="async" />
+                </div>
+                <div class="site-header__mobile-partner-col">
+                    <span class="site-header__logo-wrap flex items-center gap-2 bg-white/95 backdrop-blur px-2 py-1 rounded-xl shadow-sm border border-slate-200">
+                        <img src="images/iittirupati.png" alt="IIT Tirupati" class="w-auto object-contain" />
+                        <div class="h-5 w-px bg-slate-200 shrink-0"></div>
+                        <img src="images/IITTNiF logo.png" alt="IIT Tirupati Navavishkār I-Hub Foundation" class="w-auto object-contain" />
+                        <div class="h-5 w-px bg-slate-200 shrink-0"></div>
+                        <img src="images/make_in_india_logo.png" alt="Make in India" class="w-auto object-contain" />
+                    </span>
+                    <p class="site-header__mobile-partner-line">Geo-Intel Lab, IITTNIF, Tirupati</p>
+                </div>
+            </div>
+            <div class="site-header__mobile-brand max-lg:block lg:hidden">
+                <span class="site-header__brand-name">GeoTrip Planner</span>
+            </div>
+            <nav class="hero-mobile-actions max-lg:flex lg:hidden" aria-label="Login actions">
+                <button type="button" onclick="toggleAdminPanel(true)" class="login-mobile-admin" title="Admin">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                    <span>Admin</span>
+                </button>
+            </nav>
 
-        <!-- Center Admin Button -->
-        <button type="button" onclick="toggleAdminPanel(true)"
-           class="absolute left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white bg-white/15 border border-white/25 backdrop-blur-sm hover:bg-purple-600 hover:border-purple-500 transition-all cursor-pointer">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span class="hidden sm:inline">Admin</span>
-        </button>
-
-        <!-- Right Logos -->
-        <div class="flex flex-col items-end shrink min-w-0 z-10">
-            <span class="flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur px-2.5 py-1 rounded-xl shadow-sm border border-slate-200 shrink min-w-0">
-                <img src="images/iittirupati.png" alt="IIT Tirupati" class="h-12 sm:h-14 w-auto object-contain" />
-                <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
-                <img src="images/IITTNiF logo.png" alt="IIT Tirupati Navavishkār I-Hub Foundation" class="h-12 sm:h-14 w-auto object-contain" />
-                <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
-                <img src="images/make_in_india_logo.png" alt="Make in India" class="h-12 sm:h-14 w-auto object-contain" />
-            </span>
-            <p class="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-tight text-slate-300 drop-shadow-sm text-center"> Geo-Intel Lab, IITTNIF, Tirupati</p>
+            <div class="login-header__desktop max-lg:hidden lg:flex">
+                <div class="flex items-center gap-3 min-w-0 z-10">
+                    <span class="text-xl sm:text-2xl lg:text-3xl font-black bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent tracking-tight drop-shadow truncate">Geo Trip Planner</span>
+                </div>
+                <button type="button" onclick="toggleAdminPanel(true)"
+                    class="absolute left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white bg-white/15 border border-white/25 backdrop-blur-sm hover:bg-purple-600 hover:border-purple-500 transition-all cursor-pointer">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="hidden sm:inline">Admin</span>
+                </button>
+                <div class="flex flex-col items-end shrink min-w-0 z-10">
+                    <span class="flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur px-2.5 py-1 rounded-xl shadow-sm border border-slate-200 shrink min-w-0">
+                        <img src="images/iittirupati.png" alt="IIT Tirupati" class="h-12 sm:h-14 w-auto object-contain" />
+                        <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
+                        <img src="images/IITTNiF logo.png" alt="IIT Tirupati Navavishkār I-Hub Foundation" class="h-12 sm:h-14 w-auto object-contain" />
+                        <div class="h-5 sm:h-6 w-[1px] bg-slate-200"></div>
+                        <img src="images/make_in_india_logo.png" alt="Make in India" class="h-12 sm:h-14 w-auto object-contain" />
+                    </span>
+                    <p class="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-tight text-slate-300 drop-shadow-sm text-center"> Geo-Intel Lab, IITTNIF, Tirupati</p>
+                </div>
+            </div>
         </div>
     </header>
 
-    <main class="flex-1 flex items-center justify-center relative px-6 pt-28 pb-12 lg:pt-32 lg:pb-20">
+    <main class="flex-1 flex items-center justify-center relative px-6 pb-12 lg:pb-20">
 
         <!-- Left Content (Hidden on Mobile) -->
         <div class="hidden lg:flex flex-col max-w-sm absolute left-12 xl:left-16 top-32 xl:top-1/2 xl:-translate-y-1/2 space-y-6 z-50">
