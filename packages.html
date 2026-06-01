@@ -209,7 +209,15 @@
 
         .pricing-grid--budget-driven .pricing-card--premium .pricing-card__friendly-list li,
         .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__friendly-list li {
-            color: rgba(255, 255, 255, 0.95);
+            color: #0f172a;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__friendly-list li {
+            color: #065f46;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__friendly-list li {
+            color: #5b21b6;
         }
 
         .pricing-grid--budget-driven .pricing-card__highlights {
@@ -221,8 +229,16 @@
 
         .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights,
         .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights {
-            background: rgba(255, 255, 255, 0.14);
-            border-color: rgba(255, 255, 255, 0.22);
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights {
+            border-color: #a7f3d0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights {
+            border-color: #ddd6fe;
         }
 
         .pricing-grid--budget-driven .pricing-card__highlights-title,
@@ -236,10 +252,13 @@
         }
 
         .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights-title,
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-title {
+            color: #047857;
+        }
+
         .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights-title,
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-title,
         .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features-title {
-            color: rgba(255, 255, 255, 0.82);
+            color: #6d28d9;
         }
 
         .pricing-grid--budget-driven .pricing-card__highlights ul {
@@ -262,7 +281,7 @@
 
         .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights li,
         .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights li {
-            color: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
         }
 
         .pricing-grid--budget-driven .pricing-card__highlights li::before {
@@ -281,11 +300,11 @@
         }
 
         .pricing-grid--budget-driven .pricing-card--premium {
-            --check-color: #6ee7b7;
+            --check-color: #10b981;
         }
 
         .pricing-grid--budget-driven .pricing-card--superpremium {
-            --check-color: #c4b5fd;
+            --check-color: #7c3aed;
         }
 
         .pricing-grid--budget-driven .pricing-card--elite {
@@ -302,8 +321,17 @@
 
         .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-panel,
         .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features-panel {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.22);
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-panel {
+            border-color: #a7f3d0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features-panel {
+            border-color: #ddd6fe;
         }
 
         .pricing-grid--budget-driven .pricing-card__features {
@@ -329,8 +357,16 @@
 
         .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features li,
         .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features li {
-            color: rgba(255, 255, 255, 0.96);
-            border-bottom-color: rgba(255, 255, 255, 0.18);
+            color: #0f172a;
+            border-bottom-color: #e2e8f0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features li {
+            border-bottom-color: #d1fae5;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features li {
+            border-bottom-color: #ede9fe;
         }
 
         .pricing-grid--budget-driven .pricing-card__features li:last-child {
@@ -359,9 +395,21 @@
 
         .pricing-grid--budget-driven .pricing-card--premium .pricing-card__includes,
         .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__includes {
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.28);
+            color: #334155;
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__includes {
+            background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
+            border-color: rgba(16, 185, 129, 0.35);
+            color: #065f46;
+        }
+
+        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__includes {
+            background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
+            border-color: rgba(139, 92, 246, 0.35);
+            color: #5b21b6;
         }
 
         .pricing-grid--budget-driven .pricing-card__cta {
@@ -675,7 +723,11 @@
         }
 
         .pricing-card--premium .pricing-card__badge strong {
-            color: #ffffff;
+            color: #065f46;
+        }
+
+        .pricing-card--superpremium .pricing-card__badge strong {
+            color: #5b21b6;
         }
 
         .pricing-card__badge span {
@@ -688,9 +740,12 @@
             color: #64748b;
         }
 
-        .pricing-card--premium .pricing-card__badge span,
+        .pricing-card--premium .pricing-card__badge span {
+            color: #047857;
+        }
+
         .pricing-card--superpremium .pricing-card__badge span {
-            color: rgba(255, 255, 255, 0.82);
+            color: #6d28d9;
         }
 
         .pricing-card__wave {
@@ -724,9 +779,9 @@
 
         .pricing-card--premium .pricing-card__pick-hint,
         .pricing-card--superpremium .pricing-card__pick-hint {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.22);
-            color: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
+            border-color: #e2e8f0;
+            color: #334155;
         }
 
         .pricing-card__features {
@@ -752,7 +807,7 @@
 
         .pricing-card--premium .pricing-card__features li,
         .pricing-card--superpremium .pricing-card__features li {
-            color: rgba(255, 255, 255, 0.94);
+            color: #0f172a;
         }
 
         .pricing-card__features li::before {
@@ -860,7 +915,15 @@
         .pricing-card--premium .pricing-card__pick-hint,
         .pricing-card--superpremium .pricing-card__pick-hint,
         .pricing-card--premium .pricing-card__features li,
-        .pricing-card--superpremium .pricing-card__features li {
+        .pricing-card--superpremium .pricing-card__features li,
+        .pricing-card--premium .pricing-card__friendly-list li,
+        .pricing-card--superpremium .pricing-card__friendly-list li,
+        .pricing-card--premium .pricing-card__includes,
+        .pricing-card--superpremium .pricing-card__includes,
+        .pricing-card--premium .pricing-card__features-title,
+        .pricing-card--superpremium .pricing-card__features-title,
+        .pricing-card--premium .pricing-card__highlights-title,
+        .pricing-card--superpremium .pricing-card__highlights-title {
             color: #1f2937;
         }
 
