@@ -45,41 +45,42 @@
         rel="stylesheet" />
     <style>
         :root {
-            --pkg-ink: #0c1222;
-            --pkg-muted: #5c6578;
-            --pkg-line: rgba(148, 163, 184, 0.35);
+            --pkg-ink: #0a0f1a;
+            --pkg-muted: #475569;
+            --pkg-line: rgba(100, 116, 139, 0.45);
             --pkg-teal: #0d9488;
             --pkg-amber: #d97706;
-            --pkg-gold: #d4af37;
-            --pkg-feature-top: #14b8a6;
-            --pkg-feature-mid: #0d9488;
-            --pkg-feature-deep: #0f766e;
-            --pkg-feature-shadow: rgba(13, 148, 136, 0.38);
-            --pkg-feature-shadow-strong: rgba(13, 148, 136, 0.46);
-            --pkg-surface: #f6f7fb;
+            --pkg-gold: #ca8a04;
+            --pkg-feature-top: #0d9488;
+            --pkg-feature-mid: #0f766e;
+            --pkg-feature-deep: #115e59;
+            --pkg-feature-shadow: rgba(15, 118, 110, 0.42);
+            --pkg-feature-shadow-strong: rgba(15, 118, 110, 0.52);
+            --pkg-surface: #f4f6fa;
             --pkg-card: #ffffff;
+            color-scheme: light;
         }
 
         /* Middle “featured” card — distinct theme per grid (inherits into cards) */
         #peopleBudgetCards {
-            --budget-mid-top: #fbbf24;
+            --budget-mid-top: #f59e0b;
             --budget-mid-mid: #ea580c;
-            --budget-mid-deep: #9a3412;
-            --budget-mid-sh: rgba(234, 88, 12, 0.38);
-            --budget-mid-sh-strong: rgba(234, 88, 12, 0.48);
-            --budget-mid-bar: linear-gradient(90deg, #fef9c3, #f97316);
-            --budget-mid-ring: #fb923c;
+            --budget-mid-deep: #c2410c;
+            --budget-mid-sh: rgba(234, 88, 12, 0.42);
+            --budget-mid-sh-strong: rgba(194, 65, 12, 0.52);
+            --budget-mid-bar: linear-gradient(90deg, #fde047, #f97316);
+            --budget-mid-ring: #f97316;
             --budget-mid-cta-text: #9a3412;
         }
 
         #daysBudgetCards {
-            --budget-mid-top: #1e3a8a;
-            --budget-mid-mid: #134e4a;
-            --budget-mid-deep: #0f766e;
-            --budget-mid-sh: rgba(30, 64, 175, 0.36);
-            --budget-mid-sh-strong: rgba(15, 118, 110, 0.44);
-            --budget-mid-bar: linear-gradient(90deg, #7dd3fc, #0ea5e9);
-            --budget-mid-ring: var(--pkg-gold);
+            --budget-mid-top: #0284c7;
+            --budget-mid-mid: #0369a1;
+            --budget-mid-deep: #0e7490;
+            --budget-mid-sh: rgba(2, 132, 199, 0.4);
+            --budget-mid-sh-strong: rgba(14, 116, 144, 0.5);
+            --budget-mid-bar: linear-gradient(90deg, #38bdf8, #0ea5e9);
+            --budget-mid-ring: #0284c7;
             --budget-mid-cta-text: #0f766e;
         }
 
@@ -132,31 +133,589 @@
             }
         }
 
+        /* ─── Plan picker section (budget slider + cards) — premium motion ─── */
+        #plan-picker-section {
+            --plan-slider-pct: 7%;
+            --plan-tier-accent: #6d28d9;
+            --plan-tier-glow: rgba(109, 40, 217, 0.26);
+            position: relative;
+        }
+
+        #plan-picker-section > .flex.flex-col.items-center {
+            width: 100%;
+            max-width: 38rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 1rem;
+        }
+
+        #plan-picker-section .plan-picker-badge {
+            animation: planBadgeFloat 5s ease-in-out infinite;
+        }
+
+        @keyframes planBadgeFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        #plan-picker-section .plan-budget-slider-wrap {
+            width: 100%;
+            max-width: 38rem;
+            margin: 1.75rem auto 0;
+            padding: 1.15rem 1rem 1rem;
+            border-radius: 1.25rem;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.88));
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            transition: box-shadow 0.45s ease, border-color 0.45s ease;
+        }
+
+        #plan-picker-section.is-slider-active .plan-budget-slider-wrap {
+            border-color: rgba(124, 58, 237, 0.25);
+            box-shadow: 0 16px 48px rgba(124, 58, 237, 0.1), 0 0 0 1px rgba(124, 58, 237, 0.08);
+        }
+
+        #plan-picker-section .plan-budget-track {
+            position: relative;
+            width: 100%;
+            height: 2.75rem;
+            display: flex;
+            align-items: center;
+            overflow: visible;
+            --plan-track-h: 10px;
+            --plan-thumb: 26px;
+        }
+
+        #plan-picker-section .plan-budget-track__rail {
+            position: absolute;
+            left: calc(var(--plan-thumb) / 2);
+            right: calc(var(--plan-thumb) / 2);
+            top: 50%;
+            transform: translateY(-50%);
+            height: var(--plan-track-h);
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+            pointer-events: none;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+        }
+
+        #plan-picker-section .plan-budget-track__fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: var(--plan-slider-pct, 0%);
+            border-radius: inherit;
+            background: linear-gradient(90deg, #fde047 0%, #f97316 42%, var(--plan-tier-accent) 100%);
+            transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.45s ease;
+            pointer-events: none;
+        }
+
+        #plan-picker-section .plan-budget-range {
+            -webkit-appearance: none;
+            appearance: none;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 2.75rem;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #plan-picker-section .plan-budget-range::-webkit-slider-runnable-track {
+            height: var(--plan-track-h);
+            border-radius: 999px;
+            background: transparent;
+            border: none;
+        }
+
+        #plan-picker-section .plan-budget-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: var(--plan-thumb);
+            height: var(--plan-thumb);
+            margin-top: calc((var(--plan-track-h) - var(--plan-thumb)) / 2);
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--plan-tier-accent);
+            box-shadow:
+                0 2px 8px rgba(15, 23, 42, 0.12),
+                0 4px 16px var(--plan-tier-glow);
+            cursor: grab;
+            transition: transform 0.22s cubic-bezier(0.34, 1.45, 0.64, 1), box-shadow 0.25s ease, border-color 0.35s ease;
+        }
+
+        #plan-picker-section .plan-budget-range:active::-webkit-slider-thumb,
+        #plan-picker-section .plan-budget-range.is-dragging::-webkit-slider-thumb {
+            transform: scale(1.1);
+            box-shadow:
+                0 4px 14px var(--plan-tier-glow),
+                0 0 0 6px rgba(124, 58, 237, 0.1);
+            cursor: grabbing;
+        }
+
+        #plan-picker-section .plan-budget-range::-moz-range-track {
+            height: var(--plan-track-h);
+            border-radius: 999px;
+            background: transparent;
+            border: none;
+        }
+
+        #plan-picker-section .plan-budget-range::-moz-range-progress {
+            height: var(--plan-track-h);
+            border-radius: 999px 0 0 999px;
+            background: transparent;
+        }
+
+        #plan-picker-section .plan-budget-range::-moz-range-thumb {
+            width: var(--plan-thumb);
+            height: var(--plan-thumb);
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--plan-tier-accent);
+            box-shadow: 0 4px 16px var(--plan-tier-glow);
+            cursor: grab;
+            transition: transform 0.22s ease, box-shadow 0.25s ease;
+        }
+
+        #plan-picker-section .plan-budget-slider__track-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.65rem;
+        }
+
+        #plan-picker-section .plan-budget-range:focus-visible::-webkit-slider-thumb {
+            box-shadow:
+                0 2px 8px rgba(15, 23, 42, 0.12),
+                0 0 0 4px rgba(124, 58, 237, 0.25);
+        }
+
+        #plan-picker-section .plan-budget-range:focus-visible::-moz-range-thumb {
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.25);
+        }
+
+        #plan-picker-section .plan-slider-link {
+            position: relative;
+            max-width: 38rem;
+            height: 2.25rem;
+            margin: 0.35rem auto 0;
+            overflow: visible;
+        }
+
+        #plan-picker-section .plan-slider-link__beam {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, var(--plan-tier-accent), rgba(124, 58, 237, 0.35), transparent);
+            opacity: 0.55;
+            border-radius: 999px;
+            transition: opacity 0.4s ease;
+        }
+
+        #plan-picker-section .plan-slider-link__pulse {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 10px;
+            height: 10px;
+            transform: translate(-50%, -50%) scale(0);
+            border-radius: 50%;
+            background: var(--plan-tier-accent);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #plan-picker-section.is-tier-pulse .plan-slider-link__pulse {
+            animation: planLinkPulse 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes planLinkPulse {
+            0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.7; }
+            100% { transform: translate(-50%, -50%) scale(14); opacity: 0; }
+        }
+
+        #plan-picker-section .plan-card-stage {
+            position: relative;
+            max-width: 38rem;
+            margin: 0 auto;
+            padding: 0.5rem 1rem 0;
+            overflow: visible;
+        }
+
+        #plan-picker-section .plan-card-stage__glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(48px);
+            opacity: 0.45;
+            pointer-events: none;
+            transition: background 0.6s ease, opacity 0.5s ease;
+        }
+
+        #plan-picker-section .plan-card-stage__glow--a {
+            width: 14rem;
+            height: 14rem;
+            top: 10%;
+            left: -8%;
+            background: var(--plan-tier-glow);
+        }
+
+        #plan-picker-section .plan-card-stage__glow--b {
+            width: 11rem;
+            height: 11rem;
+            bottom: 5%;
+            right: -6%;
+            background: rgba(251, 191, 36, 0.2);
+        }
+
+        #plan-picker-section.is-tier-pulse .plan-card-stage__glow {
+            opacity: 0.72;
+            animation: planGlowBreath 0.85s ease-out;
+        }
+
+        @keyframes planGlowBreath {
+            0% { transform: scale(0.92); opacity: 0.35; }
+            50% { transform: scale(1.08); opacity: 0.75; }
+            100% { transform: scale(1); opacity: 0.45; }
+        }
+
         .pricing-grid--budget-driven {
+            display: grid;
             grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
             max-width: 38rem;
             margin-left: auto;
             margin-right: auto;
             min-height: 0;
             gap: 0;
+            overflow: visible;
+            isolation: isolate;
         }
 
         .pricing-grid.pricing-grid--budget-driven.mt-10 {
             margin-top: 1.25rem;
         }
 
-        .pricing-grid--budget-driven .pricing-card {
-            display: none;
-            animation: none;
-            max-width: 100%;
-        }
-
-        .pricing-grid--budget-driven .pricing-card.is-budget-active {
+        #plan-picker-section .pricing-grid--budget-driven .pricing-card {
+            grid-area: 1 / 1;
             display: flex;
             flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(12px) scale(0.992);
+            filter: none;
+            z-index: 0;
+            max-width: 100%;
+            width: 100%;
             animation: none;
+            transform-origin: center center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            transition: none;
+            will-change: transform, opacity;
+        }
+
+        #plan-picker-section .pricing-grid--budget-driven .pricing-card.is-budget-leaving {
+            visibility: visible;
+            pointer-events: none;
+            z-index: 1;
+            filter: none;
+            animation: planCardLeave 0.44s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        #plan-picker-section .pricing-grid--budget-driven .pricing-card.is-budget-active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            filter: none;
+            z-index: 2;
             max-width: 100%;
             min-height: 0;
+            transform: translateY(0) scale(1);
+            box-shadow:
+                0 24px 56px rgba(15, 23, 42, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.5),
+                0 0 48px var(--plan-tier-glow);
+            transition: box-shadow 0.5s ease;
+        }
+
+        #plan-picker-section .pricing-grid--budget-driven .pricing-card.is-budget-active.is-budget-entering {
+            animation: planCardEnter 0.56s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        #plan-picker-section .pricing-grid--budget-driven .pricing-card.is-budget-active:not(.is-budget-entering):hover {
+            transform: translateY(-4px) scale(1.008);
+            box-shadow:
+                0 28px 60px rgba(15, 23, 42, 0.12),
+                0 0 0 1px rgba(124, 58, 237, 0.1),
+                0 0 52px var(--plan-tier-glow);
+            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.32s ease;
+        }
+
+        @keyframes planCardEnter {
+            from {
+                opacity: 1;
+                transform: translateY(14px) scale(0.992);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes planCardLeave {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.992);
+            }
+        }
+
+        @keyframes planSlideIn {
+            from {
+                transform: translateY(8px);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes planIconReveal {
+            from {
+                transform: translateY(6px) scale(0.94);
+            }
+            to {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes planIconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        @keyframes planTierLabelIn {
+            from {
+                transform: translateY(6px);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes planBudgetValuePop {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.05); color: var(--plan-tier-accent); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes planShineSweep {
+            from { transform: translateX(-130%) skewX(-12deg); }
+            to { transform: translateX(130%) skewX(-12deg); }
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__top-wrap {
+            animation: planSlideIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__tagline {
+            animation: planSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__icon-wrap {
+            animation: planIconReveal 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-active:not(.is-budget-entering) .pricing-card__icon-wrap {
+            animation: planIconFloat 5s ease-in-out infinite;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__friendly-list li:nth-child(1) {
+            animation: planSlideIn 0.44s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__friendly-list li:nth-child(2) {
+            animation: planSlideIn 0.44s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__highlights {
+            animation: planSlideIn 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__highlights li:nth-child(1) {
+            animation: planSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__highlights li:nth-child(2) {
+            animation: planSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.26s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__highlights li:nth-child(3) {
+            animation: planSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__features-panel {
+            animation: planSlideIn 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__features li:nth-child(1) {
+            animation: planSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__features li:nth-child(2) {
+            animation: planSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.36s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__features li:nth-child(3) {
+            animation: planSlideIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__includes {
+            animation: planSlideIn 0.44s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__cta {
+            animation: planSlideIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.46s both;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__tagline,
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__friendly-list li,
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__highlights,
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__highlights li,
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__features-panel,
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__features li,
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__includes,
+        #plan-picker-section .pricing-card.is-budget-entering .pricing-card__cta {
+            opacity: 1;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-active .pricing-card__cta {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, filter 0.2s ease;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-active .pricing-card__cta::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.42) 50%, transparent 65%);
+            transform: translateX(-130%) skewX(-12deg);
+            pointer-events: none;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-active .pricing-card__cta:hover {
+            transform: translateY(-2px) scale(1.02);
+            filter: brightness(1.05);
+        }
+
+        #plan-picker-section .pricing-card.is-budget-active .pricing-card__cta:hover::after {
+            animation: planShineSweep 0.75s ease;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-active .pricing-card__highlights,
+        #plan-picker-section .pricing-card.is-budget-active .pricing-card__features-panel {
+            transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
+        }
+
+        #plan-picker-section .pricing-card.is-budget-active .pricing-card__highlights:hover,
+        #plan-picker-section .pricing-card.is-budget-active .pricing-card__features-panel:hover {
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            transform: translateY(-1px);
+        }
+
+        #plan-picker-section .plan-budget-slider__tier.is-tier-updated {
+            display: inline-block;
+            animation: planTierLabelIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            color: var(--plan-tier-accent);
+        }
+
+        #plan-picker-section .plan-budget-slider__value strong.is-budget-updated {
+            display: inline-block;
+            animation: planBudgetValuePop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @media (max-width: 640px) {
+            @keyframes planCardEnter {
+                from {
+                    opacity: 1;
+                    transform: translateY(10px) scale(0.994);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            #plan-picker-section .plan-card-stage__glow {
+                filter: blur(36px);
+                opacity: 0.35;
+            }
+        }
+
+        @media (hover: none) {
+            #plan-picker-section .pricing-grid--budget-driven .pricing-card.is-budget-active:hover {
+                transform: translateY(0) scale(1);
+            }
+
+            #plan-picker-section .pricing-card.is-budget-active .pricing-card__cta:hover {
+                transform: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #plan-picker-section .plan-picker-badge,
+            #plan-picker-section .plan-card-stage__glow,
+            #plan-picker-section .pricing-card.is-budget-active:not(.is-budget-entering) .pricing-card__icon-wrap {
+                animation: none !important;
+            }
+
+            #plan-picker-section .pricing-grid--budget-driven .pricing-card,
+            #plan-picker-section .pricing-grid--budget-driven .pricing-card.is-budget-leaving,
+            #plan-picker-section .pricing-grid--budget-driven .pricing-card.is-budget-active.is-budget-entering {
+                transition: none;
+                filter: none;
+                transform: none;
+                animation: none !important;
+            }
+
+            #plan-picker-section .pricing-grid--budget-driven .pricing-card:not(.is-budget-active) {
+                display: none;
+            }
+
+            #plan-picker-section .pricing-grid--budget-driven .pricing-card.is-budget-active {
+                display: flex;
+                opacity: 1;
+                visibility: visible;
+            }
+
+            #plan-picker-section .pricing-card.is-budget-entering *,
+            #plan-picker-section .plan-budget-slider__tier.is-tier-updated,
+            #plan-picker-section .plan-budget-slider__value strong.is-budget-updated,
+            #plan-picker-section .plan-slider-link__pulse {
+                animation: none !important;
+            }
+        }
+
+        .pricing-grid--budget-driven .pricing-card:not(.is-budget-active):not(.is-budget-leaving) {
+            animation: none !important;
         }
 
         .pricing-grid--budget-driven .pricing-card__header {
@@ -205,40 +764,15 @@
             padding-top: 0.05rem;
             padding-bottom: 0.05rem;
             color: #0f172a;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__friendly-list li,
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__friendly-list li {
-            color: #0f172a;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__friendly-list li {
-            color: #065f46;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__friendly-list li {
-            color: #5b21b6;
+            font-weight: 600;
         }
 
         .pricing-grid--budget-driven .pricing-card__highlights {
             padding: 0.75rem 0.9rem;
             border-radius: 0.8rem;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights,
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights {
-            background: #ffffff;
-            border-color: #e2e8f0;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights {
-            border-color: #a7f3d0;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights {
-            border-color: #ddd6fe;
+            background: var(--panel-bg, #f8fafc);
+            border: 1px solid var(--panel-border, #cbd5e1);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
         }
 
         .pricing-grid--budget-driven .pricing-card__highlights-title,
@@ -248,17 +782,7 @@
             font-weight: 800;
             letter-spacing: 0.07em;
             text-transform: uppercase;
-            color: #64748b;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights-title,
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-title {
-            color: #047857;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights-title,
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features-title {
-            color: #6d28d9;
+            color: var(--offer-text, #475569);
         }
 
         .pricing-grid--budget-driven .pricing-card__highlights ul {
@@ -279,11 +803,6 @@
             color: #0f172a;
         }
 
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__highlights li,
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__highlights li {
-            color: #1e293b;
-        }
-
         .pricing-grid--budget-driven .pricing-card__highlights li::before {
             content: "check";
             font-family: "Material Symbols Outlined";
@@ -292,52 +811,37 @@
             top: 0.05rem;
             font-size: 1rem;
             font-variation-settings: "FILL" 1, "wght" 700, "GRAD" 0, "opsz" 20;
-            color: var(--check-color, #ea580c);
+            color: var(--check-color, #c2410c);
         }
 
         .pricing-grid--budget-driven .pricing-card--standard {
-            --check-color: #2563eb;
+            --check-color: #1d4ed8;
         }
 
         .pricing-grid--budget-driven .pricing-card--premium {
-            --check-color: #10b981;
+            --check-color: #047857;
         }
 
         .pricing-grid--budget-driven .pricing-card--superpremium {
-            --check-color: #7c3aed;
+            --check-color: #6d28d9;
         }
 
         .pricing-grid--budget-driven .pricing-card--elite {
-            --check-color: #d97706;
-        }
-
-        .pricing-grid--budget-driven .pricing-card__features-panel {
-            padding: 0.75rem 0.9rem;
-            border-radius: 0.8rem;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-panel,
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features-panel {
-            background: #ffffff;
-            border-color: #e2e8f0;
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features-panel {
-            border-color: #a7f3d0;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features-panel {
-            border-color: #ddd6fe;
+            --check-color: #b45309;
         }
 
         .pricing-grid--budget-driven .pricing-card__features {
             flex: 0 0 auto;
             margin: 0;
             max-width: none;
+        }
+
+        .pricing-grid--budget-driven .pricing-card__features-panel {
+            padding: 0.75rem 0.9rem;
+            border-radius: 0.8rem;
+            background: #ffffff;
+            border: 1px solid var(--panel-border, #cbd5e1);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
         }
 
         .pricing-grid--budget-driven .pricing-card__features li {
@@ -352,21 +856,14 @@
             width: 100%;
             line-height: 1.42;
             color: #0f172a;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid color-mix(in srgb, var(--panel-border, #e2e8f0) 65%, transparent);
         }
 
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features li,
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features li {
-            color: #0f172a;
-            border-bottom-color: #e2e8f0;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__features li {
-            border-bottom-color: #d1fae5;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__features li {
-            border-bottom-color: #ede9fe;
+        .pricing-grid--budget-driven .pricing-card__features li .material-symbols-outlined {
+            flex-shrink: 0;
+            font-size: 1.2rem;
+            margin-top: 0.05rem;
+            color: var(--check-color, #c2410c);
         }
 
         .pricing-grid--budget-driven .pricing-card__features li:last-child {
@@ -374,42 +871,17 @@
             padding-bottom: 0;
         }
 
-        .pricing-grid--budget-driven .pricing-card__features li .material-symbols-outlined {
-            flex-shrink: 0;
-            font-size: 1.2rem;
-            margin-top: 0.05rem;
-        }
-
         .pricing-grid--budget-driven .pricing-card__includes {
             margin: 0;
             padding: 0.65rem 0.85rem;
             border-radius: 0.65rem;
             font-size: 0.88rem;
-            font-weight: 600;
+            font-weight: 700;
             line-height: 1.45;
             text-align: center;
-            color: #475569;
-            background: linear-gradient(180deg, #fffbeb 0%, #fff7ed 100%);
-            border: 1px dashed rgba(251, 146, 60, 0.45);
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__includes,
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__includes {
-            color: #334155;
-            background: #ffffff;
-            border-color: #e2e8f0;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--premium .pricing-card__includes {
-            background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
-            border-color: rgba(16, 185, 129, 0.35);
-            color: #065f46;
-        }
-
-        .pricing-grid--budget-driven .pricing-card--superpremium .pricing-card__includes {
-            background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
-            border-color: rgba(139, 92, 246, 0.35);
-            color: #5b21b6;
+            color: var(--offer-text, #475569);
+            background: var(--offer-bg, #fff7ed);
+            border: 1px dashed var(--offer-border, #ea580c);
         }
 
         .pricing-grid--budget-driven .pricing-card__cta {
@@ -443,13 +915,6 @@
             margin-bottom: 1.75rem;
         }
 
-        .plan-budget-slider-wrap {
-            width: 100%;
-            max-width: 38rem;
-            margin: 1.75rem auto 0;
-            padding: 0 0.5rem;
-        }
-
         .plan-budget-slider__track-labels {
             display: flex;
             justify-content: space-between;
@@ -461,38 +926,6 @@
             margin-bottom: 0.55rem;
         }
 
-        .plan-budget-range {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 10px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #fef3c7, #fbbf24, #d97706);
-            outline: none;
-            cursor: pointer;
-        }
-
-        .plan-budget-range::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: #fff;
-            border: 4px solid #d97706;
-            box-shadow: 0 3px 12px rgba(217, 119, 6, 0.45);
-            cursor: grab;
-        }
-
-        .plan-budget-range::-moz-range-thumb {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: #fff;
-            border: 4px solid #d97706;
-            box-shadow: 0 3px 12px rgba(217, 119, 6, 0.45);
-            cursor: grab;
-        }
-
         .plan-budget-slider__value {
             margin: 1rem 0 0;
             text-align: center;
@@ -502,7 +935,7 @@
         }
 
         .plan-budget-slider__value strong {
-            color: #92400e;
+            color: #c2410c;
             font-size: 1.35rem;
         }
 
@@ -511,7 +944,7 @@
             margin-top: 0.45rem;
             font-size: 1.1rem;
             font-weight: 700;
-            color: #7c3aed;
+            color: #6d28d9;
         }
 
         .sr-only {
@@ -571,28 +1004,7 @@
 
         .pricing-card--premium,
         .pricing-card--superpremium {
-            background: linear-gradient(165deg,
-                    var(--pkg-feature-top) 0%,
-                    var(--pkg-feature-mid) 52%,
-                    var(--pkg-feature-deep) 100%);
-            box-shadow:
-                0 22px 56px var(--pkg-feature-shadow),
-                0 0 0 1px rgba(255, 255, 255, 0.14);
             align-self: stretch;
-        }
-
-        .pricing-card--premium:hover,
-        .pricing-card--superpremium:hover {
-            box-shadow:
-                0 28px 64px var(--pkg-feature-shadow-strong),
-                0 0 0 1px rgba(255, 255, 255, 0.22);
-        }
-
-        .pricing-card--premium.is-selected,
-        .pricing-card--superpremium.is-selected {
-            box-shadow:
-                0 0 0 2px var(--pkg-gold),
-                0 24px 56px var(--pkg-feature-shadow-strong);
         }
 
         /* Decorative accent bar (gold — matches kicker / brand accents) */
@@ -654,43 +1066,38 @@
         }
 
         .pricing-card--basic .pricing-card__tagline {
-            color: #ea580c;
-            background: linear-gradient(135deg, #fb923c 0%, #fdba74 55%, #fed7aa 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #c2410c;
+            background: none;
+            -webkit-text-fill-color: currentColor;
+            background-clip: border-box;
         }
 
         .pricing-card--standard .pricing-card__tagline {
-            color: #2563eb;
-            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 55%, #93c5fd 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #1d4ed8;
+            background: none;
+            -webkit-text-fill-color: currentColor;
+            background-clip: border-box;
         }
 
         .pricing-card--premium .pricing-card__tagline {
-            color: #059669;
-            background: linear-gradient(135deg, #10b981 0%, #34d399 55%, #6ee7b7 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #047857;
+            background: none;
+            -webkit-text-fill-color: currentColor;
+            background-clip: border-box;
         }
 
         .pricing-card--superpremium .pricing-card__tagline {
-            color: #7c3aed;
-            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 55%, #c4b5fd 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #6d28d9;
+            background: none;
+            -webkit-text-fill-color: currentColor;
+            background-clip: border-box;
         }
 
         .pricing-card--elite .pricing-card__tagline {
             color: #b45309;
-            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fde68a 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            background: none;
+            -webkit-text-fill-color: currentColor;
+            background-clip: border-box;
         }
 
         .pricing-card__badge {
@@ -882,30 +1289,30 @@
             --dot: #ffffff;
         }
 
-        /* Per-card light themes */
+        /* Per-card vivid themes */
         .pricing-card--basic {
-            background: linear-gradient(165deg, #fffaf3 0%, #fff3e0 100%);
-            box-shadow: 0 10px 30px rgba(251, 146, 60, 0.14), 0 0 0 1px rgba(251, 191, 36, 0.2);
+            background: linear-gradient(168deg, #fff7ed 0%, #ffedd5 48%, #fed7aa 100%);
+            box-shadow: 0 12px 36px rgba(194, 65, 12, 0.18), 0 0 0 1px rgba(251, 146, 60, 0.35);
         }
 
         .pricing-card--standard {
-            background: linear-gradient(165deg, #f8fbff 0%, #eaf3ff 100%);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.14), 0 0 0 1px rgba(125, 211, 252, 0.28);
+            background: linear-gradient(168deg, #eff6ff 0%, #dbeafe 48%, #bfdbfe 100%);
+            box-shadow: 0 12px 36px rgba(29, 78, 216, 0.16), 0 0 0 1px rgba(59, 130, 246, 0.32);
         }
 
         .pricing-card--premium {
-            background: linear-gradient(165deg, #f3fffb 0%, #e6fffb 100%);
-            box-shadow: 0 10px 30px rgba(20, 184, 166, 0.16), 0 0 0 1px rgba(94, 234, 212, 0.28);
+            background: linear-gradient(168deg, #ecfdf5 0%, #d1fae5 48%, #a7f3d0 100%);
+            box-shadow: 0 12px 36px rgba(4, 120, 87, 0.18), 0 0 0 1px rgba(16, 185, 129, 0.35);
         }
 
         .pricing-card--superpremium {
-            background: linear-gradient(165deg, #faf8ff 0%, #f1edff 100%);
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.16), 0 0 0 1px rgba(196, 181, 253, 0.28);
+            background: linear-gradient(168deg, #f5f3ff 0%, #ede9fe 48%, #ddd6fe 100%);
+            box-shadow: 0 12px 36px rgba(109, 40, 217, 0.18), 0 0 0 1px rgba(139, 92, 246, 0.35);
         }
 
         .pricing-card--elite {
-            background: linear-gradient(165deg, #fffbeb 0%, #fef3c7 100%);
-            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.16), 0 0 0 1px rgba(253, 230, 138, 0.45);
+            background: linear-gradient(168deg, #fffbeb 0%, #fef3c7 48%, #fde68a 100%);
+            box-shadow: 0 12px 36px rgba(180, 83, 9, 0.18), 0 0 0 1px rgba(245, 158, 11, 0.4);
         }
 
         .pricing-card--premium .pricing-card__header,
@@ -947,11 +1354,11 @@
         }
 
         .pricing-card--premium::before {
-            background: linear-gradient(90deg, #14b8a6, #0ea5e9);
+            background: linear-gradient(90deg, #059669, #0d9488);
         }
 
         .pricing-card--superpremium::before {
-            background: linear-gradient(90deg, #8b5cf6, #ec4899);
+            background: linear-gradient(90deg, #7c3aed, #a855f7);
         }
 
         .pricing-card--premium {
@@ -962,60 +1369,80 @@
             --dot: #7c3aed;
         }
 
-        /* Tier specific theme variables */
+        /* Tier specific theme variables — saturated for crisp UI */
         .pricing-card--basic {
-            --offer-bg: #fffbeb;
-            --offer-border: #f59e0b;
-            --offer-text: #d97706;
-            --check-color: #f97316;
-            --cta-bg: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            --offer-bg: #ffedd5;
+            --offer-border: #ea580c;
+            --offer-text: #c2410c;
+            --check-color: #ea580c;
+            --cta-bg: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
             --cta-text: #ffffff;
             --icon-bg: #ffedd5;
-            --icon-text: #ea580c;
+            --icon-border: #fdba74;
+            --icon-shadow: rgba(194, 65, 12, 0.22);
+            --icon-text: #c2410c;
+            --panel-bg: #fff7ed;
+            --panel-border: #fdba74;
         }
 
         .pricing-card--standard {
-            --offer-bg: #eff6ff;
-            --offer-border: #3b82f6;
-            --offer-text: #1d4ed8;
-            --check-color: #3b82f6;
-            --cta-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --offer-bg: #dbeafe;
+            --offer-border: #2563eb;
+            --offer-text: #1e40af;
+            --check-color: #2563eb;
+            --cta-bg: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             --cta-text: #ffffff;
             --icon-bg: #dbeafe;
-            --icon-text: #2563eb;
+            --icon-border: #93c5fd;
+            --icon-shadow: rgba(29, 78, 216, 0.22);
+            --icon-text: #1d4ed8;
+            --panel-bg: #eff6ff;
+            --panel-border: #93c5fd;
         }
 
         .pricing-card--premium {
-            --offer-bg: #ecfdf5;
-            --offer-border: #10b981;
+            --offer-bg: #d1fae5;
+            --offer-border: #059669;
             --offer-text: #047857;
-            --check-color: #10b981;
-            --cta-bg: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --check-color: #059669;
+            --cta-bg: linear-gradient(135deg, #10b981 0%, #047857 100%);
             --cta-text: #ffffff;
             --icon-bg: #d1fae5;
-            --icon-text: #059669;
+            --icon-border: #6ee7b7;
+            --icon-shadow: rgba(4, 120, 87, 0.22);
+            --icon-text: #047857;
+            --panel-bg: #ecfdf5;
+            --panel-border: #6ee7b7;
         }
 
         .pricing-card--superpremium {
-            --offer-bg: #f5f3ff;
-            --offer-border: #8b5cf6;
-            --offer-text: #6d28d9;
-            --check-color: #8b5cf6;
-            --cta-bg: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --offer-bg: #ede9fe;
+            --offer-border: #7c3aed;
+            --offer-text: #5b21b6;
+            --check-color: #7c3aed;
+            --cta-bg: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
             --cta-text: #ffffff;
             --icon-bg: #ede9fe;
-            --icon-text: #7c3aed;
+            --icon-border: #c4b5fd;
+            --icon-shadow: rgba(109, 40, 217, 0.22);
+            --icon-text: #6d28d9;
+            --panel-bg: #f5f3ff;
+            --panel-border: #c4b5fd;
         }
 
         .pricing-card--elite {
-            --offer-bg: #fffbeb;
-            --offer-border: #f59e0b;
-            --offer-text: #b45309;
+            --offer-bg: #fef3c7;
+            --offer-border: #d97706;
+            --offer-text: #92400e;
             --check-color: #d97706;
-            --cta-bg: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            --cta-text: #78350f;
+            --cta-bg: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --cta-text: #ffffff;
             --icon-bg: #fef3c7;
-            --icon-text: #92400e;
+            --icon-border: #fcd34d;
+            --icon-shadow: rgba(180, 83, 9, 0.22);
+            --icon-text: #b45309;
+            --panel-bg: #fffbeb;
+            --panel-border: #fcd34d;
         }
 
         .pricing-card__icon-wrap {
@@ -1025,11 +1452,12 @@
             width: 4.8rem;
             height: 4.8rem;
             border-radius: 50%;
-            background: #ffffff;
+            background: var(--icon-bg, #ffffff);
             color: var(--icon-text);
+            border: 2px solid var(--icon-border, rgba(148, 163, 184, 0.35));
             margin-bottom: 0.5rem;
             z-index: 2;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 6px 18px var(--icon-shadow, rgba(15, 23, 42, 0.1));
             position: relative;
         }
 
@@ -1062,7 +1490,7 @@
             height: 160px;
             border-radius: 50%;
             background: var(--icon-bg);
-            opacity: 0.6;
+            opacity: 0.92;
             z-index: 1;
         }
 
@@ -1135,11 +1563,16 @@
             line-height: 1.35;
         }
 
+        .pricing-card--elite .pricing-card__cta {
+            --cta-bg: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --cta-text: #ffffff;
+        }
+
         .pricing-card__friendly {
             margin: 0 0 0.5rem;
             font-size: 0.83rem;
             line-height: 1.45;
-            color: #475569;
+            color: #334155;
             text-align: left;
         }
 
@@ -1175,10 +1608,10 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.35rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
             font-size: 0.88rem;
             font-weight: 600;
-            color: #475569;
+            color: #1e293b;
         }
 
         .pricing-card__features li:last-child {
@@ -2738,12 +3171,48 @@
             overflow: visible;
             border: none;
             box-shadow:
-                0 8px 32px rgba(15, 23, 42, 0.07),
-                0 0 0 1px rgba(226, 232, 240, 0.95);
+                0 10px 36px rgba(15, 23, 42, 0.08),
+                0 0 0 1px rgba(203, 213, 225, 0.9);
             transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
             min-height: 0;
             display: flex;
             flex-direction: column;
+        }
+
+        #peopleBudgetCards > .people-budget-card:nth-child(1),
+        #daysBudgetCards > .people-budget-card:nth-child(1) {
+            background: linear-gradient(168deg, #fff7ed 0%, #ffedd5 100%);
+            box-shadow: 0 10px 36px rgba(194, 65, 12, 0.14), 0 0 0 1px rgba(251, 146, 60, 0.32);
+        }
+
+        #peopleBudgetCards > .people-budget-card:nth-child(1) .people-budget-card__title,
+        #daysBudgetCards > .people-budget-card:nth-child(1) .people-budget-card__title {
+            color: #c2410c;
+        }
+
+        #peopleBudgetCards > .people-budget-card:nth-child(3),
+        #daysBudgetCards > .people-budget-card:nth-child(3) {
+            background: linear-gradient(168deg, #f5f3ff 0%, #ede9fe 100%);
+            box-shadow: 0 10px 36px rgba(109, 40, 217, 0.14), 0 0 0 1px rgba(139, 92, 246, 0.32);
+        }
+
+        #peopleBudgetCards > .people-budget-card:nth-child(3) .people-budget-card__title,
+        #daysBudgetCards > .people-budget-card:nth-child(3) .people-budget-card__title {
+            color: #6d28d9;
+        }
+
+        #peopleBudgetCards > .people-budget-card:nth-child(1) .people-budget-card__range,
+        #daysBudgetCards > .people-budget-card:nth-child(1) .people-budget-card__range {
+            background: #ffedd5;
+            border-color: #fdba74;
+            color: #9a3412;
+        }
+
+        #peopleBudgetCards > .people-budget-card:nth-child(3) .people-budget-card__range,
+        #daysBudgetCards > .people-budget-card:nth-child(3) .people-budget-card__range {
+            background: #ede9fe;
+            border-color: #c4b5fd;
+            color: #5b21b6;
         }
 
         .people-budget-card:hover {
@@ -3703,9 +4172,9 @@
                 </section>
             </div>
 
-            <div class="packages-section mt-12">
+            <div class="packages-section mt-12" id="plan-picker-section">
                 <div class="flex flex-col items-center">
-                    <div class="pill-badge">
+                    <div class="pill-badge plan-picker-badge">
                         <span class="sparkle">✦</span> Smart plans, memorable journeys
                     </div>
                     <h2 id="sec-tiers" class="packages-section__title">Choose the <span class="text-purple-600">perfect plan</span> for your trip</h2>
@@ -3715,17 +4184,30 @@
                             <span>₹1,000</span>
                             <span>₹30,000</span>
                         </div>
-                        <input type="range" id="planBudgetRange" class="plan-budget-range" min="1000" max="30000"
-                            step="500" value="3000" aria-valuemin="1000" aria-valuemax="30000" aria-valuenow="3000"
-                            aria-label="Select your trip budget" />
+                        <div class="plan-budget-track">
+                            <div class="plan-budget-track__rail" aria-hidden="true">
+                                <div class="plan-budget-track__fill" id="planBudgetTrackFill"></div>
+                            </div>
+                            <input type="range" id="planBudgetRange" class="plan-budget-range" min="1000" max="30000"
+                                step="500" value="3000" aria-valuemin="1000" aria-valuemax="30000" aria-valuenow="3000"
+                                aria-label="Select your trip budget" />
+                        </div>
                         <p class="plan-budget-slider__value">
                             Your budget: <strong id="planBudgetValue">₹3,000</strong>
                             <span class="plan-budget-slider__tier" id="planBudgetTierLabel">Basic package</span>
                         </p>
                     </div>
                 </div>
-                <section class="pricing-grid pricing-grid--budget-driven mt-10" id="packageCards"
-                    aria-label="Package tier for your budget" aria-live="polite"></section>
+                <div class="plan-slider-link" aria-hidden="true">
+                    <span class="plan-slider-link__beam"></span>
+                    <span class="plan-slider-link__pulse"></span>
+                </div>
+                <div class="plan-card-stage">
+                    <div class="plan-card-stage__glow plan-card-stage__glow--a" aria-hidden="true"></div>
+                    <div class="plan-card-stage__glow plan-card-stage__glow--b" aria-hidden="true"></div>
+                    <section class="pricing-grid pricing-grid--budget-driven mt-10" id="packageCards"
+                        aria-label="Package tier for your budget" aria-live="polite"></section>
+                </div>
 
                 <div class="bottom-features">
                     <div class="feature-item">
@@ -4183,16 +4665,64 @@
                 return 4;
             }
 
-            function showPackageCardForBudget(amount) {
-                var idx = tierIndexForBudget(amount);
-                var root = document.getElementById('packageCards');
-                if (!root) return;
-                var cards = root.querySelectorAll('.pricing-card');
-                cards.forEach(function (card, i) {
-                    var active = i === idx;
-                    card.classList.toggle('is-budget-active', active);
-                    card.setAttribute('aria-hidden', active ? 'false' : 'true');
-                });
+            var PLAN_BUDGET_CARD_ANIM_MS = 980;
+            var _planBudgetTierIdx = -1;
+            var PLAN_TIER_ACCENTS = [
+                { accent: '#c2410c', glow: 'rgba(194, 65, 12, 0.26)' },
+                { accent: '#1d4ed8', glow: 'rgba(29, 78, 216, 0.24)' },
+                { accent: '#047857', glow: 'rgba(4, 120, 87, 0.26)' },
+                { accent: '#6d28d9', glow: 'rgba(109, 40, 217, 0.26)' },
+                { accent: '#b45309', glow: 'rgba(180, 83, 9, 0.26)' }
+            ];
+
+            function planSliderFillPercent(amount) {
+                var min = PLAN_BUDGET_MIN;
+                var max = PLAN_BUDGET_MAX;
+                var v = Math.max(min, Math.min(max, Number(amount) || min));
+                return ((v - min) / (max - min)) * 100;
+            }
+
+            function updatePlanSliderVisual(amount, idx) {
+                var section = document.getElementById('plan-picker-section');
+                if (!section) return;
+                var pct = planSliderFillPercent(amount);
+                var pctStr = pct.toFixed(2) + '%';
+                section.style.setProperty('--plan-slider-pct', pctStr);
+                var theme = PLAN_TIER_ACCENTS[idx] || PLAN_TIER_ACCENTS[0];
+                section.style.setProperty('--plan-tier-accent', theme.accent);
+                section.style.setProperty('--plan-tier-glow', theme.glow);
+                var fill = document.getElementById('planBudgetTrackFill');
+                if (fill) fill.style.width = pctStr;
+            }
+
+            function triggerPlanTierPulse() {
+                var section = document.getElementById('plan-picker-section');
+                if (!section) return;
+                section.classList.remove('is-tier-pulse');
+                void section.offsetWidth;
+                section.classList.add('is-tier-pulse');
+                window.clearTimeout(triggerPlanTierPulse._t);
+                triggerPlanTierPulse._t = window.setTimeout(function () {
+                    section.classList.remove('is-tier-pulse');
+                }, 800);
+            }
+
+            function pulseBudgetSliderLabels(tierChanged) {
+                var valEl = document.getElementById('planBudgetValue');
+                var labEl = document.getElementById('planBudgetTierLabel');
+                if (valEl) {
+                    valEl.classList.remove('is-budget-updated');
+                    void valEl.offsetWidth;
+                    valEl.classList.add('is-budget-updated');
+                }
+                if (tierChanged && labEl) {
+                    labEl.classList.remove('is-tier-updated');
+                    void labEl.offsetWidth;
+                    labEl.classList.add('is-tier-updated');
+                }
+            }
+
+            function updatePlanBudgetLabels(amount, idx) {
                 var tier = TIERS[idx];
                 var valEl = document.getElementById('planBudgetValue');
                 var labEl = document.getElementById('planBudgetTierLabel');
@@ -4202,19 +4732,93 @@
                     labEl.textContent = tier.title + ' · ' + tier.displayRange;
                 }
                 if (rangeEl) rangeEl.setAttribute('aria-valuenow', String(amount));
-                document.querySelectorAll('.pricing-card').forEach(function (c) {
+            }
+
+            function showPackageCardForBudget(amount) {
+                var idx = tierIndexForBudget(amount);
+                var root = document.getElementById('packageCards');
+                if (!root) return;
+                var cards = root.querySelectorAll('.pricing-card');
+                var tierChanged = _planBudgetTierIdx !== idx;
+
+                updatePlanBudgetLabels(amount, idx);
+                updatePlanSliderVisual(amount, idx);
+                pulseBudgetSliderLabels(tierChanged);
+
+                if (!tierChanged) {
+                    return;
+                }
+
+                var prevIdx = _planBudgetTierIdx;
+                _planBudgetTierIdx = idx;
+                triggerPlanTierPulse();
+
+                cards.forEach(function (card, i) {
+                    card.classList.remove('is-budget-entering');
+                    if (i === prevIdx && prevIdx >= 0) {
+                        card.classList.remove('is-budget-active');
+                        card.classList.add('is-budget-leaving');
+                        card.setAttribute('aria-hidden', 'true');
+                    } else if (i !== idx) {
+                        card.classList.remove('is-budget-active', 'is-budget-leaving');
+                        card.setAttribute('aria-hidden', 'true');
+                    }
+                });
+
+                var next = cards[idx];
+                if (next) {
+                    next.classList.remove('is-budget-leaving');
+                    next.style.opacity = '1';
+                    next.style.visibility = 'visible';
+                    void next.offsetWidth;
+                    next.classList.add('is-budget-active', 'is-budget-entering');
+                    next.setAttribute('aria-hidden', 'false');
+                }
+
+                window.clearTimeout(showPackageCardForBudget._animTimer);
+                showPackageCardForBudget._animTimer = window.setTimeout(function () {
+                    cards.forEach(function (card) {
+                        card.classList.remove('is-budget-leaving', 'is-budget-entering');
+                        card.style.opacity = '';
+                        card.style.visibility = '';
+                    });
+                }, PLAN_BUDGET_CARD_ANIM_MS);
+
+                document.querySelectorAll('#plan-picker-section .pricing-card').forEach(function (c) {
                     c.classList.remove('is-selected');
                 });
             }
 
             function initPlanBudgetSlider() {
                 var range = document.getElementById('planBudgetRange');
+                var section = document.getElementById('plan-picker-section');
                 if (!range) return;
+
+                function endDrag() {
+                    range.classList.remove('is-dragging');
+                    if (section) {
+                        window.clearTimeout(initPlanBudgetSlider._idleT);
+                        initPlanBudgetSlider._idleT = window.setTimeout(function () {
+                            section.classList.remove('is-slider-active');
+                        }, 400);
+                    }
+                }
+
                 var onInput = function () {
+                    if (section) section.classList.add('is-slider-active');
+                    range.classList.add('is-dragging');
                     showPackageCardForBudget(parseInt(range.value, 10));
                 };
+
                 range.addEventListener('input', onInput);
                 range.addEventListener('change', onInput);
+                range.addEventListener('pointerdown', function () {
+                    range.classList.add('is-dragging');
+                });
+                range.addEventListener('pointerup', endDrag);
+                range.addEventListener('pointercancel', endDrag);
+                range.addEventListener('blur', endDrag);
+                range.addEventListener('touchend', endDrag);
                 showPackageCardForBudget(parseInt(range.value, 10));
             }
 
