@@ -4378,6 +4378,28 @@
             var pkgHospitalLayer = null;
             var routeAbort = null;
             var emergencyAbort = null;
+
+            function getLiveGpsPosition(onSuccess, onError) {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function (position) {
+                            if (onSuccess) {
+                                onSuccess(
+                                    position.coords.latitude,
+                                    position.coords.longitude,
+                                    position
+                                );
+                            }
+                        },
+                        function () {
+                            if (onError) onError('Sorry, no position available.');
+                        }
+                    );
+                } else if (onError) {
+                    onError('Geolocation is not supported by this browser.');
+                }
+            }
+
             /** Fast fallback coords for emergency hospitals (used before network geocoding). */
             var EMERGENCY_HOSPITAL_LATLNG_FALLBACK = {
                 'SVIMS Hospital': { lat: 13.642478, lng: 79.405348 },
@@ -5223,11 +5245,7 @@
                 }).filter(Boolean);
                 closePlacePicker();
                 renderSelectionStrip();
-                window.requestAnimationFrame(function () {
-                    window.setTimeout(function () {
-                        showTripMapInline({ revealQr: true });
-                    }, 100);
-                });
+                showTripMapInline({ revealQr: true });
             }
 
             function renderSelectionStrip() {
@@ -5886,26 +5904,26 @@
                     document.getElementById('mapSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
 
-                if (useGps && navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        function (pos) {
+                if (useGps) {
+                    getLiveGpsPosition(
+                        function (lat, lng) {
                             if (signal.aborted) return;
-                            drawStopsAndRoute(pos.coords.latitude, pos.coords.longitude, 'Live GPS location');
+                            drawStopsAndRoute(lat, lng, 'Live GPS location');
                         },
-                        function () {
-                            setMapStatus('GPS was denied or unavailable. Enter a location above and try again.');
-                        },
-                        { enableHighAccuracy: true, timeout: 18000, maximumAge: 0 }
-                    );
-                } else {
-                    resolveStartGeoWithFallback(loc || 'Tirupati', signal).then(function (geo) {
-                        if (signal.aborted) return;
-                        drawStopsAndRoute(geo.lat, geo.lng, geo.label || loc);
-                        if (geo && geo.fallback) {
-                            setMapStatus('Address lookup was weak, so map started from Tirupati center.');
+                        function (msg) {
+                            setMapStatus(msg + ' Enter a location above and try again.');
                         }
-                    });
+                    );
+                    return;
                 }
+
+                resolveStartGeoWithFallback(loc || 'Tirupati', signal).then(function (geo) {
+                    if (signal.aborted) return;
+                    drawStopsAndRoute(geo.lat, geo.lng, geo.label || loc);
+                    if (geo && geo.fallback) {
+                        setMapStatus('Address lookup was weak, so map started from Tirupati center.');
+                    }
+                });
             }
 
             function renderEmergencyHospitalList() {
@@ -5952,26 +5970,23 @@
                     hint.style.fontWeight = '600';
                 }
 
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function (position) {
+                getLiveGpsPosition(
+                    function () {
                         if (hint) {
                             hint.textContent = 'Accessed the live location. Click below to show on map.';
-                            hint.style.color = '#059669'; // Greenish success
+                            hint.style.color = '#059669';
                         }
-
-                        // Set the GPS checkbox so the button click knows to use it
                         var gpsEl = document.getElementById('useLiveGps');
                         if (gpsEl) gpsEl.checked = true;
                         syncStartAddressFieldForGps();
-                    }, function (error) {
+                    },
+                    function () {
                         if (hint) {
                             hint.textContent = 'Location access denied. Please enter address manually.';
                             hint.style.color = '#475569';
                         }
-                    });
-                } else {
-                    if (hint) hint.textContent = 'Geolocation not supported by this browser.';
-                }
+                    }
+                );
             }
 
             function closeEmergencyPanel() {
@@ -6182,28 +6197,28 @@
                         });
                 }
 
-                if (useGps && navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        function (pos) {
+                if (useGps) {
+                    getLiveGpsPosition(
+                        function (lat, lng) {
                             if (signal.aborted) return;
-                            drawEmergencyFromStart(pos.coords.latitude, pos.coords.longitude, 'Live GPS');
+                            drawEmergencyFromStart(lat, lng, 'Live GPS');
                         },
-                        function () {
-                            fail('GPS denied. Enter an address under Route start.');
-                        },
-                        { enableHighAccuracy: true, timeout: 18000, maximumAge: 0 }
-                    );
-                } else {
-                    geocodeNominatim(loc || 'Tirupati, India', signal).then(function (geo) {
-                        if (signal.aborted) return;
-                        if (!geo || isNaN(geo.lat)) {
-                            fail('Could not geocode your start location.');
-                            if (btn) btn.disabled = false;
-                            return;
+                        function (msg) {
+                            fail(msg + ' Enter an address under Route start.');
                         }
-                        drawEmergencyFromStart(geo.lat, geo.lng, geo.label || loc);
-                    });
+                    );
+                    return;
                 }
+
+                geocodeNominatim(loc || 'Tirupati, India', signal).then(function (geo) {
+                    if (signal.aborted) return;
+                    if (!geo || isNaN(geo.lat)) {
+                        fail('Could not geocode your start location.');
+                        if (btn) btn.disabled = false;
+                        return;
+                    }
+                    drawEmergencyFromStart(geo.lat, geo.lng, geo.label || loc);
+                });
             }
 
             var emergencyFabEl = document.getElementById('emergencyFab');

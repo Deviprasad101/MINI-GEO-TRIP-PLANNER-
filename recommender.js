@@ -140,15 +140,16 @@ class GeoTripRecommender {
      * @returns {Object} { lat, lng }
      */
     getCurrentStartLocation() {
-        // Try to use GPS location if checkbox is enabled
         const gpsCb = document.getElementById('mainGpsCheckbox');
         if (gpsCb && gpsCb.checked) {
-            if (window._mainLastStartLat !== undefined && window._mainLastStartLng !== undefined) {
-                return { lat: window._mainLastStartLat, lng: window._mainLastStartLng };
+            if (typeof window.getMainGpsCoords === 'function') {
+                const gps = window.getMainGpsCoords();
+                if (gps && gps.lat != null && gps.lng != null) {
+                    return { lat: gps.lat, lng: gps.lng };
+                }
             }
         }
 
-        // Try to read from stored coordinates (set by map click or GPS)
         if (window._mainLastStartLat !== undefined && window._mainLastStartLng !== undefined) {
             return { lat: window._mainLastStartLat, lng: window._mainLastStartLng };
         }
