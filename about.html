@@ -263,6 +263,11 @@
                 transform-style: preserve-3d;
             }
 
+            body.site-header-mobile .step-card__inner img { transform: translateZ(20px); }
+            body.site-header-mobile .step-card__inner .step-num { transform: translateZ(14px); }
+            body.site-header-mobile .step-card__inner h3,
+            body.site-header-mobile .step-card__inner p { transform: translateZ(10px); }
+
             body.site-header-mobile .step-card img {
                 width: 100%;
                 height: auto;
@@ -842,6 +847,7 @@
                 line-height: 1.28;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
+                line-clamp: 2;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
                 flex-shrink: 0;
@@ -854,6 +860,7 @@
                 min-height: 0;
                 display: -webkit-box;
                 -webkit-line-clamp: 4;
+                line-clamp: 4;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
             }
@@ -912,6 +919,7 @@
                 font-size: 0.62rem;
                 line-height: 1.45;
                 -webkit-line-clamp: 3;
+                line-clamp: 3;
             }
             .what-offer-section .offer-item__badge {
                 font-size: 0.5rem;
