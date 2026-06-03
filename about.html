@@ -420,6 +420,10 @@
             .step-card__inner {
                 transform-style: preserve-3d;
             }
+            .step-card__inner img { transform: translateZ(18px); }
+            .step-card__inner .step-num { transform: translateZ(12px); }
+            .step-card__inner h3,
+            .step-card__inner p { transform: translateZ(8px); }
             .step-card img {
                 height: auto;
                 min-height: 9.5rem;
@@ -2308,7 +2312,7 @@
 
             function tiltSettings() {
                 return compactMq.matches
-                    ? { maxDeg: 7.5, liftPx: 3, spring: 0.16 }
+                    ? { maxDeg: 8, liftPx: 3, spring: 0.16 }
                     : { maxDeg: 10.5, liftPx: 4, spring: 0.14 };
             }
 
@@ -2323,6 +2327,7 @@
                 var tgtY = 0;
                 var hovering = false;
                 var rafId = 0;
+                var activePointer = null;
 
                 function applyTransform() {
                     curX += (tgtX - curX) * spring;
@@ -2336,6 +2341,9 @@
                         rafId = requestAnimationFrame(applyTransform);
                     } else {
                         rafId = 0;
+                        if (!hovering && Math.abs(curX) < 0.001 && Math.abs(curY) < 0.001) {
+                            card.style.transform = '';
+                        }
                     }
                 }
 
@@ -2343,40 +2351,27 @@
                     if (!rafId) rafId = requestAnimationFrame(applyTransform);
                 }
 
+                function refreshSettings() {
+                    settings = tiltSettings();
+                    maxDeg = settings.maxDeg;
+                    liftPx = settings.liftPx;
+                    spring = settings.spring;
+                }
+
                 function setTargetFromPoint(clientX, clientY) {
                     var rect = card.getBoundingClientRect();
+                    if (!rect.width || !rect.height) return;
                     var xPct = (clientX - rect.left) / rect.width - 0.5;
                     var yPct = (clientY - rect.top) / rect.height - 0.5;
                     tgtX = Math.max(-0.5, Math.min(0.5, xPct));
                     tgtY = Math.max(-0.5, Math.min(0.5, yPct));
                 }
 
-                function onEnter() {
-                    settings = tiltSettings();
-                    maxDeg = settings.maxDeg;
-                    liftPx = settings.liftPx;
-                    spring = settings.spring;
-                    hovering = true;
-                    card.classList.add('is-tilt-hover');
-                    if (reduceMotion) {
-                        card.style.transform = 'translateY(-' + liftPx + 'px)';
-                        return;
-                    }
-                    startLoop();
-                }
-
-                function onMove(e) {
-                    if (reduceMotion) return;
-                    setTargetFromPoint(e.clientX, e.clientY);
-                    hovering = true;
-                    card.classList.add('is-tilt-hover');
-                    startLoop();
-                }
-
-                function onLeave() {
+                function resetTilt() {
                     tgtX = 0;
                     tgtY = 0;
                     hovering = false;
+                    activePointer = null;
                     card.classList.remove('is-tilt-hover');
                     if (reduceMotion) {
                         card.style.transform = '';
@@ -2385,10 +2380,64 @@
                     startLoop();
                 }
 
-                card.addEventListener('pointerenter', onEnter);
-                card.addEventListener('pointermove', onMove);
-                card.addEventListener('pointerleave', onLeave);
-                card.addEventListener('pointercancel', onLeave);
+                function engageTilt(e) {
+                    refreshSettings();
+                    hovering = true;
+                    activePointer = e.pointerId;
+                    setTargetFromPoint(e.clientX, e.clientY);
+                    card.classList.add('is-tilt-hover');
+                    if (reduceMotion) {
+                        card.style.transform = 'translateY(-' + liftPx + 'px)';
+                        return;
+                    }
+                    try { card.setPointerCapture(e.pointerId); } catch (err) {}
+                    startLoop();
+                }
+
+                function updateTilt(e) {
+                    if (reduceMotion) return;
+                    setTargetFromPoint(e.clientX, e.clientY);
+                    hovering = true;
+                    card.classList.add('is-tilt-hover');
+                    startLoop();
+                }
+
+                card.addEventListener('pointerdown', function(e) {
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    engageTilt(e);
+                });
+
+                card.addEventListener('pointermove', function(e) {
+                    if (reduceMotion) return;
+                    if (e.pointerType === 'mouse') {
+                        if (!hovering) return;
+                        updateTilt(e);
+                        return;
+                    }
+                    if (activePointer === e.pointerId) updateTilt(e);
+                });
+
+                card.addEventListener('pointerup', function(e) {
+                    if (activePointer !== null && e.pointerId !== activePointer) return;
+                    try { card.releasePointerCapture(e.pointerId); } catch (err) {}
+                    resetTilt();
+                });
+
+                card.addEventListener('pointercancel', resetTilt);
+
+                card.addEventListener('pointerenter', function(e) {
+                    if (e.pointerType !== 'mouse' || reduceMotion) return;
+                    refreshSettings();
+                    hovering = true;
+                    setTargetFromPoint(e.clientX, e.clientY);
+                    card.classList.add('is-tilt-hover');
+                    startLoop();
+                });
+
+                card.addEventListener('pointerleave', function(e) {
+                    if (e.pointerType !== 'mouse') return;
+                    resetTilt();
+                });
             });
         })();
 
