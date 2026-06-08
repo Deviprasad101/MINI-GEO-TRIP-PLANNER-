@@ -1447,129 +1447,1228 @@
 <!-- ═══════════ ADMIN PANEL (merged from admin.html) ═══════════ -->
 <div id="adminFullPanel" style="display:none">
 <style>
-    #adminFullPanel { font-family: 'Inter', 'Poppins', sans-serif; position: fixed; inset: 0; z-index: 9999; background: #f9fafb; overflow-y: auto; }
-    #adminFullPanel .adm-stat-card { transition: transform 0.2s; }
-    #adminFullPanel .adm-stat-card:hover { transform: translateY(-4px); }
-    #adminFullPanel .adm-tab-btn.active { background: #7c3aed; color: #fff; }
-    #adminFullPanel .adm-tab-btn { transition: all 0.2s; }
-    #adminFullPanel .adm-fade-in { animation: admFadeIn 0.4s ease; }
-    @keyframes admFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    #adminFullPanel table th { position: sticky; top: 0; z-index: 2; }
-    #adminFullPanel .adm-toast { animation: admSlideIn 0.3s ease, admFadeOut 0.3s 2.7s ease forwards; }
-    @keyframes admSlideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    @keyframes admFadeOut { to { opacity: 0; transform: translateX(100%); } }
+    #adminFullPanel {
+        font-family: 'Poppins', sans-serif;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        overflow-y: auto;
+    }
+
+    #admLoginScreen.hidden,
+    #admDashboardScreen.hidden {
+        display: none !important;
+    }
+
+    /* ── Login screen ── */
+    .adm-login-screen {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse 90% 80% at 50% 40%, rgba(124, 58, 237, 0.45) 0%, transparent 58%),
+            radial-gradient(ellipse 60% 50% at 15% 85%, rgba(99, 102, 241, 0.25) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 45% at 88% 12%, rgba(167, 139, 250, 0.2) 0%, transparent 48%),
+            linear-gradient(160deg, #070312 0%, #150828 30%, #2a1060 55%, #0d0618 100%);
+    }
+
+    .adm-login-bg {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .adm-login-bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at center, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        background-size: 28px 28px;
+        mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+        opacity: 0.35;
+    }
+
+    .adm-login-aurora {
+        position: absolute;
+        inset: -20%;
+        background:
+            conic-gradient(from 200deg at 50% 50%, transparent 0deg, rgba(124, 58, 237, 0.18) 60deg, transparent 120deg, rgba(99, 102, 241, 0.14) 200deg, transparent 280deg);
+        animation: admAuroraSpin 22s linear infinite;
+        opacity: 0.7;
+    }
+
+    @keyframes admAuroraSpin {
+        to { transform: rotate(360deg); }
+    }
+
+    .adm-stars span {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.45);
+        animation: admTwinkle 4s ease-in-out infinite;
+    }
+
+    .adm-stars span:nth-child(1) { top: 8%; left: 12%; animation-delay: 0s; }
+    .adm-stars span:nth-child(2) { top: 18%; left: 78%; animation-delay: 0.8s; width: 2px; height: 2px; }
+    .adm-stars span:nth-child(3) { top: 32%; left: 6%; animation-delay: 1.6s; }
+    .adm-stars span:nth-child(4) { top: 44%; left: 92%; animation-delay: 0.4s; width: 2px; height: 2px; }
+    .adm-stars span:nth-child(5) { top: 58%; left: 22%; animation-delay: 2.2s; }
+    .adm-stars span:nth-child(6) { top: 72%; left: 68%; animation-delay: 1.1s; width: 2px; height: 2px; }
+    .adm-stars span:nth-child(7) { top: 85%; left: 38%; animation-delay: 2.8s; }
+    .adm-stars span:nth-child(8) { top: 12%; left: 48%; animation-delay: 1.9s; width: 2px; height: 2px; }
+    .adm-stars span:nth-child(9) { top: 66%; left: 8%; animation-delay: 0.6s; }
+    .adm-stars span:nth-child(10) { top: 28%; left: 88%; animation-delay: 2.4s; }
+    .adm-stars span:nth-child(11) { top: 52%; left: 52%; animation-delay: 3.1s; width: 2px; height: 2px; opacity: 0.6; }
+    .adm-stars span:nth-child(12) { top: 78%; left: 88%; animation-delay: 1.4s; }
+
+    @keyframes admTwinkle {
+        0%, 100% { opacity: 0.25; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.35); }
+    }
+
+    .adm-geo-float {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.12);
+        font-size: 1.35rem;
+        animation: admGeoDrift 16s ease-in-out infinite;
+    }
+
+    .adm-geo-float--1 { top: 14%; left: 10%; animation-delay: 0s; }
+    .adm-geo-float--2 { top: 22%; right: 12%; font-size: 1.1rem; animation-delay: -4s; }
+    .adm-geo-float--3 { bottom: 18%; left: 14%; font-size: 1.6rem; animation-delay: -8s; }
+    .adm-geo-float--4 { bottom: 24%; right: 10%; animation-delay: -12s; }
+    .adm-geo-float--5 { top: 48%; left: 5%; font-size: 1rem; opacity: 0.7; animation-delay: -6s; }
+
+    @keyframes admGeoDrift {
+        0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.12; }
+        50% { transform: translateY(-18px) rotate(8deg); opacity: 0.22; }
+    }
+
+    .adm-login-card-glow {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 28rem;
+        padding: 2px;
+        border-radius: 2.1rem;
+        background: linear-gradient(135deg, #a855f7, #6366f1, #7c3aed, #4f46e5, #a855f7);
+        background-size: 320% 320%;
+        animation: admBorderGlow 7s ease infinite;
+        box-shadow:
+            0 0 80px -12px rgba(124, 58, 237, 0.55),
+            0 0 120px -30px rgba(99, 102, 241, 0.35);
+    }
+
+    @keyframes admBorderGlow {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .adm-login-card-glow .adm-login-card {
+        max-width: none;
+        border-radius: calc(2.1rem - 2px);
+        border: none;
+        margin: 0;
+    }
+
+    .adm-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.55;
+        animation: admOrbFloat 14s ease-in-out infinite;
+    }
+
+    .adm-orb--1 {
+        width: 22rem;
+        height: 22rem;
+        top: -6rem;
+        left: -4rem;
+        background: #7c3aed;
+        animation-delay: 0s;
+    }
+
+    .adm-orb--2 {
+        width: 18rem;
+        height: 18rem;
+        bottom: -5rem;
+        right: -3rem;
+        background: #6366f1;
+        animation-delay: -5s;
+    }
+
+    .adm-orb--3 {
+        width: 12rem;
+        height: 12rem;
+        top: 35%;
+        right: 18%;
+        background: #a855f7;
+        animation-delay: -9s;
+        opacity: 0.35;
+    }
+
+    @keyframes admOrbFloat {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(18px, -22px) scale(1.06); }
+        66% { transform: translate(-14px, 16px) scale(0.96); }
+    }
+
+    .adm-login-card {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 27rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(250, 250, 255, 0.97) 100%);
+        border-radius: 2rem;
+        padding: 2.65rem 2.35rem 2.1rem;
+        border: 1px solid rgba(255, 255, 255, 0.92);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 1),
+            0 32px 64px -24px rgba(0, 0, 0, 0.55);
+        animation: admCardIn 0.65s cubic-bezier(0.19, 1, 0.22, 1);
+        backdrop-filter: blur(12px);
+        overflow: hidden;
+    }
+
+    .adm-login-card::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 30% 20%, rgba(124, 58, 237, 0.06) 0%, transparent 42%);
+        pointer-events: none;
+    }
+
+    .adm-login-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 1.5rem;
+        right: 1.5rem;
+        height: 3px;
+        border-radius: 0 0 999px 999px;
+        background: linear-gradient(90deg, transparent, #7c3aed, #6366f1, #a855f7, transparent);
+    }
+
+    @keyframes admCardIn {
+        from { opacity: 0; transform: translateY(24px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .adm-login-icon-wrap {
+        position: relative;
+        width: 4.5rem;
+        height: 4.5rem;
+        margin: 0 auto 1.1rem;
+    }
+
+    .adm-login-icon-ring {
+        position: absolute;
+        inset: -6px;
+        border-radius: 1.35rem;
+        border: 2px solid rgba(124, 58, 237, 0.25);
+        animation: admRingPulse 2.8s ease-in-out infinite;
+    }
+
+    .adm-login-icon-ring--2 {
+        inset: -14px;
+        border-radius: 1.55rem;
+        border-color: rgba(99, 102, 241, 0.12);
+        animation-delay: -1.4s;
+    }
+
+    @keyframes admRingPulse {
+        0%, 100% { transform: scale(1); opacity: 0.6; }
+        50% { transform: scale(1.08); opacity: 0.2; }
+    }
+
+    .adm-login-icon {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1.15rem;
+        background: linear-gradient(145deg, #8b5cf6 0%, #6366f1 48%, #4f46e5 100%);
+        color: #fff;
+        font-size: 1.55rem;
+        box-shadow: 0 14px 32px -10px rgba(99, 102, 241, 0.75);
+    }
+
+    .adm-login-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 55%, #6366f1 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .adm-login-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.75rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border: 1px solid #ddd6fe;
+        color: #6d28d9;
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        box-shadow: 0 4px 12px -6px rgba(124, 58, 237, 0.35);
+    }
+
+    .adm-login-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 1.75rem 0 1.35rem;
+        color: #cbd5e1;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .adm-login-divider::before,
+    .adm-login-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+    }
+
+    .adm-field-label {
+        display: block;
+        margin-left: 0.15rem;
+        margin-bottom: 0.4rem;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #7c3aed;
+    }
+
+    .adm-field-wrap {
+        position: relative;
+    }
+
+    .adm-field-wrap i.adm-field-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.875rem;
+        pointer-events: none;
+        transition: color 0.2s;
+    }
+
+    .adm-field-wrap:focus-within i.adm-field-icon {
+        color: #7c3aed;
+    }
+
+    .adm-field-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.95rem 2.75rem 0.95rem 2.75rem;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 0.95rem;
+        background: linear-gradient(180deg, #fafbff 0%, #f8fafc 100%);
+        font-family: inherit;
+        font-size: 0.875rem;
+        color: #0f172a;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .adm-field-input:focus {
+        border-color: #a78bfa;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .adm-toggle-pass {
+        position: absolute;
+        right: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 0.25rem;
+        font-size: 0.875rem;
+        transition: color 0.2s;
+    }
+
+    .adm-toggle-pass:hover {
+        color: #7c3aed;
+    }
+
+    .adm-login-btn {
+        position: relative;
+        width: 100%;
+        margin-top: 0.35rem;
+        padding: 0.95rem 1rem;
+        border: none;
+        border-radius: 0.95rem;
+        overflow: hidden;
+        background: linear-gradient(90deg, #7c3aed 0%, #6366f1 50%, #4f46e5 100%);
+        background-size: 200% 100%;
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        box-shadow: 0 14px 32px -10px rgba(99, 102, 241, 0.8);
+        transition: transform 0.15s, box-shadow 0.2s, background-position 0.35s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .adm-login-btn .adm-btn-arrow {
+        font-size: 0.75rem;
+        opacity: 0.9;
+        transition: transform 0.25s;
+    }
+
+    .adm-login-btn:hover:not(:disabled) .adm-btn-arrow {
+        transform: translateX(3px);
+    }
+
+    .adm-secure-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        margin-top: 1rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: #94a3b8;
+        letter-spacing: 0.03em;
+    }
+
+    .adm-secure-note i {
+        color: #a78bfa;
+        font-size: 0.625rem;
+    }
+
+    .adm-login-btn::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.22) 50%, transparent 65%);
+        transform: translateX(-120%);
+        transition: transform 0.55s ease;
+    }
+
+    .adm-login-btn:hover:not(:disabled) {
+        background-position: 100% 0;
+        box-shadow: 0 18px 36px -10px rgba(99, 102, 241, 0.9);
+        transform: translateY(-1px);
+    }
+
+    .adm-login-btn:hover:not(:disabled)::after {
+        transform: translateX(120%);
+    }
+
+    .adm-login-btn:active:not(:disabled) {
+        transform: scale(0.98);
+    }
+
+    .adm-login-btn:disabled {
+        opacity: 0.8;
+        cursor: wait;
+    }
+
+    .adm-back-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        width: 100%;
+        margin-top: 1.65rem;
+        padding: 0.55rem 0;
+        border: none;
+        background: transparent;
+        font-family: inherit;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #94a3b8;
+        cursor: pointer;
+        transition: color 0.2s, transform 0.15s;
+    }
+
+    .adm-back-link:hover {
+        color: #7c3aed;
+        transform: translateX(-2px);
+    }
+
+    .adm-login-partners {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+        margin-top: 1.35rem;
+        padding-top: 1.15rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .adm-login-partners img {
+        height: 1.65rem;
+        width: auto;
+        object-fit: contain;
+        opacity: 0.72;
+        filter: grayscale(20%);
+        transition: opacity 0.2s;
+    }
+
+    .adm-login-partners img:hover {
+        opacity: 1;
+    }
+
+    #admLoginError {
+        margin: 0;
+        padding: 0.7rem 0.9rem;
+        border-radius: 0.75rem;
+        background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    #admLoginError::before {
+        content: "\f071";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    #admLoginError.hidden {
+        display: none !important;
+    }
+
+    /* ── Dashboard ── */
+    .adm-dashboard {
+        position: relative;
+        min-height: 100vh;
+        background:
+            radial-gradient(ellipse 80% 50% at 100% 0%, rgba(124, 58, 237, 0.1) 0%, transparent 55%),
+            radial-gradient(ellipse 60% 40% at 0% 100%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+            linear-gradient(180deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
+    }
+
+    .adm-dash-bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .adm-dash-bg .adm-orb {
+        opacity: 0.28;
+        filter: blur(80px);
+    }
+
+    .adm-dash-bg .adm-orb--1 {
+        width: 28rem;
+        height: 28rem;
+        top: -10rem;
+        right: -8rem;
+        left: auto;
+        background: #c4b5fd;
+    }
+
+    .adm-dash-bg .adm-orb--2 {
+        width: 22rem;
+        height: 22rem;
+        bottom: -8rem;
+        left: -6rem;
+        background: #a5b4fc;
+    }
+
+    .adm-dashboard > header,
+    .adm-dashboard > main {
+        position: relative;
+        z-index: 1;
+    }
+
+    .adm-dash-header {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06);
+    }
+
+    .adm-dash-header::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #7c3aed, #6366f1, #a855f7, #6366f1, #7c3aed);
+        background-size: 200% 100%;
+        animation: admBarShine 6s linear infinite;
+    }
+
+    @keyframes admBarShine {
+        0% { background-position: 0% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    .adm-dash-brand-icon {
+        width: 2.65rem;
+        height: 2.65rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.85rem;
+        background: linear-gradient(145deg, #8b5cf6 0%, #6366f1 100%);
+        color: #fff;
+        box-shadow: 0 8px 20px -8px rgba(124, 58, 237, 0.65);
+    }
+
+    .adm-logout-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #fecaca;
+        border-radius: 0.75rem;
+        background: linear-gradient(180deg, #fff 0%, #fff5f5 100%);
+        color: #dc2626;
+        font-family: inherit;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+
+    .adm-logout-btn:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px -8px rgba(220, 38, 38, 0.35);
+    }
+
+    .adm-welcome-banner {
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.75rem;
+        padding: 1.5rem 1.65rem;
+        border-radius: 1.35rem;
+        background: linear-gradient(125deg, #3b0764 0%, #6d28d9 38%, #6366f1 72%, #7c3aed 100%);
+        color: #fff;
+        box-shadow:
+            0 20px 48px -18px rgba(76, 29, 149, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .adm-welcome-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .adm-welcome-icon {
+        flex-shrink: 0;
+        width: 3.25rem;
+        height: 3.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        font-size: 1.35rem;
+        backdrop-filter: blur(8px);
+    }
+
+    .adm-welcome-deco {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 5.5rem;
+        color: rgba(255, 255, 255, 0.07);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .adm-welcome-chips {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1.1rem;
+    }
+
+    .adm-welcome-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(6px);
+    }
+
+    .adm-welcome-banner::before {
+        content: "";
+        position: absolute;
+        top: -40%;
+        right: -8%;
+        width: 14rem;
+        height: 14rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .adm-welcome-banner::after {
+        content: "";
+        position: absolute;
+        bottom: -50%;
+        left: 20%;
+        width: 10rem;
+        height: 10rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .adm-welcome-banner h2 {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .adm-welcome-banner p {
+        position: relative;
+        z-index: 1;
+        margin: 0.35rem 0 0;
+        font-size: 0.8125rem;
+        color: rgba(255, 255, 255, 0.82);
+        font-weight: 500;
+    }
+
+    #adminFullPanel .adm-stat-card {
+        position: relative;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.92) !important;
+        backdrop-filter: blur(8px);
+        transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.3s;
+    }
+
+    #adminFullPanel .adm-stat-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -120%;
+        width: 80%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+        transform: skewX(-18deg);
+        transition: left 0.55s ease;
+    }
+
+    #adminFullPanel .adm-stat-card:hover::after {
+        left: 140%;
+    }
+
+    #adminFullPanel .adm-stat-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 4px 0 0 4px;
+    }
+
+    #adminFullPanel .adm-stat-card--blue::before { background: linear-gradient(180deg, #3b82f6, #60a5fa); }
+    #adminFullPanel .adm-stat-card--green::before { background: linear-gradient(180deg, #10b981, #34d399); }
+    #adminFullPanel .adm-stat-card--amber::before { background: linear-gradient(180deg, #f59e0b, #fbbf24); }
+    #adminFullPanel .adm-stat-card--purple::before { background: linear-gradient(180deg, #7c3aed, #a78bfa); }
+    #adminFullPanel .adm-stat-card--cyan::before { background: linear-gradient(180deg, #06b6d4, #22d3ee); }
+    #adminFullPanel .adm-stat-card--rose::before { background: linear-gradient(180deg, #f43f5e, #fb7185); }
+
+    #adminFullPanel .adm-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 16px 36px -14px rgba(15, 23, 42, 0.18);
+    }
+
+    #admStatsRow .adm-stat-card {
+        animation: admStatIn 0.55s cubic-bezier(0.19, 1, 0.22, 1) both;
+    }
+
+    #admStatsRow .adm-stat-card:nth-child(1) { animation-delay: 0.04s; }
+    #admStatsRow .adm-stat-card:nth-child(2) { animation-delay: 0.08s; }
+    #admStatsRow .adm-stat-card:nth-child(3) { animation-delay: 0.12s; }
+    #admStatsRow .adm-stat-card:nth-child(4) { animation-delay: 0.16s; }
+    #admStatsRow .adm-stat-card:nth-child(5) { animation-delay: 0.2s; }
+    #admStatsRow .adm-stat-card:nth-child(6) { animation-delay: 0.24s; }
+
+    @keyframes admStatIn {
+        from { opacity: 0; transform: translateY(16px) scale(0.96); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    #adminFullPanel .adm-stat-icon {
+        width: 2.35rem;
+        height: 2.35rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    #adminFullPanel .adm-stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        line-height: 1.1;
+    }
+
+    .adm-search-input {
+        padding: 0.55rem 1rem 0.55rem 2.25rem;
+        font-family: inherit;
+        font-size: 0.8125rem;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 0.75rem;
+        background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .adm-search-input:focus {
+        border-color: #a78bfa;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    .adm-btn-danger {
+        padding: 0.5rem 1rem;
+        font-family: inherit;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 0.65rem;
+        border: 1px solid #fecaca;
+        background: linear-gradient(180deg, #fff 0%, #fef2f2 100%);
+        color: #dc2626;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .adm-btn-danger:hover:not(:disabled) {
+        background: #fee2e2;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px -8px rgba(220, 38, 38, 0.4);
+    }
+
+    .adm-btn-danger:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .adm-table-wrap {
+        overflow-x: auto;
+        max-height: 500px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #c4b5fd #f1f5f9;
+    }
+
+    .adm-table-wrap::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .adm-table-wrap::-webkit-scrollbar-thumb {
+        background: #c4b5fd;
+        border-radius: 999px;
+    }
+
+    .adm-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 2.5rem 1rem;
+        color: #94a3b8;
+        font-size: 0.875rem;
+    }
+
+    .adm-empty-state i {
+        font-size: 2rem;
+        color: #ddd6fe;
+    }
+
+    .adm-empty-state.hidden {
+        display: none !important;
+    }
+
+    .adm-tabs-wrap {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        padding: 0.35rem;
+        margin-bottom: 1.5rem;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 16px -8px rgba(15, 23, 42, 0.12);
+    }
+
+    #adminFullPanel .adm-tab-btn {
+        transition: all 0.22s;
+        border: 1px solid transparent;
+    }
+
+    #adminFullPanel .adm-tab-btn:not(.active) {
+        background: transparent;
+        color: #64748b;
+    }
+
+    #adminFullPanel .adm-tab-btn:not(.active):hover {
+        background: #f8fafc;
+        color: #4c1d95;
+    }
+
+    #adminFullPanel .adm-tab-btn.active {
+        background: linear-gradient(90deg, #7c3aed, #6366f1);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 8px 20px -8px rgba(124, 58, 237, 0.65);
+    }
+
+    .adm-panel {
+        background: rgba(255, 255, 255, 0.94);
+        border-radius: 1.35rem;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        box-shadow:
+            0 12px 40px -16px rgba(15, 23, 42, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 1);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .adm-panel-head {
+        padding: 1.2rem 1.4rem;
+        border-bottom: 1px solid #f1f5f9;
+        background: linear-gradient(180deg, #fafbff 0%, rgba(255, 255, 255, 0.95) 100%);
+    }
+
+    #adminFullPanel .adm-fade-in {
+        animation: admFadeIn 0.45s ease;
+    }
+
+    @keyframes admFadeIn {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    #adminFullPanel table thead {
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    #adminFullPanel table th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+
+    #adminFullPanel table tbody tr {
+        transition: background 0.15s;
+    }
+
+    #adminFullPanel table tbody tr:hover {
+        background: #faf5ff;
+    }
+
+    #adminFullPanel .adm-toast {
+        animation: admSlideIn 0.3s ease, admFadeOut 0.3s 2.7s ease forwards;
+        border-radius: 0.85rem;
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.25);
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding-left: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    #adminFullPanel .adm-toast--success {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+    }
+
+    #adminFullPanel .adm-toast--error {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%) !important;
+    }
+
+    @keyframes admSlideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes admFadeOut {
+        to { opacity: 0; transform: translateX(100%); }
+    }
+
+    @media (max-width: 640px) {
+        .adm-login-card-glow {
+            max-width: 100%;
+        }
+
+        .adm-login-card {
+            padding: 2.15rem 1.35rem 1.75rem;
+            border-radius: 1.5rem;
+        }
+
+        .adm-dash-header {
+            flex-wrap: wrap;
+            padding: 0.85rem 1rem;
+        }
+
+        .adm-welcome-banner {
+            padding: 1.15rem 1.15rem;
+        }
+
+        .adm-welcome-deco {
+            display: none;
+        }
+
+        .adm-tabs-wrap {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .adm-orb, .adm-login-icon-ring, .adm-dash-header::after, .adm-login-aurora, .adm-stars span, .adm-geo-float { animation: none; }
+        .adm-login-card, .adm-login-btn::after, .adm-login-card-glow, #admStatsRow .adm-stat-card { animation: none; transition: none; }
+        #adminFullPanel .adm-stat-card::after { display: none; }
+    }
 </style>
 
 <!-- Admin Login Screen -->
-<div id="admLoginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-    <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md adm-fade-in">
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-2xl shadow-lg mb-4">
-                <i class="fa-solid fa-shield-halved text-2xl"></i>
-            </div>
-            <h1 class="text-2xl font-extrabold text-slate-800">Admin Panel</h1>
-            <p class="text-slate-500 text-sm mt-1">GeoTrip Planner Administration</p>
+<div id="admLoginScreen" class="adm-login-screen">
+    <div class="adm-login-bg" aria-hidden="true">
+        <div class="adm-login-aurora"></div>
+        <div class="adm-stars">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
-        <form id="admLoginForm" class="space-y-5">
-            <div>
-                <label class="text-xs font-bold text-purple-600 uppercase ml-1">Username</label>
-                <div class="relative mt-1">
-                    <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="admUser" required placeholder="admin"
-                        class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition" autocomplete="off">
+        <span class="adm-orb adm-orb--1"></span>
+        <span class="adm-orb adm-orb--2"></span>
+        <span class="adm-orb adm-orb--3"></span>
+        <div class="adm-geo-float adm-geo-float--1"><i class="fa-solid fa-location-dot"></i></div>
+        <div class="adm-geo-float adm-geo-float--2"><i class="fa-solid fa-map"></i></div>
+        <div class="adm-geo-float adm-geo-float--3"><i class="fa-solid fa-gopuram"></i></div>
+        <div class="adm-geo-float adm-geo-float--4"><i class="fa-solid fa-route"></i></div>
+        <div class="adm-geo-float adm-geo-float--5"><i class="fa-solid fa-compass"></i></div>
+    </div>
+    <div class="adm-login-card-glow">
+        <div class="adm-login-card">
+            <div class="text-center relative z-[1]">
+                <div class="adm-login-icon-wrap">
+                    <span class="adm-login-icon-ring adm-login-icon-ring--2" aria-hidden="true"></span>
+                    <span class="adm-login-icon-ring" aria-hidden="true"></span>
+                    <div class="adm-login-icon" aria-hidden="true">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
                 </div>
+                <h1 class="adm-login-title">Admin Panel</h1>
+                <p class="text-slate-500 text-sm mt-1.5">GeoTrip Planner Administration</p>
+                <span class="adm-login-badge">
+                    <i class="fa-solid fa-flask" aria-hidden="true"></i>
+                    Geo-Intel Lab · IITTNIF
+                </span>
             </div>
-            <div>
-                <label class="text-xs font-bold text-purple-600 uppercase ml-1">Password</label>
-                <div class="relative mt-1">
-                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="password" id="admPass" required placeholder="••••••••"
-                        class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 transition" autocomplete="new-password">
+            <div class="adm-login-divider relative z-[1]">Secure access</div>
+            <form id="admLoginForm" class="space-y-4 relative z-[1]">
+                <div>
+                    <label class="adm-field-label" for="admUser">Username</label>
+                    <div class="adm-field-wrap">
+                        <i class="fa-solid fa-user adm-field-icon" aria-hidden="true"></i>
+                        <input type="text" id="admUser" required placeholder="Enter username"
+                            class="adm-field-input" autocomplete="username">
+                    </div>
                 </div>
-            </div>
-            <p id="admLoginError" class="text-red-500 text-sm font-medium hidden"></p>
-            <button type="submit"
-                class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:brightness-110 transition active:scale-95">
-                <span id="admLoginBtnText">Login</span>
-                <i class="fa-solid fa-spinner fa-spin hidden" id="admLoginSpinner"></i>
+                <div>
+                    <label class="adm-field-label" for="admPass">Password</label>
+                    <div class="adm-field-wrap">
+                        <i class="fa-solid fa-lock adm-field-icon" aria-hidden="true"></i>
+                        <input type="password" id="admPass" required placeholder="Enter password"
+                            class="adm-field-input" autocomplete="current-password">
+                        <button type="button" class="adm-toggle-pass" id="admTogglePass" aria-label="Show password">
+                            <i class="fa-solid fa-eye" id="admTogglePassIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                <p id="admLoginError" class="hidden"></p>
+                <button type="submit" id="admLoginBtn" class="adm-login-btn">
+                    <span id="admLoginBtnText">Login</span>
+                    <i class="fa-solid fa-arrow-right adm-btn-arrow" aria-hidden="true"></i>
+                    <i class="fa-solid fa-spinner fa-spin hidden" id="admLoginSpinner"></i>
+                </button>
+            </form>
+            <p class="adm-secure-note relative z-[1]">
+                <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                Encrypted admin session
+            </p>
+            <button type="button" onclick="toggleAdminPanel(false)" class="adm-back-link relative z-[1]">
+                <i class="fa-solid fa-arrow-left text-[10px]" aria-hidden="true"></i>
+                Back to GeoTrip Planner
             </button>
-        </form>
-        <button type="button" onclick="toggleAdminPanel(false)" class="block text-center text-xs text-slate-400 mt-6 hover:text-purple-600 transition w-full cursor-pointer bg-transparent border-none">← Back to GeoTrip Planner</button>
+            <div class="adm-login-partners relative z-[1]" aria-hidden="true">
+                <img src="images/iittirupati.png" alt="">
+                <img src="images/IITTNiF logo.png" alt="">
+                <img src="images/make_in_india_logo.png" alt="">
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Admin Dashboard -->
-<div id="admDashboardScreen" class="hidden">
-    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-xl flex items-center justify-center shadow">
+<div id="admDashboardScreen" class="adm-dashboard hidden">
+    <div class="adm-dash-bg" aria-hidden="true">
+        <span class="adm-orb adm-orb--1"></span>
+        <span class="adm-orb adm-orb--2"></span>
+    </div>
+    <header class="adm-dash-header">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="adm-dash-brand-icon" aria-hidden="true">
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
-            <div>
-                <h1 class="text-lg font-extrabold text-slate-800 leading-tight">GeoTrip Admin</h1>
-                <p class="text-[11px] text-slate-400 font-medium">Administration Dashboard</p>
+            <div class="min-w-0">
+                <h1 class="text-lg font-extrabold text-slate-800 leading-tight truncate">GeoTrip Admin</h1>
+                <p class="text-[11px] text-slate-400 font-medium truncate">Geo-Intel Lab · Administration Dashboard</p>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-sm text-slate-500 font-medium hidden sm:inline"><i class="fa-solid fa-user-shield mr-1 text-purple-500"></i> <span id="admName">admin</span></span>
-            <button onclick="admLogout()" class="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-100 transition">
+        <div class="flex items-center gap-3 shrink-0">
+            <span id="admName" class="hidden" aria-hidden="true">admin</span>
+            <button type="button" onclick="admLogout()" class="adm-logout-btn">
                 <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
             </button>
         </div>
     </header>
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div id="admStatsRow" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-users"></i></div></div>
-                <p class="text-2xl font-extrabold text-slate-800" id="admStatUsers">-</p>
-                <p class="text-[11px] text-slate-400 font-medium mt-1">Total Users</p>
+        <div class="adm-welcome-banner adm-fade-in">
+            <div class="adm-welcome-deco" aria-hidden="true"><i class="fa-solid fa-gopuram"></i></div>
+            <div class="adm-welcome-inner">
+                <div class="adm-welcome-icon" aria-hidden="true">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h2>Welcome to GeoTrip Admin</h2>
+                    <p>Monitor users, temple visits, and platform activity — Geo-Intel Lab · IITTNIF, Tirupati</p>
+                </div>
             </div>
-            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-green-100 text-green-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-user-check"></i></div></div>
-                <p class="text-2xl font-extrabold text-slate-800" id="admStatVerified">-</p>
-                <p class="text-[11px] text-slate-400 font-medium mt-1">Verified Users</p>
-            </div>
-            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-gopuram"></i></div></div>
-                <p class="text-2xl font-extrabold text-slate-800" id="admStatTemples">-</p>
-                <p class="text-[11px] text-slate-400 font-medium mt-1">Temples</p>
-            </div>
-            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-location-dot"></i></div></div>
-                <p class="text-2xl font-extrabold text-slate-800" id="admStatVisits">-</p>
-                <p class="text-[11px] text-slate-400 font-medium mt-1">Total Check-ins</p>
-            </div>
-            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-cyan-100 text-cyan-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-person-walking"></i></div></div>
-                <p class="text-2xl font-extrabold text-slate-800" id="admStatUniqueVisitors">-</p>
-                <p class="text-[11px] text-slate-400 font-medium mt-1">Unique Visitors</p>
-            </div>
-            <div class="adm-stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div class="flex items-center gap-3 mb-2"><div class="w-9 h-9 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-calendar-day"></i></div></div>
-                <p class="text-2xl font-extrabold text-slate-800" id="admStatToday">-</p>
-                <p class="text-[11px] text-slate-400 font-medium mt-1">Visits Today</p>
+            <div class="adm-welcome-chips">
+                <span class="adm-welcome-chip"><i class="fa-solid fa-bolt"></i> Live analytics</span>
+                <span class="adm-welcome-chip"><i class="fa-solid fa-gopuram"></i> Temple tracking</span>
+                <span class="adm-welcome-chip"><i class="fa-solid fa-shield-halved"></i> Secure panel</span>
             </div>
         </div>
-        <div class="flex gap-2 mb-6">
+        <div id="admStatsRow" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            <div class="adm-stat-card adm-stat-card--blue bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2.5"><div class="adm-stat-icon bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600"><i class="fa-solid fa-users"></i></div></div>
+                <p class="adm-stat-value" id="admStatUsers">-</p>
+                <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">Total Users</p>
+            </div>
+            <div class="adm-stat-card adm-stat-card--green bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2.5"><div class="adm-stat-icon bg-gradient-to-br from-green-100 to-emerald-50 text-green-600"><i class="fa-solid fa-user-check"></i></div></div>
+                <p class="adm-stat-value" id="admStatVerified">-</p>
+                <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">Verified Users</p>
+            </div>
+            <div class="adm-stat-card adm-stat-card--amber bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2.5"><div class="adm-stat-icon bg-gradient-to-br from-amber-100 to-yellow-50 text-amber-600"><i class="fa-solid fa-gopuram"></i></div></div>
+                <p class="adm-stat-value" id="admStatTemples">-</p>
+                <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">Temples</p>
+            </div>
+            <div class="adm-stat-card adm-stat-card--purple bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2.5"><div class="adm-stat-icon bg-gradient-to-br from-purple-100 to-violet-50 text-purple-600"><i class="fa-solid fa-location-dot"></i></div></div>
+                <p class="adm-stat-value" id="admStatVisits">-</p>
+                <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">Total Check-ins</p>
+            </div>
+            <div class="adm-stat-card adm-stat-card--cyan bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2.5"><div class="adm-stat-icon bg-gradient-to-br from-cyan-100 to-sky-50 text-cyan-600"><i class="fa-solid fa-person-walking"></i></div></div>
+                <p class="adm-stat-value" id="admStatUniqueVisitors">-</p>
+                <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">Unique Visitors</p>
+            </div>
+            <div class="adm-stat-card adm-stat-card--rose bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-3 mb-2.5"><div class="adm-stat-icon bg-gradient-to-br from-rose-100 to-pink-50 text-rose-600"><i class="fa-solid fa-calendar-day"></i></div></div>
+                <p class="adm-stat-value" id="admStatToday">-</p>
+                <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">Visits Today</p>
+            </div>
+        </div>
+        <div class="adm-tabs-wrap">
             <button class="adm-tab-btn active px-5 py-2.5 rounded-xl text-sm font-bold" data-admtab="users"><i class="fa-solid fa-users mr-1.5"></i>Users</button>
-            <button class="adm-tab-btn bg-white border border-gray-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold" data-admtab="visits"><i class="fa-solid fa-location-dot mr-1.5"></i>Temple Visits</button>
-            <button class="adm-tab-btn bg-white border border-gray-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold" data-admtab="userdetails"><i class="fa-solid fa-id-card mr-1.5"></i>User Details</button>
+            <button class="adm-tab-btn px-5 py-2.5 rounded-xl text-sm font-bold" data-admtab="visits"><i class="fa-solid fa-location-dot mr-1.5"></i>Temple Visits</button>
+            <button class="adm-tab-btn px-5 py-2.5 rounded-xl text-sm font-bold" data-admtab="userdetails"><i class="fa-solid fa-id-card mr-1.5"></i>User Details</button>
         </div>
         <div id="admtab-users" class="adm-tab-content adm-fade-in">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+            <div class="adm-panel">
+                <div class="adm-panel-head flex items-center justify-between flex-wrap gap-3">
                     <h2 class="font-bold text-slate-800"><i class="fa-solid fa-users mr-2 text-purple-500"></i>Registered Users</h2>
                     <div class="flex items-center gap-2 flex-wrap">
-                        <button type="button" id="admDeleteSelectedUsersBtn" disabled
-                            class="px-4 py-2 text-xs font-bold rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                        <button type="button" id="admDeleteSelectedUsersBtn" disabled class="adm-btn-danger">
                             <i class="fa-solid fa-trash mr-1"></i>Delete selected (<span id="admSelectedUserCount">0</span>)
                         </button>
                         <div class="relative"><i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                            <input type="text" id="admUserSearch" placeholder="Search users..." class="pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-purple-400 w-48">
+                            <input type="text" id="admUserSearch" placeholder="Search users..." class="adm-search-input w-48">
                         </div>
                     </div>
                 </div>
-                <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                <div class="adm-table-wrap">
                     <table class="w-full text-sm"><thead class="bg-gray-50"><tr>
                         <th class="px-4 py-3 text-xs font-bold text-slate-500 uppercase w-10">
                             <input type="checkbox" id="admSelectAllUsers" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" title="Select all">
@@ -1583,19 +2682,21 @@
                         <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Action</th>
                     </tr></thead><tbody id="admUsersTableBody" class="divide-y divide-gray-100"></tbody></table>
                 </div>
-                <p id="admUsersEmpty" class="hidden text-center text-slate-400 py-10 text-sm">No users found</p>
+                <p id="admUsersEmpty" class="adm-empty-state hidden">
+                    <i class="fa-solid fa-users" aria-hidden="true"></i>
+                    No users found
+                </p>
             </div>
         </div>
         <div id="admtab-visits" class="adm-tab-content hidden adm-fade-in">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+            <div class="adm-panel">
+                <div class="adm-panel-head flex items-center justify-between flex-wrap gap-3">
                     <h2 class="font-bold text-slate-800"><i class="fa-solid fa-location-dot mr-2 text-purple-500"></i>Temple Visit Log</h2>
-                    <button type="button" id="admDeleteSelectedVisitsBtn" disabled
-                        class="px-4 py-2 text-xs font-bold rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                    <button type="button" id="admDeleteSelectedVisitsBtn" disabled class="adm-btn-danger">
                         <i class="fa-solid fa-trash mr-1"></i>Delete selected (<span id="admSelectedVisitCount">0</span>)
                     </button>
                 </div>
-                <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                <div class="adm-table-wrap">
                     <table class="w-full text-sm"><thead class="bg-gray-50"><tr>
                         <th class="px-4 py-3 text-xs font-bold text-slate-500 uppercase w-10">
                             <input type="checkbox" id="admSelectAllVisits" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" title="Select all">
@@ -1608,14 +2709,17 @@
                         <th class="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase">Check-ins</th>
                     </tr></thead><tbody id="admVisitsTableBody" class="divide-y divide-gray-100"></tbody></table>
                 </div>
-                <p id="admVisitsEmpty" class="hidden text-center text-slate-400 py-10 text-sm">No visits recorded yet</p>
+                <p id="admVisitsEmpty" class="adm-empty-state hidden">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    No visits recorded yet
+                </p>
             </div>
         </div>
         <div id="admtab-userdetails" class="adm-tab-content hidden adm-fade-in">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+            <div class="adm-panel">
+                <div class="adm-panel-head flex items-center justify-between flex-wrap gap-3">
                     <h2 class="font-bold text-slate-800"><i class="fa-solid fa-id-card mr-2 text-purple-500"></i>User Visit Details</h2>
-                    <select id="admUserDetailSelect" class="pl-4 pr-8 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-purple-400"><option value="">Select a user...</option></select>
+                    <select id="admUserDetailSelect" class="adm-search-input pl-4 pr-8"><option value="">Select a user...</option></select>
                 </div>
                 <div id="admUserDetailContent" class="p-5 hidden">
                     <div class="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
@@ -1631,7 +2735,10 @@
                         <div><h3 class="text-xs font-bold uppercase text-amber-700 mb-3"><i class="fa-solid fa-users mr-1.5"></i>Visitors today</h3><div id="admUdVisitorsToday" class="space-y-2 max-h-[300px] overflow-y-auto"><p class="text-sm text-slate-400">No visitors checked in today</p></div></div>
                     </div>
                 </div>
-                <p id="admUserDetailEmpty" class="text-center text-slate-400 py-10 text-sm">Select a user from the dropdown above to view their visit details</p>
+                <p id="admUserDetailEmpty" class="adm-empty-state">
+                    <i class="fa-solid fa-id-card" aria-hidden="true"></i>
+                    Select a user from the dropdown above to view their visit details
+                </p>
             </div>
         </div>
     </main>
@@ -1651,8 +2758,32 @@
     function admShowToast(msg, type) {
         var c = document.getElementById('admToastContainer');
         var t = document.createElement('div');
-        t.className = 'adm-toast ' + (type === 'error' ? 'bg-red-500' : 'bg-green-500') + ' text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium';
-        t.textContent = msg; c.appendChild(t); setTimeout(function(){ t.remove(); }, 3000);
+        var isErr = type === 'error';
+        t.className = 'adm-toast adm-toast--' + (isErr ? 'error' : 'success') + ' text-white px-5 py-3 text-sm font-medium';
+        t.innerHTML = '<i class="fa-solid ' + (isErr ? 'fa-circle-xmark' : 'fa-circle-check') + '" aria-hidden="true"></i><span>' + admEsc(msg) + '</span>';
+        c.appendChild(t);
+        setTimeout(function(){ t.remove(); }, 3000);
+    }
+
+    function admAnimateStat(el, end, duration) {
+        if (!el) return;
+        var target = parseInt(end, 10);
+        if (isNaN(target)) { el.textContent = end; return; }
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            el.textContent = target;
+            return;
+        }
+        var startTime = null;
+        function step(ts) {
+            if (!startTime) startTime = ts;
+            var p = Math.min((ts - startTime) / (duration || 900), 1);
+            var eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.floor(target * eased);
+            if (p < 1) requestAnimationFrame(step);
+            else el.textContent = target;
+        }
+        el.textContent = '0';
+        requestAnimationFrame(step);
     }
 
     window.toggleAdminPanel = function(show) {
@@ -1675,16 +2806,44 @@
     document.getElementById('admLoginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         var errEl = document.getElementById('admLoginError');
+        var btn = document.getElementById('admLoginBtn');
         errEl.classList.add('hidden');
+        errEl.textContent = '';
+        btn.disabled = true;
         document.getElementById('admLoginBtnText').textContent = 'Logging in...';
+        var arrow = btn.querySelector('.adm-btn-arrow');
+        if (arrow) arrow.classList.add('hidden');
         document.getElementById('admLoginSpinner').classList.remove('hidden');
         try {
-            var res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: document.getElementById('admUser').value.trim(), password: document.getElementById('admPass').value }) });
-            var data = await res.json();
-            if (data.status === 'success') { admShowDashboard(); } else { errEl.textContent = data.message; errEl.classList.remove('hidden'); }
-        } catch(ex) { errEl.textContent = 'Connection error'; errEl.classList.remove('hidden'); }
-        finally { document.getElementById('admLoginBtnText').textContent = 'Login'; document.getElementById('admLoginSpinner').classList.add('hidden'); }
+            var res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    username: document.getElementById('admUser').value.trim(),
+                    password: document.getElementById('admPass').value
+                })
+            });
+            var data = {};
+            try { data = await res.json(); } catch (_) {
+                throw new Error('Invalid server response');
+            }
+            if (data.status === 'success') {
+                admShowDashboard();
+            } else {
+                errEl.textContent = data.message || 'Login failed. Check your credentials.';
+                errEl.classList.remove('hidden');
+            }
+        } catch(ex) {
+            errEl.textContent = ex.message || 'Connection error. Is the server running?';
+            errEl.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+            document.getElementById('admLoginBtnText').textContent = 'Login';
+            var arrowEl = btn.querySelector('.adm-btn-arrow');
+            if (arrowEl) arrowEl.classList.remove('hidden');
+            document.getElementById('admLoginSpinner').classList.add('hidden');
+        }
     });
 
     window.admLogout = async function() {
@@ -1698,16 +2857,19 @@
         document.getElementById('admLoginScreen').classList.add('hidden');
         document.getElementById('admDashboardScreen').classList.remove('hidden');
         admLoadStats(); admLoadUsers(); admLoadVisits(); admPopulateUserDropdown();
+        fetch('/api/admin/me', { credentials: 'same-origin' }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.username) document.getElementById('admName').textContent = d.username;
+        }).catch(function() {});
     }
 
     async function admLoadStats() {
         try { var res = await fetch('/api/admin/stats'); var d = await res.json(); if (d.status !== 'ok') return;
-            document.getElementById('admStatUsers').textContent = d.totalUsers;
-            document.getElementById('admStatVerified').textContent = d.verifiedUsers;
-            document.getElementById('admStatTemples').textContent = d.totalTemples;
-            document.getElementById('admStatVisits').textContent = d.totalVisits;
-            document.getElementById('admStatUniqueVisitors').textContent = d.uniqueVisitors;
-            document.getElementById('admStatToday').textContent = d.visitsToday;
+            admAnimateStat(document.getElementById('admStatUsers'), d.totalUsers);
+            admAnimateStat(document.getElementById('admStatVerified'), d.verifiedUsers);
+            admAnimateStat(document.getElementById('admStatTemples'), d.totalTemples);
+            admAnimateStat(document.getElementById('admStatVisits'), d.totalVisits);
+            admAnimateStat(document.getElementById('admStatUniqueVisitors'), d.uniqueVisitors);
+            admAnimateStat(document.getElementById('admStatToday'), d.visitsToday);
         } catch(ex) {}
     }
 
@@ -1888,12 +3050,26 @@
 
     document.querySelectorAll('.adm-tab-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.adm-tab-btn').forEach(function(b) { b.classList.remove('active'); b.classList.add('bg-white', 'border', 'border-gray-200', 'text-slate-600'); });
-            btn.classList.add('active'); btn.classList.remove('bg-white', 'border', 'border-gray-200', 'text-slate-600');
+            document.querySelectorAll('.adm-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
             document.querySelectorAll('.adm-tab-content').forEach(function(c) { c.classList.add('hidden'); });
             document.getElementById('admtab-' + btn.dataset.admtab).classList.remove('hidden');
         });
     });
+
+    (function() {
+        var passInput = document.getElementById('admPass');
+        var toggleBtn = document.getElementById('admTogglePass');
+        var toggleIcon = document.getElementById('admTogglePassIcon');
+        if (!passInput || !toggleBtn) return;
+        toggleBtn.addEventListener('click', function() {
+            var show = passInput.type === 'password';
+            passInput.type = show ? 'text' : 'password';
+            toggleIcon.classList.toggle('fa-eye', !show);
+            toggleIcon.classList.toggle('fa-eye-slash', show);
+            toggleBtn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        });
+    })();
 
     async function admPopulateUserDropdown() {
         try { var res = await fetch('/api/admin/users'); var d = await res.json();
