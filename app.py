@@ -25,7 +25,7 @@ try:
 except ImportError:
     TwilioClient = None
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
 import logging
 
@@ -141,9 +141,9 @@ def _otp_response_extra(send_err, otp):
 
 
 def _send_email_message(msg, otp_hint=None):
-    """Send email; on SMTP failure optionally allow dev OTP fallback."""
+    """Send email via Flask-Mail; on SMTP failure optionally allow dev OTP fallback."""
     try:
-        _send_via_smtp(msg.recipients or [], msg.subject or '', msg.body or '')
+        mail.send(msg)
         return True, None
     except Exception as e:
         print(f'[ERROR] Email send failed: {e}')
@@ -168,23 +168,34 @@ def _check_mail_config():
     password = app.config['MAIL_PASSWORD']
     host = app.config['MAIL_SERVER']
     context = ssl.create_default_context()
-    try:
-        if app.config['MAIL_USE_SSL']:
-            with smtplib.SMTP_SSL(host, app.config['MAIL_PORT'], timeout=15, context=context) as smtp:
-                smtp.login(username, password)
-        else:
-            with smtplib.SMTP(host, app.config['MAIL_PORT'], timeout=15) as smtp:
-                smtp.ehlo()
-                if app.config['MAIL_USE_TLS']:
-                    smtp.starttls(context=context)
+    attempts = []
+    if app.config['MAIL_USE_SSL']:
+        attempts.append(('ssl', app.config['MAIL_PORT']))
+    else:
+        attempts.append(('starttls', app.config['MAIL_PORT']))
+        if app.config['MAIL_PORT'] != 465:
+            attempts.append(('ssl', 465))
+    last_error = None
+    for mode, smtp_port in attempts:
+        try:
+            if mode == 'ssl':
+                with smtplib.SMTP_SSL(host, smtp_port, timeout=15, context=context) as smtp:
+                    smtp.login(username, password)
+            else:
+                with smtplib.SMTP(host, smtp_port, timeout=15) as smtp:
                     smtp.ehlo()
-                smtp.login(username, password)
-        print(f"[OK] SMTP login verified for {username}")
-    except Exception as e:
-        print(f'[WARN] SMTP login failed for {username}: {e}')
-        if _email_otp_fallback_enabled():
-            print('[WARN] EMAIL_OTP_CONSOLE_FALLBACK is on — OTP codes will appear in the UI/server terminal until mail is fixed.')
-        print('[WARN] Fix .env: regenerate App Password at https://myaccount.google.com/apppasswords')
+                    if app.config['MAIL_USE_TLS']:
+                        smtp.starttls(context=context)
+                        smtp.ehlo()
+                    smtp.login(username, password)
+            print(f"[OK] SMTP verified for {username}")
+            return
+        except Exception as exc:
+            last_error = exc
+    print(f'[WARN] SMTP login failed for {username}: {last_error}')
+    if _email_otp_fallback_enabled():
+        print('[WARN] OTP will show on screen until you fix Gmail App Password in .env')
+    print('[WARN] Regenerate App Password: https://myaccount.google.com/apppasswords')
 
 # User Model
 class User(db.Model):
@@ -1052,9 +1063,12 @@ def register():
             session.pop('registration_data', None)
             return jsonify({"status": "error", "message": send_err}), 503
 
-        user_message = "OTP sent to email"
+        user_message = "OTP sent to your email inbox"
         if send_err == 'otp_console_fallback':
-            user_message = "SMTP unavailable - use the dev OTP shown below to continue."
+            user_message = (
+                "Email could not be sent (fix Gmail App Password in .env). "
+                "Use the OTP shown on screen."
+            )
         return jsonify({
             "status": "success",
             "step": "email",

@@ -852,9 +852,10 @@
                     <p class="text-center text-sm text-slate-500 font-medium">
                         We've sent a 6-digit code to <br><span id="displayEmail" class="text-purple-600 font-bold"></span>
                     </p>
-                    <div id="regDevOtpBanner" class="hidden rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-900">
-                        <p class="font-bold">Dev mode — email not sent</p>
-                        <p class="mt-1">Use this OTP: <span id="regDevOtpCode" class="font-black tracking-widest text-lg text-purple-700"></span></p>
+                    <div id="regDevOtpBanner" class="hidden rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-4 text-center text-sm text-amber-950 shadow-md">
+                        <p class="font-bold text-base">Email could not be sent — use this OTP on screen</p>
+                        <p class="mt-2 text-xs text-amber-800">Check your inbox only after Gmail SMTP is fixed in .env</p>
+                        <p class="mt-2 font-black tracking-[0.35em] text-2xl text-purple-700" id="regDevOtpCode"></p>
                     </div>
                     <div class="flex justify-center gap-2">
                         <input type="text" maxlength="1" class="otp-input email-otp-input" onkeyup="moveEmailFocus(this, 1)">
@@ -1173,6 +1174,15 @@
             });
         }
 
+        function presentRegistrationOtp(result) {
+            if (!result || !result.dev_otp) {
+                hideDevOtp('regDevOtpBanner');
+                return;
+            }
+            showDevOtp('regDevOtpBanner', 'regDevOtpCode', result.dev_otp);
+            fillOtpInputs('.email-otp-input', result.dev_otp);
+        }
+
         // Register Logic
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1196,18 +1206,14 @@
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ name, email, phone, password })
                 });
                 const result = await response.json();
 
                 if (result.status === 'success') {
                     document.getElementById('displayEmail').innerText = email;
-                    if (result.dev_otp) {
-                        showDevOtp('regDevOtpBanner', 'regDevOtpCode', result.dev_otp);
-                        fillOtpInputs('.email-otp-input', result.dev_otp);
-                    } else {
-                        hideDevOtp('regDevOtpBanner');
-                    }
+                    presentRegistrationOtp(result);
                     showStep(2);
                     startTimer();
                 } else {
@@ -1289,13 +1295,10 @@
         // Resend email OTP
         document.getElementById('resendBtn').addEventListener('click', async () => {
             try {
-                const res = await fetch('/api/auth/resend_otp', { method: 'POST' });
+                const res = await fetch('/api/auth/resend_otp', { method: 'POST', credentials: 'same-origin' });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    if (result.dev_otp) {
-                        showDevOtp('regDevOtpBanner', 'regDevOtpCode', result.dev_otp);
-                        fillOtpInputs('.email-otp-input', result.dev_otp);
-                    }
+                    presentRegistrationOtp(result);
                     startTimer();
                 }
             } catch (err) { alert("Resend failed"); }
@@ -1324,6 +1327,7 @@
                 const response = await fetch('/api/auth/verify_otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ otp })
                 });
                 const result = await response.json();
