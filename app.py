@@ -621,16 +621,21 @@ def _backfill_qr_tokens():
 def _sync_admin_credentials():
     """Ensure admin exists and password matches ADMIN_USERNAME / ADMIN_PASSWORD in .env."""
     uname = (os.getenv('ADMIN_USERNAME') or 'admin').strip()
-    pwd = os.getenv('ADMIN_PASSWORD') or 'admin'
+    pwd = (os.getenv('ADMIN_PASSWORD') or 'admin').strip()
     if not uname:
         return
 
-    admin = Admin.query.filter_by(username=uname).first()
+    admin = Admin.query.filter(
+        db.func.lower(Admin.username) == uname.lower()
+    ).first()
     if admin:
+        admin.username = uname
         if not check_password_hash(admin.password_hash, pwd):
             admin.password_hash = generate_password_hash(pwd)
             db.session.commit()
             print(f'[INFO] Admin "{uname}" password synced from .env')
+        else:
+            db.session.commit()
         return
 
     admin = Admin(
@@ -1690,8 +1695,10 @@ def admin_page():
 def admin_login():
     data = request.json or {}
     username = (data.get('username') or '').strip()
-    password = data.get('password') or ''
-    admin = Admin.query.filter_by(username=username).first()
+    password = (data.get('password') or '').strip()
+    admin = Admin.query.filter(
+        db.func.lower(Admin.username) == username.lower()
+    ).first()
     if not admin or not check_password_hash(admin.password_hash, password):
         return jsonify({'status': 'error', 'message': 'Invalid admin credentials'}), 401
     session['is_admin'] = True
