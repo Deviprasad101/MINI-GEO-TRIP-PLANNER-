@@ -135,9 +135,30 @@ def _send_via_smtp(recipients, subject, body):
 
 
 def _otp_response_extra(send_err, otp):
+    """Return OTP to the UI only when email could not be sent (dev fallback)."""
     if send_err == 'otp_console_fallback' and otp and _email_otp_fallback_enabled():
-        return {'dev_otp': otp}
-    return {}
+        return {'dev_otp': otp, 'email_sent': False}
+    return {'email_sent': send_err != 'otp_console_fallback'}
+
+
+def _build_otp_email(greeting_name, purpose_line, otp):
+    """Plain + HTML body so OTP is visible in all mail clients."""
+    plain = (
+        f"Hello {greeting_name},\n\n"
+        f"{purpose_line}\n\n"
+        f"Your verification code is: {otp}\n\n"
+        f"This code expires in 5 minutes.\n"
+        f"If you did not request this, you can ignore this email."
+    )
+    html = f"""<!DOCTYPE html>
+<html><body style="font-family:Arial,sans-serif;color:#1e293b;line-height:1.5;">
+<p>Hello {greeting_name},</p>
+<p>{purpose_line}</p>
+<p style="margin:24px 0;font-size:15px;">Your verification code is:</p>
+<p style="margin:0 0 24px;font-size:32px;font-weight:bold;letter-spacing:8px;color:#7c3aed;">{otp}</p>
+<p style="font-size:13px;color:#64748b;">This code expires in 5 minutes. If you did not request this, ignore this email.</p>
+</body></html>"""
+    return plain, html
 
 
 def _send_email_message(msg, otp_hint=None):
@@ -850,9 +871,16 @@ def clean_json_from_llm(text: str) -> str:
             clean_text = clean_text[4:].strip()
     return clean_text
 
+def _serve_login_page():
+    response = send_from_directory('.', 'login.html')
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
+
+
 @app.route('/')
 def home():
-    return send_from_directory('.', 'login.html')
+    return _serve_login_page()
 
 @app.route('/dashboard')
 def dashboard():
@@ -1057,7 +1085,13 @@ def register():
         }
 
         msg = Message('GeoTrip Planner - Verify Your Email', recipients=[email])
-        msg.body = f"Hello {username},\n\nYour OTP for GeoTrip Planner registration is: {otp}\n\nThis code expires in 5 minutes."
+        body, html = _build_otp_email(
+            username,
+            'Use this code to verify your GeoTrip Planner registration.',
+            otp,
+        )
+        msg.body = body
+        msg.html = html
         ok, send_err = _send_email_message(msg, otp_hint=otp)
         if not ok:
             session.pop('registration_data', None)
@@ -1142,7 +1176,13 @@ def resend_otp():
             session['registration_data'] = reg_data
 
             msg = Message('GeoTrip Planner - Resend OTP', recipients=[reg_data['email']])
-            msg.body = f"Your new OTP is: {otp}"
+            body, html = _build_otp_email(
+                reg_data.get('username') or 'there',
+                'Here is your new GeoTrip Planner verification code.',
+                otp,
+            )
+            msg.body = body
+            msg.html = html
             ok, send_err = _send_email_message(msg, otp_hint=otp)
             if not ok:
                 return jsonify({"status": "error", "message": send_err}), 503
@@ -1532,14 +1572,23 @@ def forgot_password():
         print(f"[DEBUG] Password reset OTP for {email}: {otp}")
 
         msg = Message('GeoTrip Planner - Password Reset Verification', recipients=[email])
-        msg.body = f"Hello {user.username},\n\nYou requested a password reset for your GeoTrip Planner account.\nYour reset OTP is: {otp}\n\nThis code expires in 5 minutes. If you did not request this reset, please ignore this email."
+        body, html = _build_otp_email(
+            user.username,
+            'You requested a password reset for your GeoTrip Planner account.',
+            otp,
+        )
+        msg.body = body
+        msg.html = html
         ok, send_err = _send_email_message(msg, otp_hint=otp)
         if not ok:
             session.pop('reset_data', None)
             return jsonify({"status": "error", "message": send_err}), 503
-        user_message = "Reset OTP sent to your email"
+        user_message = "Reset OTP sent to your email inbox"
         if send_err == 'otp_console_fallback':
-            user_message = "SMTP unavailable - use the dev OTP shown below."
+            user_message = (
+                "Email could not be sent (fix Gmail App Password in .env). "
+                "Use the OTP shown on screen."
+            )
         return jsonify({
             "status": "success",
             "message": user_message,
@@ -1566,10 +1615,13 @@ def reset_password():
             session.pop('reset_data', None)
             return jsonify({"status": "error", "message": "OTP expired"}), 400
 
-        if user_otp == reset_data['otp']:
+        if str(user_otp or '').strip() == str(reset_data['otp']).strip():
             user = User.query.filter_by(email=email).first()
             if not user:
                 return jsonify({"status": "error", "message": "User not found"}), 404
+
+            if not new_password or len(str(new_password)) < 6:
+                return jsonify({"status": "error", "message": "Password must be at least 6 characters"}), 400
 
             user.password_hash = generate_password_hash(new_password)
             db.session.commit()
@@ -1702,7 +1754,7 @@ def about_page():
 
 @app.route('/admin')
 def admin_page():
-    return send_from_directory('.', 'login.html')
+    return _serve_login_page()
 
 
 @app.route('/api/admin/login', methods=['POST'])
