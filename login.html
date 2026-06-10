@@ -1057,7 +1057,6 @@
         openForgot.addEventListener('click', () => forgotModal.classList.add('active'));
         closeForgot.addEventListener('click', () => forgotModal.classList.remove('active'));
         window.addEventListener('click', (e) => {
-            if (e.target === registerModal) registerModal.classList.remove('active');
             if (e.target === forgotModal) forgotModal.classList.remove('active');
         });
 
