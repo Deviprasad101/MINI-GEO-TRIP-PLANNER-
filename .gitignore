@@ -45,4 +45,5 @@ venv.bak/
 
 # Large Media Files
 *.mp4
+assets/images/*.mp4
 images/*.mp4
