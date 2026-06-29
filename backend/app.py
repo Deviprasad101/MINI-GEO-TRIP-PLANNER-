@@ -948,6 +948,14 @@ def serve_recommender_js():
 def serve_weather_js():
     return send_from_directory(FRONTEND_DIR, 'weather.js')
 
+@app.route('/emergency-widget.js')
+def serve_emergency_widget_js():
+    return send_from_directory(FRONTEND_DIR, 'emergency-widget.js')
+
+@app.route('/emergency-widget.css')
+def serve_emergency_widget_css():
+    return send_from_directory(FRONTEND_DIR, 'emergency-widget.css')
+
 @app.route('/booking.html')
 def booking_page():
     return send_from_directory(FRONTEND_DIR, 'booking.html')

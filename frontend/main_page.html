@@ -3536,8 +3536,8 @@
             <h2 id="emergencyTitle">Emergency - Hospitals</h2>
             <button type="button" class="emergency-panel__close" id="emergencyCloseBtn" aria-label="Close">x</button>
         </div>
-        <p class="emergency-panel__lead">Hospitals listed in the Tirupati dataset. Open the map to see the <strong>three
-                nearest</strong> to your route start with an OSRM-optimized driving path.</p>
+        <p class="emergency-panel__lead">Uses your <strong>live GPS location</strong> to show the <strong>three
+                nearest</strong> hospitals with a driving route.</p>
         <div id="emergencyListRoot" class="emergency-list"></div>
         <div class="emergency-panel__foot">
             <button type="button" class="btn-emergency-map" id="emergencyShowMapBtn">Show nearest 3 on map</button>
@@ -4138,25 +4138,34 @@
             var mainPreviewAbort = null;
             var mainGpsCoords = null;
 
+            var LIVE_GPS_OPTS = { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 };
+
             function getLiveGpsPosition(onSuccess, onError) {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        function (position) {
-                            if (onSuccess) {
-                                onSuccess(
-                                    position.coords.latitude,
-                                    position.coords.longitude,
-                                    position
-                                );
-                            }
-                        },
-                        function () {
-                            if (onError) onError('Sorry, no position available.');
-                        }
-                    );
-                } else if (onError) {
-                    onError('Geolocation is not supported by this browser.');
+                if (!navigator.geolocation) {
+                    if (onError) onError('Geolocation is not supported by this browser.');
+                    return;
                 }
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        if (onSuccess) {
+                            onSuccess(
+                                position.coords.latitude,
+                                position.coords.longitude,
+                                position
+                            );
+                        }
+                    },
+                    function (err) {
+                        var msg = 'Could not get your live location.';
+                        if (err && err.code === 1) {
+                            msg = 'Location permission denied. Allow GPS for this site in browser settings.';
+                        } else if (err && err.code === 3) {
+                            msg = 'Location request timed out. Try again with GPS enabled.';
+                        }
+                        if (onError) onError(msg);
+                    },
+                    LIVE_GPS_OPTS
+                );
             }
 
             /** Fast fallback coords for emergency hospitals (used before network geocoding). */
@@ -5239,7 +5248,7 @@
                 var hint = document.getElementById('emergencyMapHint');
                 if (hint) {
                     hint.textContent =
-                        'Tap Show nearest 3 on map to request live GPS first; if unavailable, a default start near Tirupati is used.';
+                        'Tap Show nearest 3 on map — uses your exact live GPS location.';
                     hint.style.color = '#64748b';
                     hint.style.fontWeight = '';
                 }
@@ -5333,24 +5342,13 @@
             }
 
             function showEmergencyNearestHospitals() {
-                var locInput = document.getElementById('userStartLocation');
-                var gpsEl = document.getElementById('mainGpsCheckbox');
-                var loc = locInput ? locInput.value.trim() : '';
-                var useGps = gpsEl && gpsEl.checked;
                 var btn = document.getElementById('emergencyShowMapBtn');
                 var hint = document.getElementById('emergencyMapHint');
-                if (!useGps && !loc) {
-                    if (hint) {
-                        hint.textContent =
-                            'Enter a start address or enable live GPS (same as your trip route).';
-                    }
-                    return;
-                }
                 if (emergencyAbort) emergencyAbort.abort();
                 emergencyAbort = new AbortController();
                 var signal = emergencyAbort.signal;
                 if (btn) btn.disabled = true;
-                if (hint) hint.textContent = 'Locating nearest hospitals...';
+                if (hint) hint.textContent = 'Requesting your live GPS location…';
 
                 function fail(msg) {
                     if (hint) hint.textContent = msg || 'Could not complete.';
@@ -5462,28 +5460,17 @@
                         }, fail);
                 }
 
-                if (useGps) {
-                    getLiveGpsPosition(
-                        function (lat, lng) {
-                            if (signal.aborted) return;
-                            drawEmergencyFromStart(lat, lng, 'Live GPS');
-                        },
-                        function (msg) {
-                            fail(msg + ' Enter an address under Trip Details.');
-                        }
-                    );
-                    return;
-                }
-
-                geocodeNominatim(loc || 'Tirupati, India', signal).then(function (geo) {
-                    if (signal.aborted) return;
-                    if (!geo || isNaN(geo.lat)) {
-                        fail('Could not geocode your start location.');
-                        if (btn) btn.disabled = false;
-                        return;
+                getLiveGpsPosition(
+                    function (lat, lng, position) {
+                        if (signal.aborted) return;
+                        var acc = position && position.coords ? position.coords.accuracy : null;
+                        var label = 'Your live location' + (acc ? ' (±' + Math.round(acc) + ' m)' : '');
+                        drawEmergencyFromStart(lat, lng, label);
+                    },
+                    function (msg) {
+                        fail(msg);
                     }
-                    drawEmergencyFromStart(geo.lat, geo.lng, geo.label || loc);
-                });
+                );
             }
 
             var emergencyFabEl = document.getElementById('emergencyFab');

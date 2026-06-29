@@ -1602,6 +1602,52 @@
             box-shadow: 0 10px 28px rgba(15, 23, 42, 0.15);
         }
 
+        /* Emergency hospitals map — above footer (About page) */
+        .about-emergency-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 2rem;
+            box-sizing: border-box;
+        }
+        @media (min-width: 640px) { .about-emergency-section { padding-inline: 2rem; } }
+        @media (min-width: 1024px) { .about-emergency-section { padding-inline: 2.5rem; } }
+        .about-emergency-section:empty { display: none; }
+        body.about-page .about-emergency-section:not(:has(.emergency-map-card:not(.hidden))) {
+            display: none;
+        }
+        body.about-page #gtEmergencyMapSection.emergency-map-card--about-footer {
+            margin: 0;
+            padding: 1rem 1.15rem 1.1rem;
+            border-radius: 1.25rem;
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 12px 32px rgba(23, 37, 84, 0.06);
+        }
+        body.about-page #gtEmergencyMapSection.emergency-map-card--about-footer .emergency-map-card__title {
+            font-family: "Noto Serif", Georgia, serif;
+            font-size: 0.92rem;
+            color: var(--gov-navy);
+        }
+        body.about-page #gtEmergencyMapSection.emergency-map-card--about-footer #gtEmergencyMap {
+            width: 100%;
+            min-height: 220px;
+            height: 220px;
+            max-height: 220px;
+            border-radius: 0.85rem;
+            border: 1px solid #e2e8f0;
+        }
+        @media (min-width: 900px) {
+            body.about-page #gtEmergencyMapSection.emergency-map-card--about-footer #gtEmergencyMap {
+                min-height: 280px;
+                height: 280px;
+                max-height: 280px;
+            }
+        }
+        body.about-page #gtEmergencyMapSection.emergency-map-card--about-footer .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12) !important;
+        }
+
         /* ─── Social buttons ─── */
         .social-row { display: flex; flex-wrap: nowrap; gap: 0.5rem; overflow-x: auto; }
         .social-btn { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.45rem 1rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; color: #fff; text-decoration: none; transition: all 0.2s; flex-shrink: 0; }
@@ -1619,7 +1665,7 @@
         .floating-qr__label{margin:0;font-size:.8rem;font-weight:800;color:#0f172a;line-height:3}
     </style>
 </head>
-<body class="site-header-mobile">
+<body class="site-header-mobile about-page">
     <!-- ═══════════ HEADER ═══════════ -->
     <header class="site-header sticky top-0 z-50 shrink-0 border-b border-amber-200/60 bg-white/95 backdrop-blur-md">
         <div class="site-header__layout min-w-0 px-4 py-2.5 sm:px-6 sm:py-3 lg:min-h-[7rem]">
@@ -2238,6 +2284,8 @@
         </section>
 
     </main>
+
+    <div id="gtEmergencyMapAnchor" class="about-emergency-section" aria-live="polite"></div>
 
     <script src="chatbot.js" defer></script>
 
@@ -3055,5 +3103,7 @@
             window.addEventListener('resize', function(){ map.invalidateSize(); });
         })();
     </script>
+    <link rel="stylesheet" href="/emergency-widget.css">
+    <script src="/emergency-widget.js" defer></script>
 </body>
 </html>

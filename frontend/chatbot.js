@@ -318,7 +318,7 @@
             <button class="gt-chatbot-quick-btn" onclick="window.location.href='packages.html'">📦 Packages</button>
             <button class="gt-chatbot-quick-btn" onclick="window.location.href='/dashboard'">🗺️ GeoTrip map</button>
             <button class="gt-chatbot-quick-btn" onclick="window.location.href='booking.html'">🚆 Booking</button>
-            <button class="gt-chatbot-quick-btn" onclick="alert('Checklist coming soon! Remember IDs &amp; traditional wear.')">✅ Checklist Feature</button>
+            <button class="gt-chatbot-quick-btn" onclick="window.location.href='/dashboard'">🏠 Home</button>
         </div>
     `;
 

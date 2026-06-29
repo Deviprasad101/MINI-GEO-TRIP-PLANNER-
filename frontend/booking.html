@@ -1979,8 +1979,8 @@
             <h2 id="emergencyTitle">Emergency - Hospitals</h2>
             <button type="button" class="emergency-panel__close" id="emergencyCloseBtn" aria-label="Close">x</button>
         </div>
-        <p class="emergency-panel__lead">Hospitals listed in the Tirupati dataset. Open the map to see the <strong>three
-                nearest</strong> to your route start with an OSRM-optimized driving path.</p>
+        <p class="emergency-panel__lead">Uses your <strong>live GPS location</strong> to show the <strong>three
+                nearest</strong> hospitals with an optimized driving route.</p>
         <div id="emergencyListRoot" class="emergency-list"></div>
         <div class="emergency-panel__foot">
             <button type="button" class="btn-emergency-map" id="emergencyShowMapBtn">Show nearest 3 on map</button>
@@ -2524,16 +2524,13 @@
             }
 
             function showEmergencyNearestHospitals() {
-                var locInput = document.getElementById('userStartLocation');
-                var loc = locInput ? locInput.value.trim() : '';
-                var fallbackQuery = loc || 'Tirupati, India';
                 var btn = document.getElementById('emergencyShowMapBtn');
                 var hint = document.getElementById('emergencyMapHint');
                 if (emergencyAbort) emergencyAbort.abort();
                 emergencyAbort = new AbortController();
                 var signal = emergencyAbort.signal;
                 if (btn) btn.disabled = true;
-                if (hint) hint.textContent = 'Requesting live GPS...';
+                if (hint) hint.textContent = 'Requesting your live GPS location…';
 
                 function fail(msg) {
                     if (hint) hint.textContent = msg || 'Could not complete.';
@@ -2649,22 +2646,8 @@
                         });
                 }
 
-                function tryGeocodedFallback() {
-                    if (hint) hint.textContent = 'Using default start (GPS unavailable)...';
-                    geocodeNominatim(fallbackQuery, signal).then(function (geo) {
-                        if (signal.aborted) return;
-                        if (!geo || isNaN(geo.lat)) {
-                            fail('Could not locate a start point. Try again later.');
-                            if (btn) btn.disabled = false;
-                            return;
-                        }
-                        drawEmergencyFromStart(geo.lat, geo.lng, geo.label || fallbackQuery);
-                    });
-                }
-
                 if (!navigator.geolocation) {
-                    if (hint) hint.textContent = 'Geocoding default start (no GPS API)...';
-                    tryGeocodedFallback();
+                    fail('Geolocation is not supported on this device.');
                     return;
                 }
 
@@ -2672,13 +2655,21 @@
                     function (pos) {
                         if (signal.aborted) return;
                         if (hint) hint.textContent = 'Locating nearest hospitals...';
-                        drawEmergencyFromStart(pos.coords.latitude, pos.coords.longitude, 'Live GPS');
+                        var acc = pos.coords.accuracy;
+                        var label = 'Your live location' + (acc ? ' (±' + Math.round(acc) + ' m)' : '');
+                        drawEmergencyFromStart(pos.coords.latitude, pos.coords.longitude, label);
                     },
-                    function () {
+                    function (err) {
                         if (signal.aborted) return;
-                        tryGeocodedFallback();
+                        var msg = 'Could not get your live location.';
+                        if (err && err.code === 1) {
+                            msg = 'Location permission denied. Allow GPS for this site in browser settings.';
+                        } else if (err && err.code === 3) {
+                            msg = 'Location request timed out. Try again with GPS enabled.';
+                        }
+                        fail(msg);
                     },
-                    { enableHighAccuracy: true, timeout: 25000, maximumAge: 0 }
+                    { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
                 );
             }
 

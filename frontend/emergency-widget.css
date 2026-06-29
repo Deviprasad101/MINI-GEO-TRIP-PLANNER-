@@ -1,0 +1,130 @@
+/* GeoTrip emergency hospitals widget (shared: about, login, etc.) */
+.emergency-fab {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 10001;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 0.8125rem;
+    color: #fff;
+    background: linear-gradient(135deg, #d4af37, #735c00);
+    box-shadow: 0 6px 22px rgba(115, 92, 0, 0.38);
+    font-family: inherit;
+}
+.emergency-fab:hover { filter: brightness(1.06); }
+.emergency-fab .material-symbols-outlined { font-size: 1.35rem; }
+.emergency-panel-backdrop {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(15, 23, 42, 0.42);
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+}
+.emergency-panel-backdrop.is-open { opacity: 1; pointer-events: auto; }
+.emergency-panel {
+    position: fixed; top: 0.75rem; right: 0;
+    width: min(100vw - 1rem, 22rem);
+    max-height: min(88vh, 34rem); z-index: 9999;
+    background: #fff; border-radius: 1rem 0 0 1rem;
+    box-shadow: -10px 0 36px rgba(0, 0, 0, 0.18);
+    transform: translateX(105%); transition: transform 0.22s ease;
+    display: flex; flex-direction: column; overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+.emergency-panel.is-open { transform: translateX(0); }
+.emergency-panel__head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 0.75rem; padding: 1rem 1rem 0.5rem;
+    background: linear-gradient(180deg, #fff8e6 0%, #ffffff 100%);
+    border-bottom: 1px solid #e5cf8a;
+}
+.emergency-panel__head h2 { margin: 0; font-size: 1.1rem; font-weight: 800; color: #554300; }
+.emergency-panel__close {
+    border: none; background: #fff; width: 2rem; height: 2rem;
+    border-radius: 0.5rem; cursor: pointer; font-size: 1.25rem; color: #64748b;
+}
+.emergency-panel__lead { margin: 0; padding: 0.75rem 1rem; font-size: 0.82rem; color: #475569; line-height: 1.45; }
+.emergency-list { flex: 1; overflow-y: auto; padding: 0 1rem; font-size: 0.8rem; }
+.emergency-list ul { margin: 0; padding: 0; list-style: none; }
+.emergency-list li { padding: 0.45rem 0; border-bottom: 1px solid #f1f5f9; }
+.emergency-list li span.meta { display: block; color: #94a3b8; font-size: 0.72rem; }
+.emergency-panel__foot { padding: 0.75rem 1rem 1rem; border-top: 1px solid #e2e8f0; }
+.emergency-panel__foot .btn-emergency-map {
+    width: 100%; padding: 0.75rem; border: none; border-radius: 0.65rem;
+    font-weight: 800; cursor: pointer; color: #fff;
+    background: linear-gradient(135deg, #d4af37, #735c00);
+}
+.emergency-panel__foot .btn-emergency-map:disabled { opacity: 0.55; cursor: not-allowed; }
+.emergency-hint { margin: 0.5rem 0 0; font-size: 0.75rem; color: #64748b; }
+
+/* Inline map (login / default) — hide map chrome until opened */
+.emergency-map-card .emergency-map-card__head,
+.emergency-map-card .emergency-map-legend {
+    display: none;
+}
+.emergency-map-card:not(.hidden) .emergency-map-card__head,
+.emergency-map-card:not(.hidden) .emergency-map-legend {
+    display: flex;
+}
+.emergency-map-card__status {
+    font-size: 0.85rem;
+    margin: 0 0 0.5rem;
+}
+.emergency-map-card {
+    margin: 1rem; padding: 0.75rem;
+    border: 1px solid #e2e8f0; border-radius: 0.75rem; background: #fff;
+}
+.emergency-map-card.hidden { display: none !important; }
+#gtEmergencyMap { width: 100%; min-height: 360px; border-radius: 0.5rem; }
+body.about-page #gtEmergencyMapSection.emergency-map-card--about-footer #gtEmergencyMap {
+    min-height: 220px;
+    height: 220px;
+    max-height: 220px;
+}
+@media (min-width: 900px) {
+    body.about-page #gtEmergencyMapSection.emergency-map-card--about-footer #gtEmergencyMap {
+        min-height: 280px;
+        height: 280px;
+        max-height: 280px;
+    }
+}
+body.about-page .emergency-map-card--about-footer {
+    margin: 0;
+}
+
+.emergency-map-card__head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 0.5rem; margin-bottom: 0.35rem;
+}
+.emergency-map-card__title {
+    font-size: 0.8rem; font-weight: 800; color: #554300; letter-spacing: 0.02em;
+}
+.emergency-map-card__close {
+    border: none; background: #f1f5f9; width: 1.65rem; height: 1.65rem;
+    border-radius: 0.4rem; cursor: pointer; font-size: 1rem; line-height: 1;
+    color: #64748b; flex-shrink: 0;
+}
+.emergency-map-card__close:hover { background: #e2e8f0; }
+.emergency-map-card__status {
+    font-size: 0.72rem; color: #64748b; margin: 0 0 0.35rem; line-height: 1.35;
+}
+.emergency-map-legend {
+    display: flex; flex-wrap: wrap; gap: 0.35rem 0.55rem;
+    margin-bottom: 0.4rem; font-size: 0.68rem; font-weight: 700; color: #475569;
+}
+.emergency-map-legend span {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    padding: 0.15rem 0.4rem; border-radius: 999px; background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+.emergency-map-legend .dot {
+    width: 0.55rem; height: 0.55rem; border-radius: 50%; display: inline-block;
+}
+.emergency-map-legend .dot-you { background: #0f172a; }
+.emergency-map-legend .dot-h { background: #735c00; }
+
