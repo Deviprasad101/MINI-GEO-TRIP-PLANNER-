@@ -207,6 +207,27 @@
             background: linear-gradient(180deg, #fffbeb, #fff4d6);
             border-top-color: #e5cf8a;
         }
+        .gt-chatbot-provider-wrap {
+            display: none;
+            padding: 0 12px 8px;
+            font-size: 0.72rem;
+            color: #554300;
+            background: linear-gradient(180deg, #fff4d6, #fffbeb);
+            border-top: 1px solid #f3e8c0;
+        }
+        .gt-chatbot-provider-wrap.is-visible {
+            display: block;
+        }
+        .gt-chatbot-provider-wrap select {
+            width: 100%;
+            margin-top: 4px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid #d0c5af;
+            font-size: 0.75rem;
+            background: #fff;
+            font-family: inherit;
+        }
         .gt-chatbot-input-area {
             display: flex;
             padding: 12px;
@@ -242,6 +263,19 @@
         .gt-chatbot-input-area button:hover {
             transform: scale(1.05);
         }
+        .gt-chatbot-action-btn {
+            display: inline-block;
+            margin: 4px 4px 0 0;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border-radius: 999px;
+            border: 1px solid #e5cf8a;
+            background: #fffbeb;
+            color: #735c00;
+            cursor: pointer;
+        }
+        .gt-chatbot-action-btn:hover { background: #ffe088; }
         @media (max-width: 480px) {
             .gt-chatbot-window {
                 width: calc(100% - 48px);
@@ -348,11 +382,18 @@
             <div class="gt-chatbot-options" id="gtChatOptions">
                 ${htmlOptions}
             </div>
-            <label class="gt-chatbot-ollama-toggle" id="gtOllamaToggleLabel" for="gtUseOllama">
-                <input type="checkbox" id="gtUseOllama" aria-describedby="gtOllamaHint" />
-                <span class="gt-chatbot-ollama-label">Use Ollama AI</span>
-                <span id="gtOllamaHint" class="text-slate-500" style="font-weight:400;font-size:0.72rem;">(off = quick FAQ answers)</span>
+            <label class="gt-chatbot-ollama-toggle" id="gtAgentToggleLabel" for="gtUseAgent">
+                <input type="checkbox" id="gtUseAgent" aria-describedby="gtAgentHint" />
+                <span class="gt-chatbot-ollama-label">Use GeoTrip Agent</span>
+                <span id="gtAgentHint" class="text-slate-500" style="font-weight:400;font-size:0.72rem;">(off = FAQ)</span>
             </label>
+            <div class="gt-chatbot-provider-wrap" id="gtAgentProviderWrap">
+                <label for="gtAgentProvider">Agent engine</label>
+                <select id="gtAgentProvider" aria-label="Choose agent engine">
+                    <option value="gemini">Gemini ADK (cloud API key)</option>
+                    <option value="ollama">Ollama Gemma3 (local, no API key)</option>
+                </select>
+            </div>
             <div class="gt-chatbot-input-area">
                 <input type="text" id="gtChatInput" placeholder="Type your question..." autocomplete="off" />
                 <button id="gtChatSend" aria-label="Send Message"><span class="material-symbols-outlined">send</span></button>
@@ -397,20 +438,48 @@
 
     const chatInput = document.getElementById('gtChatInput');
     const chatSend = document.getElementById('gtChatSend');
-    const useOllamaCheckbox = document.getElementById('gtUseOllama');
-    const ollamaToggleLabel = document.getElementById('gtOllamaToggleLabel');
-    const OLLAMA_PREF_KEY = 'gtChatUseOllama';
+    const useAgentCheckbox = document.getElementById('gtUseAgent');
+    const agentToggleLabel = document.getElementById('gtAgentToggleLabel');
+    const agentProviderWrap = document.getElementById('gtAgentProviderWrap');
+    const agentProviderSelect = document.getElementById('gtAgentProvider');
+    const AGENT_PREF_KEY = 'gtChatUseAgent';
+    const AGENT_PROVIDER_KEY = 'gtChatAgentProvider';
+    let agentSessionId = sessionStorage.getItem('geotrip_agent_session') || '';
 
-    function isOllamaEnabled() {
-        return useOllamaCheckbox && useOllamaCheckbox.checked;
+    function getAgentProvider() {
+        return (agentProviderSelect && agentProviderSelect.value) || 'gemini';
     }
 
-    const ollamaHint = document.getElementById('gtOllamaHint');
+    function isAgentEnabled() {
+        return useAgentCheckbox && useAgentCheckbox.checked;
+    }
 
-    function syncOllamaToggleUi() {
-        const on = isOllamaEnabled();
-        if (ollamaToggleLabel) {
-            ollamaToggleLabel.classList.toggle('is-on', on);
+    const agentHint = document.getElementById('gtAgentHint');
+
+    function applyChatAgentActions(actions) {
+        if (!actions || !actions.length) return;
+        actions.forEach(function(act) {
+            if (!act || !act.type) return;
+            if (act.type === 'open_map') {
+                window.location.href = '/dashboard';
+            } else if (act.type === 'show_package') {
+                window.location.href = act.url || '/packages.html';
+            } else if (act.type === 'show_qr') {
+                if (typeof window.showFloatingTempleQr === 'function') window.showFloatingTempleQr();
+            } else if (act.type === 'show_emergency_map') {
+                var emFab = document.getElementById('emergencyFab');
+                if (emFab) emFab.click();
+            }
+        });
+    }
+
+    function syncAgentToggleUi() {
+        const on = isAgentEnabled();
+        if (agentToggleLabel) {
+            agentToggleLabel.classList.toggle('is-on', on);
+        }
+        if (agentProviderWrap) {
+            agentProviderWrap.classList.toggle('is-visible', on);
         }
         if (options) {
             options.classList.toggle('is-hidden', on);
@@ -418,25 +487,42 @@
         if (body) {
             body.classList.toggle('is-ollama-mode', on);
         }
-        if (ollamaHint) {
-            ollamaHint.textContent = on
-                ? '(AI mode — FAQ shortcuts hidden)'
+        const provider = getAgentProvider();
+        if (agentHint) {
+            agentHint.textContent = on
+                ? (provider === 'ollama'
+                    ? '(Ollama Gemma3 local — FAQ hidden)'
+                    : '(Gemini ADK cloud — FAQ hidden)')
                 : '(off = quick FAQ answers)';
         }
         if (chatInput) {
             chatInput.placeholder = on
-                ? 'Ask Ollama AI about your trip…'
+                ? (provider === 'ollama'
+                    ? 'Ask Gemma3 (local) about your trip…'
+                    : 'Ask GeoTrip Agent (Gemini)…')
                 : 'Type your question (FAQ mode)…';
         }
     }
 
-    if (useOllamaCheckbox) {
-        const saved = localStorage.getItem(OLLAMA_PREF_KEY);
-        useOllamaCheckbox.checked = saved === '1';
-        syncOllamaToggleUi();
-        useOllamaCheckbox.addEventListener('change', () => {
-            localStorage.setItem(OLLAMA_PREF_KEY, useOllamaCheckbox.checked ? '1' : '0');
-            syncOllamaToggleUi();
+    if (useAgentCheckbox) {
+        const saved = localStorage.getItem(AGENT_PREF_KEY);
+        useAgentCheckbox.checked = saved === '1';
+        if (agentProviderSelect) {
+            const savedProvider = localStorage.getItem(AGENT_PROVIDER_KEY);
+            if (savedProvider === 'ollama' || savedProvider === 'gemini') {
+                agentProviderSelect.value = savedProvider;
+            }
+        }
+        syncAgentToggleUi();
+        useAgentCheckbox.addEventListener('change', () => {
+            localStorage.setItem(AGENT_PREF_KEY, useAgentCheckbox.checked ? '1' : '0');
+            syncAgentToggleUi();
+        });
+    }
+    if (agentProviderSelect) {
+        agentProviderSelect.addEventListener('change', () => {
+            localStorage.setItem(AGENT_PROVIDER_KEY, agentProviderSelect.value);
+            syncAgentToggleUi();
         });
     }
 
@@ -458,20 +544,53 @@
         return null;
     }
 
-    function appendBotMessage(html, isThinking) {
+    function appendBotMessage(html, isThinking, actions) {
         const bMsg = document.createElement('div');
         bMsg.className = 'gt-chat-msg bot' + (isThinking ? ' gt-chat-msg--thinking' : '');
         bMsg.innerHTML = html;
+        if (actions && actions.length) {
+            const wrap = document.createElement('div');
+            wrap.style.marginTop = '6px';
+            actions.forEach(function(act) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'gt-chatbot-action-btn';
+                btn.textContent = act.type === 'open_map' ? 'Open map'
+                    : act.type === 'show_package' ? 'Packages'
+                    : act.type === 'show_qr' ? 'Show QR'
+                    : act.type === 'show_emergency_map' ? 'Emergency map'
+                    : 'Open';
+                btn.onclick = function() { applyChatAgentActions([act]); };
+                wrap.appendChild(btn);
+            });
+            bMsg.appendChild(wrap);
+        }
         body.appendChild(bMsg);
         body.scrollTop = body.scrollHeight;
         return bMsg;
+    }
+
+    function getAgentCoords() {
+        if (typeof window.getMainGpsCoords === 'function') {
+            var gps = window.getMainGpsCoords();
+            if (gps && gps.lat != null && gps.lng != null) {
+                return { lat: gps.lat, lng: gps.lng };
+            }
+        }
+        if (window.mainGpsCoords && window.mainGpsCoords.lat != null) {
+            return { lat: window.mainGpsCoords.lat, lng: window.mainGpsCoords.lng };
+        }
+        if (window._mainLastStartLat != null && window._mainLastStartLng != null) {
+            return { lat: window._mainLastStartLat, lng: window._mainLastStartLng };
+        }
+        return { lat: 13.6288, lng: 79.4192 };
     }
 
     async function handleManualInput() {
         const text = chatInput.value.trim();
         if (!text) return;
 
-        const useOllama = isOllamaEnabled();
+        const useAgent = isAgentEnabled();
         chatInput.value = '';
         chatSend.disabled = true;
 
@@ -482,24 +601,43 @@
         body.scrollTop = body.scrollHeight;
 
         let answer = null;
+        let actions = [];
         let thinkingEl = null;
 
-        if (useOllama) {
-            thinkingEl = appendBotMessage('Thinking with Ollama…', true);
+        if (useAgent) {
+            thinkingEl = appendBotMessage(
+                getAgentProvider() === 'ollama' ? 'Gemma3 (local) is thinking…' : 'GeoTrip Agent is thinking…',
+                true
+            );
             try {
-                const res = await fetch('/api/chat', {
+                const coords = getAgentCoords();
+                const bodyPayload = {
+                    message: text,
+                    session_id: agentSessionId || undefined,
+                    lat: coords.lat,
+                    lng: coords.lng,
+                    provider: getAgentProvider(),
+                };
+                const res = await fetch('/api/agent', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text }),
+                    credentials: 'include',
+                    body: JSON.stringify(bodyPayload),
                 });
                 const data = await res.json();
+                if (data.session_id) {
+                    agentSessionId = data.session_id;
+                    try { sessionStorage.setItem('geotrip_agent_session', agentSessionId); } catch (e) {}
+                }
                 if (data.status === 'success' && data.reply) {
                     answer = escapeHtml(data.reply).replace(/\n/g, '<br>');
+                    if (data.warning) answer += '<br><small>' + escapeHtml(data.warning) + '</small>';
+                    actions = data.actions || [];
                 } else if (data.message) {
                     answer = escapeHtml(data.message);
                 }
             } catch (err) {
-                console.warn('Ollama chat unavailable:', err);
+                console.warn('GeoTrip Agent unavailable:', err);
             }
             if (thinkingEl) thinkingEl.remove();
         } else {
@@ -507,12 +645,12 @@
         }
 
         if (!answer) {
-            answer = useOllama
-                ? "I couldn't reach Ollama. Make sure <code>ollama serve</code> is running and your model name in <code>.env</code> matches <code>ollama list</code>, then try again."
-                : "I don't have a specific FAQ answer for that. Turn on <strong>Use Ollama AI</strong> below for open-ended questions, or pick a suggested question above.";
+            answer = useAgent
+                ? 'I could not reach GeoTrip Agent. Check that the server is running and your Gemini API key is set in <code>backend/.env</code>.'
+                : "I don't have a specific FAQ answer for that. Turn on <strong>Use GeoTrip Agent</strong> below for AI trip help, or pick a suggested question above.";
         }
 
-        appendBotMessage(answer);
+        appendBotMessage(answer, false, actions);
         chatSend.disabled = false;
         chatInput.focus();
     }

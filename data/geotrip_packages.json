@@ -1,0 +1,57 @@
+[
+  {
+    "id": "basic",
+    "title": "Basic Package",
+    "budget_range_inr": "1000-5000",
+    "display_range": "₹1,000 – ₹5,000",
+    "people": "1-2",
+    "duration_days": "1",
+    "place_limit": 5,
+    "highlights": ["Optimized stop order", "Same-day local temple runs", "Clear budget"],
+    "url": "/packages.html"
+  },
+  {
+    "id": "standard",
+    "title": "Standard Package",
+    "budget_range_inr": "5000-10000",
+    "display_range": "₹5,000 – ₹10,000",
+    "people": "2-4",
+    "duration_days": "1-2",
+    "place_limit": 10,
+    "highlights": ["Couples and small families", "Balanced days", "Recommended tier"],
+    "url": "/packages.html"
+  },
+  {
+    "id": "premium",
+    "title": "Premium Package",
+    "budget_range_inr": "10000-15000",
+    "display_range": "₹10,000 – ₹15,000",
+    "people": "6-8",
+    "duration_days": "3-5",
+    "place_limit": 20,
+    "highlights": ["Multi-day pilgrimages", "Comfortable pacing", "Extended place limits"],
+    "url": "/packages.html"
+  },
+  {
+    "id": "superpremium",
+    "title": "Super Premium Package",
+    "budget_range_inr": "15000-25000",
+    "display_range": "₹15,000 – ₹25,000",
+    "people": "8+",
+    "duration_days": "5-7",
+    "place_limit": 30,
+    "highlights": ["Maximum stops", "Large groups", "VIP-style planning"],
+    "url": "/packages.html"
+  },
+  {
+    "id": "elite",
+    "title": "Elite Package",
+    "budget_range_inr": "25000-30000+",
+    "display_range": "₹25,000 – ₹30,000+",
+    "people": "10+",
+    "duration_days": "7+",
+    "place_limit": 35,
+    "highlights": ["Luxury pilgrimages", "Highest place limit", "Priority routing"],
+    "url": "/packages.html"
+  }
+]

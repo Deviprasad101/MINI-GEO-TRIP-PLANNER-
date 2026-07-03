@@ -8,6 +8,7 @@ import secrets
 import requests
 import random
 import uuid
+import sys
 from threading import Lock
 from urllib.parse import quote, urlparse
 from datetime import datetime, timedelta, timezone, date
@@ -31,6 +32,8 @@ import logging
 
 # Project layout: backend/ | frontend/ | data/ | assets/
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
 PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
 FRONTEND_DIR = os.path.join(PROJECT_ROOT, 'frontend')
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
@@ -1824,6 +1827,54 @@ def api_chat():
     except Exception as e:
         print(f"Chat Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/agent', methods=['POST'])
+def api_agent():
+    """GeoTrip ADK agent — recommendations, itinerary, weather, emergency."""
+    try:
+        from agent_runner import run_geotrip_agent
+
+        data = request.json or {}
+        message = (data.get('message') or '').strip()
+        if not message:
+            return jsonify({'status': 'error', 'message': 'Message is required'}), 400
+
+        lat = data.get('lat')
+        lng = data.get('lng')
+        try:
+            lat = float(lat) if lat is not None else None
+            lng = float(lng) if lng is not None else None
+        except (TypeError, ValueError):
+            lat, lng = None, None
+
+        user_id = str(data.get('user_id') or session.get('user_id') or 'geotrip_user')
+        session_id = data.get('session_id')
+        provider = (data.get('provider') or 'gemini').strip().lower()
+
+        if provider in ('ollama', 'gemma', 'gemma3', 'local'):
+            from ollama_agent_runner import run_ollama_agent
+            result = run_ollama_agent(
+                message,
+                user_id=user_id,
+                session_id=session_id,
+                lat=lat,
+                lng=lng,
+            )
+        else:
+            result = run_geotrip_agent(
+                message,
+                user_id=user_id,
+                session_id=session_id,
+                lat=lat,
+                lng=lng,
+            )
+        if result.get('status') == 'error':
+            return jsonify(result), 400
+        return jsonify(result)
+    except Exception as e:
+        print(f'Agent Error: {e}')
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 # --- Admin Panel ---
