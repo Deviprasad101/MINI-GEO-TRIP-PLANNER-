@@ -419,6 +419,161 @@ def find_nearest_hospitals(lat: float, lng: float, count: int = 3) -> dict:
     }
 
 
+def _category_key_from_csv(category: str) -> str:
+    c = (category or '').lower()
+    if 'food' in c or 'restaurant' in c:
+        return 'food'
+    if 'temple' in c:
+        return 'temple'
+    if 'sight' in c:
+        return 'sightseeing'
+    if 'adventure' in c:
+        return 'adventure'
+    if 'wildlife' in c:
+        return 'wildlife'
+    if 'hospital' in c:
+        return 'hospital'
+    return 'other'
+
+
+def _parse_trip_categories(message: str) -> list[str]:
+    msg = (message or '').lower()
+    found: list[str] = []
+    patterns = (
+        ('temple', 'temple'),
+        ('darshan', 'temple'),
+        ('tirumala', 'temple'),
+        ('food', 'food'),
+        ('restaurant', 'food'),
+        ('meal', 'food'),
+        ('dining', 'food'),
+        ('sightseeing', 'sightseeing'),
+        ('sight', 'sightseeing'),
+        ('adventure', 'adventure'),
+        ('wildlife', 'wildlife'),
+    )
+    for key, cat in patterns:
+        if key in msg and cat not in found:
+            found.append(cat)
+    return found or ['temple']
+
+
+def _parse_trip_budget(message: str) -> tuple[str, int]:
+    msg = (message or '').lower()
+    bm = re.search(r'(\d{3,6})', msg.replace(',', ''))
+    if bm:
+        budget_inr = int(bm.group(1))
+    elif re.search(r'\b(low|cheap|basic)\b', msg):
+        return 'low', 3500
+    elif re.search(r'\b(high|premium|luxury|elite)\b', msg):
+        return 'high', 12000
+    elif re.search(r'\b(medium|standard|mid)\b', msg):
+        return 'medium', 7500
+    else:
+        budget_inr = 7500
+
+    if budget_inr <= 5000:
+        return 'low', budget_inr
+    if budget_inr <= 10000:
+        return 'medium', budget_inr
+    return 'high', budget_inr
+
+
+def _greedy_order_stops(start_lat: float, start_lng: float, places: list) -> list:
+    remaining = list(places)
+    ordered = []
+    cur_lat, cur_lng = start_lat, start_lng
+    order = 1
+    while remaining:
+        remaining.sort(key=lambda p: _haversine_km(cur_lat, cur_lng, p['lat'], p['lng']))
+        nxt = remaining.pop(0)
+        ordered.append({
+            'order': order,
+            'name': nxt.get('name', ''),
+            'lat': nxt['lat'],
+            'lng': nxt['lng'],
+            'category': nxt.get('category', ''),
+            'categoryKey': _category_key_from_csv(nxt.get('category', '')),
+            'timings': nxt.get('timings', ''),
+            'description': (nxt.get('description') or '')[:200],
+            'booking_link': nxt.get('booking_link', ''),
+        })
+        order += 1
+        cur_lat, cur_lng = nxt['lat'], nxt['lng']
+    return ordered
+
+
+def plan_automated_trip(message: str, lat: float, lng: float) -> dict:
+    """Build an ordered day trip from CSV places, package tier, and user categories.
+
+    Parses days, budget, and category mix from natural language, picks a package tier,
+    selects nearest places per category, and returns greedy-nearest stop order for map routing.
+
+    Args:
+        message: User request, e.g. "Plan 1-day temple + food trip, medium budget".
+        lat: Start latitude (user GPS or Tirupati default).
+        lng: Start longitude.
+
+    Returns:
+        dict with package tier, categories, ordered stops, and show_route action hint.
+    """
+    msg = (message or '').strip()
+    days = 1
+    dm = re.search(r'(\d+)\s*day', msg, re.I)
+    if dm:
+        days = max(1, min(int(dm.group(1)), 5))
+
+    categories = _parse_trip_categories(msg)
+    budget_label, budget_inr = _parse_trip_budget(msg)
+
+    pkg_result = get_trip_packages('', budget_inr)
+    suggested = pkg_result.get('suggested_tier_id') or 'standard'
+    packages = pkg_result.get('packages') or _load_packages()
+    tier_pkg = next((p for p in packages if p.get('id') == suggested), None)
+    if not tier_pkg and packages:
+        tier_pkg = packages[0]
+        suggested = tier_pkg.get('id', 'standard')
+
+    place_limit = int((tier_pkg or {}).get('place_limit') or 6)
+    max_stops = min(place_limit, days * 6)
+    per_cat = max(1, max_stops // len(categories))
+
+    candidates = []
+    seen_names: set[str] = set()
+    all_places = _load_places()
+    for cat in categories:
+        cat_places = [p for p in all_places if cat in (p.get('category') or '').lower()]
+        cat_places.sort(key=lambda p: _haversine_km(lat, lng, p['lat'], p['lng']))
+        picked = 0
+        for place in cat_places:
+            name = place.get('name') or ''
+            if name in seen_names:
+                continue
+            candidates.append(place)
+            seen_names.add(name)
+            picked += 1
+            if picked >= per_cat:
+                break
+
+    stops = _greedy_order_stops(lat, lng, candidates)
+
+    return {
+        'status': 'ok',
+        'days': days,
+        'budget': budget_label,
+        'budget_inr': budget_inr,
+        'categories': categories,
+        'package_tier': suggested,
+        'package_title': (tier_pkg or {}).get('title', suggested),
+        'package_display_range': (tier_pkg or {}).get('display_range', ''),
+        'place_limit': place_limit,
+        'stop_count': len(stops),
+        'start': {'lat': lat, 'lng': lng},
+        'stops': stops,
+        'action': 'show_route',
+    }
+
+
 def get_user_qr_info(user_id: Optional[str] = None) -> dict:
     """Explain QR check-in and what the app provides (token requires logged-in session).
 

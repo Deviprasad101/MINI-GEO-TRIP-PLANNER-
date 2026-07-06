@@ -469,6 +469,13 @@
             } else if (act.type === 'show_emergency_map') {
                 var emFab = document.getElementById('emergencyFab');
                 if (emFab) emFab.click();
+            } else if (act.type === 'show_route') {
+                if (typeof window.drawAgentRoute === 'function') {
+                    window.drawAgentRoute(act);
+                } else {
+                    try { sessionStorage.setItem('geotrip_pending_route', JSON.stringify(act)); } catch (e) {}
+                    window.location.href = '/dashboard';
+                }
             }
         });
     }
@@ -559,6 +566,7 @@
                     : act.type === 'show_package' ? 'Packages'
                     : act.type === 'show_qr' ? 'Show QR'
                     : act.type === 'show_emergency_map' ? 'Emergency map'
+                    : act.type === 'show_route' ? 'View route on map'
                     : 'Open';
                 btn.onclick = function() { applyChatAgentActions([act]); };
                 wrap.appendChild(btn);
@@ -651,6 +659,9 @@
         }
 
         appendBotMessage(answer, false, actions);
+        actions.filter(function(a) { return a && a.type === 'show_route'; }).forEach(function(act) {
+            applyChatAgentActions([act]);
+        });
         chatSend.disabled = false;
         chatInput.focus();
     }

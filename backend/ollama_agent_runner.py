@@ -135,6 +135,7 @@ def run_ollama_agent(
     """Sync entry point — tool-augmented local agent (Gemma3 via Ollama)."""
     from agent_runner import (
         _build_agent_message,
+        _ensure_route_action,
         _extract_actions_from_text,
         _format_tool_answer,
         _gather_tool_context,
@@ -190,6 +191,8 @@ def run_ollama_agent(
 
         if not reply:
             reply, actions = _format_tool_answer(message, tool_ctx)
+
+        actions = _ensure_route_action(message, actions, tool_ctx)
 
         history.append({'role': 'user', 'content': message})
         history.append({'role': 'assistant', 'content': reply})

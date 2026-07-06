@@ -76,6 +76,40 @@ def _default_coords(lat: Optional[float], lng: Optional[float]) -> tuple[float, 
     return use_lat, use_lng
 
 
+def _route_action_from_ctx(ctx: dict) -> Optional[dict]:
+    ap = ctx.get('auto_plan') or {}
+    if ap.get('status') != 'ok' or not ap.get('stops'):
+        return None
+    start = ap.get('start') or {}
+    return {
+        'type': 'show_route',
+        'stops': ap['stops'],
+        'start_lat': start.get('lat'),
+        'start_lng': start.get('lng'),
+        'start_label': 'Your location',
+        'package_id': ap.get('package_tier'),
+        'package_title': ap.get('package_title'),
+        'days': ap.get('days'),
+        'budget': ap.get('budget'),
+    }
+
+
+def _ensure_route_action(message: str, actions: list, ctx: dict) -> list:
+    """Attach show_route when automated trip plan is available."""
+    if ctx.get('intent') != 'itinerary':
+        return actions
+    route = _route_action_from_ctx(ctx)
+    if not route:
+        return actions
+    out = [a for a in actions if a.get('type') != 'open_map']
+    if not any(a.get('type') == 'show_route' for a in out):
+        out.insert(0, route)
+    pkg_id = route.get('package_id')
+    if pkg_id and not any(a.get('type') == 'show_package' for a in out):
+        out.append({'type': 'show_package', 'url': '/packages.html', 'package_id': pkg_id})
+    return out
+
+
 def _detect_intent(message: str) -> str:
     msg = (message or '').strip().lower()
     if 'weather' in msg:
@@ -149,7 +183,10 @@ def _gather_tool_context(message: str, lat: Optional[float], lng: Optional[float
             interests = 'temples, food'
         elif 'sight' in msg.lower():
             interests = 'temples, sightseeing'
-        ctx['itinerary'] = T.generate_itinerary(days, budget, interests)
+        ctx['auto_plan'] = T.plan_automated_trip(msg, use_lat, use_lng)
+        api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('GEMINI_API_KEY')
+        if api_key:
+            ctx['itinerary'] = T.generate_itinerary(days, budget, interests)
         ctx['places'] = T.search_places('temple', 5)
 
     elif intent == 'places_food':
@@ -277,17 +314,43 @@ def _format_tool_answer(message: str, ctx: dict) -> tuple[str, list[dict]]:
         actions.append({'type': 'open_map'})
 
     if intent == 'itinerary':
-        it = ctx.get('itinerary') or {}
-        if it.get('status') == 'ok' and it.get('itinerary'):
-            summary = []
-            for day in it['itinerary']:
-                acts = day.get('activities') or []
-                summary.append(f"Day {day.get('day', '?')}: " + '; '.join(acts[:4]))
-            parts.append('Suggested itinerary:\n' + '\n'.join(summary))
-            actions.append({'type': 'open_map'})
-        elif ctx.get('places', {}).get('places'):
-            names = ', '.join(p['name'] for p in ctx['places']['places'][:5])
-            parts.append(f'Key temples to include: {names}')
+        ap = ctx.get('auto_plan') or {}
+        if ap.get('status') == 'ok' and ap.get('stops'):
+            intro = (
+                f"{ap.get('days', 1)}-day trip · {ap.get('budget', 'medium')} budget · "
+                f"{ap.get('package_title', 'Standard')} ({ap.get('package_display_range', '')})"
+            )
+            cats = ', '.join(ap.get('categories') or [])
+            lines = [intro, f'Categories: {cats}', 'Ordered route (nearest-neighbor from your location):']
+            for s in ap['stops']:
+                line = f"  {s.get('order', '?')}. {s['name']}"
+                if s.get('category'):
+                    line += f" ({s['category']})"
+                if s.get('timings'):
+                    line += f" — {s['timings']}"
+                lines.append(line)
+            parts.append('\n'.join(lines))
+            parts.append('Opening the map with your full routed itinerary.')
+            route_act = _route_action_from_ctx(ctx)
+            if route_act:
+                actions.append(route_act)
+            actions.append({
+                'type': 'show_package',
+                'url': '/packages.html',
+                'package_id': ap.get('package_tier'),
+            })
+        else:
+            it = ctx.get('itinerary') or {}
+            if it.get('status') == 'ok' and it.get('itinerary'):
+                summary = []
+                for day in it['itinerary']:
+                    acts = day.get('activities') or []
+                    summary.append(f"Day {day.get('day', '?')}: " + '; '.join(acts[:4]))
+                parts.append('Suggested itinerary:\n' + '\n'.join(summary))
+                actions.append({'type': 'open_map'})
+            elif ctx.get('places', {}).get('places'):
+                names = ', '.join(p['name'] for p in ctx['places']['places'][:5])
+                parts.append(f'Key temples to include: {names}')
 
     if not parts:
         parts.append(
@@ -295,6 +358,7 @@ def _format_tool_answer(message: str, ctx: dict) -> tuple[str, list[dict]]:
             'Try asking something specific, e.g. "Timings of Tirumala temple" or "Nearest hospitals".'
         )
 
+    actions = _ensure_route_action(message, actions, ctx)
     return '\n\n'.join(parts), actions
 
 
@@ -389,6 +453,8 @@ async def _run_adk_async(
 
     if not actions:
         actions = _extract_actions_from_text(reply)
+
+    actions = _ensure_route_action(message, actions, tool_ctx)
 
     return {
         'status': 'success',

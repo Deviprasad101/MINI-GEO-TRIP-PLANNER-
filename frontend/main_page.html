@@ -5242,6 +5242,207 @@
                     });
             }
 
+            /**
+             * Level 3 automation — draw agent-planned route on dashboard maps.
+             * Called from GeoTrip Agent / Ollama when API returns show_route action.
+             */
+            window.drawAgentRoute = function (act) {
+                if (!act || !act.stops || !act.stops.length) return;
+                var startLat = act.start_lat != null ? Number(act.start_lat) : 13.6288;
+                var startLng = act.start_lng != null ? Number(act.start_lng) : 79.4192;
+                var startLabel = act.start_label || 'Trip start';
+                var stops = act.stops.slice().sort(function (a, b) {
+                    return (a.order || 0) - (b.order || 0);
+                });
+
+                window._mainLastStartLat = startLat;
+                window._mainLastStartLng = startLng;
+
+                var mapSec = document.getElementById('mapSection');
+                if (mapSec) mapSec.classList.remove('hidden');
+
+                var mapsToUpdate = [];
+                if (ensurePkgMap()) {
+                    mapsToUpdate.push({
+                        map: pkgMap,
+                        markers: pkgMarkersLayer,
+                        route: pkgRouteLayer,
+                        start: pkgStartLayer
+                    });
+                }
+                if (ensurePreflightMap()) {
+                    mapsToUpdate.push({
+                        map: preflightMap,
+                        markers: preflightMarkersLayer,
+                        route: preflightRouteLayer,
+                        start: preflightStartLayer
+                    });
+                }
+                if (!mapsToUpdate.length) return;
+
+                if (window._agentRouteAbort) window._agentRouteAbort.abort();
+                window._agentRouteAbort = new AbortController();
+                var signal = window._agentRouteAbort.signal;
+
+                mapsToUpdate.forEach(function (m) {
+                    if (m.markers) m.markers.clearLayers();
+                    if (m.route) m.route.clearLayers();
+                    if (m.start) m.start.clearLayers();
+                });
+
+                var startIconHtml =
+                    '<div class="start-home-pin start-home-pin--typed" role="img" aria-label="Trip start">' +
+                    '<span class="material-symbols-outlined">home</span></div>';
+                var startIcon = L.divIcon({
+                    className: 'start-home-icon',
+                    html: startIconHtml,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20],
+                    popupAnchor: [0, -18]
+                });
+
+                mapsToUpdate.forEach(function (m) {
+                    L.marker([startLat, startLng], { icon: startIcon, zIndexOffset: 900 })
+                        .bindPopup(buildStartPopupHtml(startLabel), {
+                            className: 'place-popup--gov place-popup--start',
+                            minWidth: 300,
+                            maxWidth: 420
+                        })
+                        .addTo(m.start);
+                });
+
+                var seqPts = [[startLat, startLng]].concat(
+                    stops.map(function (s) {
+                        return [s.lat, s.lng];
+                    })
+                );
+                var orderedPts = greedyNearestOrder(seqPts);
+
+                var orderedStops = orderedPts.slice(1).map(function (pt) {
+                    return stops.find(function (s) {
+                        return (
+                            Math.abs(s.lat - pt[0]) < 0.0001 && Math.abs(s.lng - pt[1]) < 0.0001
+                        );
+                    });
+                }).filter(Boolean);
+
+                window.lastSelectedStops = orderedStops.map(function (p) {
+                    var catKey =
+                        p.categoryKey ||
+                        (window.categoryKeyFromCsv
+                            ? window.categoryKeyFromCsv(p.category)
+                            : 'other');
+                    return {
+                        name: p.name,
+                        category: p.category,
+                        categoryKey: catKey,
+                        lat: p.lat,
+                        lng: p.lng,
+                        timings: p.timings,
+                        booking_link: p.booking_link || ''
+                    };
+                });
+
+                try {
+                    localStorage.setItem(
+                        'geotrip_shortlisted',
+                        JSON.stringify(window.lastSelectedStops)
+                    );
+                } catch (e) { /* ignore */ }
+
+                var ouS = 0;
+                var ouE = 24 * 60;
+                var startTEl = document.getElementById('mainTripStartTime');
+                var endTEl = document.getElementById('mainTripEndTime');
+                if (startTEl && endTEl) {
+                    ouS = timeToMinMain(startTEl.value);
+                    ouE = timeToMinMain(endTEl.value);
+                }
+
+                mapsToUpdate.forEach(function (m) {
+                    orderedStops.forEach(function (p, idx) {
+                        var catKey =
+                            p.categoryKey ||
+                            (window.categoryKeyFromCsv
+                                ? window.categoryKeyFromCsv(p.category)
+                                : 'other');
+                        var placeObj = {
+                            name: p.name,
+                            category: p.category,
+                            categoryKey: catKey,
+                            lat: p.lat,
+                            lng: p.lng,
+                            timings: p.timings,
+                            description: p.description || '',
+                            booking_link: p.booking_link || ''
+                        };
+                        var v = deriveVisitDisplayFromTimingsLanding(p.timings, catKey);
+                        placeObj.visit_start = v.visit_start;
+                        placeObj.visit_end = v.visit_end;
+                        var o = categoryPinStyleLanding(catKey);
+                        L.marker([p.lat, p.lng], {
+                            icon: placeMarkerIconWithOrderLanding(catKey, idx + 1),
+                            zIndexOffset: 400 + idx
+                        })
+                            .bindPopup(buildPlacePopupHtmlMain(placeObj, idx + 1, o, ouS, ouE), {
+                                className: 'place-popup--gov',
+                                minWidth: 220,
+                                maxWidth: 320
+                            })
+                            .addTo(m.markers);
+                    });
+                });
+
+                fetchOsrmRoute(orderedPts, signal).then(function (coords) {
+                    if (signal.aborted) return;
+                    mapsToUpdate.forEach(function (m) {
+                        if (coords && coords.length >= 2) {
+                            var routeLine = L.polyline(coords, {
+                                color: '#0f766e',
+                                weight: 4,
+                                opacity: 0.9,
+                                interactive: false
+                            }).addTo(m.route);
+                            try {
+                                var elPath = routeLine.getElement && routeLine.getElement();
+                                if (elPath) elPath.style.filter = 'drop-shadow(0 0 3px rgba(0,0,0,.25))';
+                            } catch (e0) { /* ignore */ }
+                        } else if (orderedPts.length >= 2) {
+                            L.polyline(orderedPts, {
+                                color: '#0f766e',
+                                weight: 3,
+                                dashArray: '6 5',
+                                opacity: 0.85,
+                                interactive: false
+                            }).addTo(m.route);
+                        }
+                        var b = orderedPts.slice();
+                        if (b.length && m.map) {
+                            m.map.fitBounds(b, { padding: [42, 42], maxZoom: 13, animate: true });
+                        }
+                        window.setTimeout(function () {
+                            if (m.map) m.map.invalidateSize();
+                        }, 200);
+                    });
+                });
+
+                setMapStatus('');
+                if (mapSec) mapSec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            };
+
+            try {
+                var pendingRoute = sessionStorage.getItem('geotrip_pending_route');
+                if (pendingRoute) {
+                    sessionStorage.removeItem('geotrip_pending_route');
+                    var pendingAct = JSON.parse(pendingRoute);
+                    window.setTimeout(function () {
+                        if (typeof window.drawAgentRoute === 'function') {
+                            window.drawAgentRoute(pendingAct);
+                        }
+                    }, 350);
+                }
+            } catch (pendingErr) { /* ignore */ }
+
             function renderEmergencyHospitalList() {
                 var root = document.getElementById('emergencyListRoot');
                 if (!root) return;
@@ -5872,6 +6073,10 @@
                     if (emFab) emFab.click();
                     var emBtn = document.getElementById('emergencyShowMapBtn');
                     if (emBtn) setTimeout(function() { emBtn.click(); }, 400);
+                } else if (act.type === 'show_route') {
+                    if (typeof window.drawAgentRoute === 'function') {
+                        window.drawAgentRoute(act);
+                    }
                 }
             });
         };
@@ -5912,7 +6117,7 @@
                 '</select>' +
                 '<div id="recAgentLog" style="font-size:0.78rem;color:#451a03;line-height:1.45;margin-bottom:0.65rem;max-height:140px;overflow-y:auto;"></div>' +
                 '<div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.5rem;">' +
-                '<button type="button" class="rec-agent-quick" data-q="Plan 1-day temple trip medium budget" style="font-size:0.65rem;padding:0.25rem 0.45rem;border-radius:999px;border:1px solid #fde68a;background:#fffbeb;cursor:pointer;color:#92400e;">1-day temples</button>' +
+                '<button type="button" class="rec-agent-quick" data-q="Plan 1-day temple + food trip, medium budget" style="font-size:0.65rem;padding:0.25rem 0.45rem;border-radius:999px;border:1px solid #fde68a;background:#fffbeb;cursor:pointer;color:#92400e;">Temple + food route</button>' +
                 '<button type="button" class="rec-agent-quick" data-q="Weather in Tirupati" style="font-size:0.65rem;padding:0.25rem 0.45rem;border-radius:999px;border:1px solid #fde68a;background:#fffbeb;cursor:pointer;color:#92400e;">Weather</button>' +
                 '<button type="button" class="rec-agent-quick" data-q="Nearest hospitals emergency" style="font-size:0.65rem;padding:0.25rem 0.45rem;border-radius:999px;border:1px solid #fde68a;background:#fffbeb;cursor:pointer;color:#92400e;">Emergency</button>' +
                 '</div>' +
