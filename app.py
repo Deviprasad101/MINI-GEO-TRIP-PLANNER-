@@ -12,7 +12,7 @@ LAUNCHER = os.path.normpath(os.path.abspath(__file__))
 
 def _use_project_venv():
     if not os.path.isfile(VENV_PYTHON):
-        return
+            return
     if os.path.normcase(os.path.normpath(sys.executable)) == os.path.normcase(VENV_PYTHON):
         return
     # os.execv breaks on Windows when the path contains spaces (e.g. TIH PROJECTS)
