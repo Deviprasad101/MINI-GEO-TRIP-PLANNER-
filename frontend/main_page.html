@@ -2413,6 +2413,51 @@
             display: none !important;
         }
 
+        /* Recommendation panel — sit above & left of chatbot FAB (no overlap) */
+        #recPanel {
+            bottom: 14.5rem !important;
+            right: calc(1.5rem + 4.75rem) !important;
+            max-height: min(70vh, 520px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #recPanel #recContent {
+            max-height: min(42vh, 320px);
+            overflow-y: auto;
+        }
+
+        body.gt-rec-panel-open #recFab {
+            display: none !important;
+        }
+
+        body.gt-rec-panel-open .gt-chatbot-btn {
+            z-index: 10002;
+        }
+
+        @media (max-width: 480px) {
+            #recPanel {
+                right: 0.75rem !important;
+                left: 0.75rem !important;
+                width: auto !important;
+                bottom: 13.5rem !important;
+            }
+
+            body.gt-rec-panel-open .gt-chatbot-btn {
+                bottom: 1rem !important;
+                right: 1rem !important;
+                width: 52px;
+                height: 52px;
+            }
+
+            body.gt-rec-panel-open .gt-chatbot-window {
+                right: 0.75rem !important;
+                left: 0.75rem !important;
+                width: auto !important;
+                bottom: 5.5rem !important;
+            }
+        }
+
         .temple-staff-scan {
             display: none;
             height: 100dvh;
@@ -5635,8 +5680,6 @@
     <div id="recPanel" style="
         display:none;
         position:fixed;
-        bottom:10rem;
-        right:1.5rem;
         width:min(360px, 94vw);
         background:#fff;
         border-radius:1.25rem;
@@ -5655,7 +5698,7 @@
                 <span class="material-symbols-outlined" style="font-size:1.1rem;">auto_awesome</span>
                 Recommended for You
             </span>
-            <button id="recPanelClose" onclick="document.getElementById('recPanel').style.display='none'"
+            <button id="recPanelClose" type="button"
                 style="background:none;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.25rem;line-height:1;padding:0;">✕</button>
         </div>
 
@@ -5796,8 +5839,7 @@
                 btn.style.color = '#78350f';
 
                 var tab = btn.dataset.recTab;
-                var panel = document.getElementById('recPanel');
-                panel.style.display = 'block';
+                if (window._setRecPanelOpen) window._setRecPanelOpen(true);
 
                 if (tab === 'similar') {
                     window._renderRecSimilar(window._lastRecPlace || null);
@@ -6046,23 +6088,48 @@
             setContent(hasAny ? html : '<p style="font-size:0.8rem;color:#92400e;text-align:center;">No places match your trip window. Try changing start/end time.</p>');
         };
 
-        window._showRecPanel = function() {
+        window._setRecPanelOpen = function(open) {
             var panel = document.getElementById('recPanel');
-            var isOpen = panel.style.display !== 'none' && panel.style.display !== '';
-            panel.style.display = isOpen ? 'none' : 'block';
-            if (!isOpen) {
-                // Reset to Day Plan tab when opening
-                document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
-                    b.style.borderBottomColor = 'transparent';
-                    b.style.color = '#92400e';
-                    if (b.dataset.recTab === 'itinerary') {
-                        b.style.borderBottomColor = '#b45309';
-                        b.style.color = '#78350f';
-                    }
-                });
-                window._renderRecItinerary();
+            var fab = document.getElementById('recFab');
+            if (!panel) return;
+            panel.style.display = open ? 'block' : 'none';
+            panel.classList.toggle('is-open', open);
+            document.body.classList.toggle('gt-rec-panel-open', open);
+            if (fab) {
+                if (open) {
+                    fab.style.display = 'none';
+                } else if (window.recommender && window.recommender.loaded) {
+                    fab.style.display = 'flex';
+                }
             }
         };
+
+        window._showRecPanel = function() {
+            var panel = document.getElementById('recPanel');
+            var isOpen = panel && panel.style.display !== 'none' && panel.style.display !== '';
+            if (isOpen) {
+                window._setRecPanelOpen(false);
+                return;
+            }
+            window._setRecPanelOpen(true);
+            // Reset to Day Plan tab when opening
+            document.querySelectorAll('.rec-tab-btn').forEach(function(b) {
+                b.style.borderBottomColor = 'transparent';
+                b.style.color = '#92400e';
+                if (b.dataset.recTab === 'itinerary') {
+                    b.style.borderBottomColor = '#b45309';
+                    b.style.color = '#78350f';
+                }
+            });
+            window._renderRecItinerary();
+        };
+
+        var recPanelCloseBtn = document.getElementById('recPanelClose');
+        if (recPanelCloseBtn) {
+            recPanelCloseBtn.addEventListener('click', function() {
+                window._setRecPanelOpen(false);
+            });
+        }
 
         // ── Hook into category chip clicks (Theme Selection) ───────────────
         document.addEventListener('click', function(e) {
