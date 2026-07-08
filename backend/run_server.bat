@@ -35,7 +35,15 @@ if not exist ".venv\Scripts\python.exe" (
   )
 )
 
-echo Starting GeoTrip Planner at http://127.0.0.1:5000
+REM --- Read app port from backend\.env (default 5000) ---
+set "APP_PORT=5000"
+if exist "backend\.env" (
+  for /f "usebackq tokens=1,* delims==" %%a in ("backend\.env") do (
+    if /i "%%a"=="PORT" set "APP_PORT=%%b"
+  )
+)
+
+echo Starting GeoTrip Planner at http://127.0.0.1:!APP_PORT!
 echo Press Ctrl+C to stop the server.
 echo.
 ".venv\Scripts\python.exe" app.py
